@@ -28,14 +28,16 @@ AMMO_KEYWORDS = ("arrow", "bolt", "dart", "javelin", "throwing", "cannonball")
 WEAPON_KEYWORDS = (
     "dagger", "sword", "scimitar", "battleaxe", "_axe", "mace", "warhammer",
     "spear", "halberd", "claws", "hatchet", "pickaxe", "whip", "flail",
-    "staff", "wand", "bow", "crossbow", "sceptre", "sickle", "godsword",
+    "staff", "wand", "shortbow", "longbow", "crossbow", "ogre_bow",
+    "crystal_bow", "seercull", "sceptre", "godsword",
     "mcannon", "dragonfire",
 )
 # Jewellery: rings, amulets, necklaces, holy symbols and emblems.
 JEWEL_KEYWORDS = (
     "ring_of", "amulet", "necklace", "holy_symbol", "unholy_symbol",
-    "_emblem", "symbol_of", "_ring",
+    "_emblem", "symbol_of",
 )
+JEWEL_RING_RE = re.compile(r"^(gold|silver|sapphire|emerald|ruby|diamond|dragonstone)_ring$")
 # Fletching intermediates live with crafting.
 FLETCH_KEYWORDS = ("unstrung", "arrowheads", "arrow_shaft", "bow_string")
 # Bows below magic tier — plus magic longbows — are fletching stock rather
@@ -116,6 +118,19 @@ _override("crafting", [
 ])
 _override("runecrafting", ["blankrune"])
 _override("jewellery", ["blessedstar", "stringstar"])
+_override("herblore", ["vial", "vial_empty", "vial_water", "vial_enchanted"])
+_override("food", [
+    "pineapple_pizza", "half_pineapple_pizza", "pineapple", "pineapple_ring",
+    "pineapple_chunks", "tomato", "bowl_tomato",
+])
+_override("crafting", [
+    "flamtaer_hammer", "silver_sickle", "silver_sickle_blessed", "hardleather_body",
+])
+_override("junk", [
+    "felinemedal",          # cat training medal
+    "worm_hole", "premade_worm_hole", "unfinished_worm_hole",
+    "rotten_tomato", "machette", "ball_gnomeball_game",
+])
 _override("equipment", [
     "splitbark_helm", "splitbark_body", "splitbark_legs",
     "splitbark_gauntlets", "splitbark_greaves",
@@ -166,6 +181,8 @@ JUNK_SLUGS = {
 # Whole families that are vendor-bought for coppers. A fremennik cloak was
 # being valued at 100k off one stale listing; they cost about 1k from an NPC.
 JUNK_PREFIXES = (
+    "snelm_",
+    "flowers_",
     "fremennik_",
     "viking_cloak_", "viking_top_",   # Fremennik cloaks/shirts, ~100gp from an NPC
     "petecandlestick", "petes_",
@@ -324,7 +341,7 @@ def categorize(slug, name="", is_set=False):
     # "knife" is the cooking/fletching tool and is junk.
     if any(k in s for k in AMMO_KEYWORDS) or TIERED_KNIFE_RE.match(s):
         return "ammunition"
-    if any(k in s for k in JEWEL_KEYWORDS):
+    if any(k in s for k in JEWEL_KEYWORDS) or JEWEL_RING_RE.match(s):
         return "jewellery"
     if any(k in s for k in WEAPON_KEYWORDS):
         return "weapons"
@@ -401,6 +418,17 @@ HIDE_COLOURS = {
 # the slug's g/s/z is the only thing telling them apart.
 TORN_PAGE_GODS = {"g": "Guthix", "s": "Saradomin", "z": "Zamorak"}
 
+# Every unfinished potion is just named "Unfinished potion"; the herb is the
+# only thing that distinguishes them (and what sets the price).
+UNF_HERB_NAMES = {
+    "guam": "Guam", "marrentill": "Marrentill", "tarromin": "Tarromin",
+    "harralander": "Harralander", "ranarr": "Ranarr", "irit": "Irit",
+    "avantoe": "Avantoe", "kwuarm": "Kwuarm", "cadantine": "Cadantine",
+    "lantadyme": "Lantadyme", "dwarfweed": "Dwarf weed", "toadflax": "Toadflax",
+    "snapdragon": "Snapdragon", "torstol": "Torstol", "ashes": "Ashes",
+    "janger": "Jangerberries", "guamjanger": "Guam + jangerberries",
+}
+
 
 def base_variant(slug):
     """Return (base_slug, variant_label) for a poison/leather variant."""
@@ -421,6 +449,12 @@ def disambiguate_name(slug, name):
     bank listing without the colour or god.
     """
     if not name:
+        return name
+
+    if slug.endswith("vial") and slug not in ("vial", "vial_water", "vial_empty"):
+        herb = UNF_HERB_NAMES.get(slug[: -len("vial")])
+        if herb and herb.lower() not in name.lower():
+            return f"{name} ({herb})"
         return name
 
     if slug.startswith("holy_book_") and "_page" in slug:

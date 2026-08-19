@@ -165,14 +165,34 @@ def split_by_window(events, now):
     return recent, older
 
 
-def robust_median(values):
-    """Median with a light outlier trim. Returns (value, sample_size)."""
+def robust_median(values, floor=None, ceiling=None):
+    """Median with a light outlier trim. Returns (value, sample_size).
+
+    `floor`/`ceiling` reject values against an independent reference (the order
+    book) before the trim. The internal trim only works when the bad values are
+    a minority; a reference catches them even when they aren't.
+    """
     vals = [v for v in values if v and v > 0]
+    if floor is not None:
+        vals = [v for v in vals if v >= floor]
+    if ceiling is not None:
+        vals = [v for v in vals if v <= ceiling]
     if not vals:
         return None, 0
     raw = statistics.median(vals)
     trimmed = [v for v in vals if raw * OUTLIER_LO <= v <= raw * OUTLIER_HI] or vals
     return statistics.median(trimmed), len(trimmed)
+
+
+def book_reference(bid_list, ask_list):
+    """Mean of the standing offers — an independent sanity reference for sales.
+
+    Someone who lists 1,000 blood runes and types the total instead of the
+    per-unit price records a real 1gp sale. Nothing in the sale data itself
+    marks it as wrong, but four people bidding 800-900 each do.
+    """
+    quotes = list(bid_list or []) + list(ask_list or [])
+    return sum(quotes) / len(quotes) if quotes else None
 
 
 def price_from_book(bid_list, ask_list):
@@ -211,8 +231,20 @@ def compute_prices(catalog, history, bids, asks, now_iso):
     prices = {}
     for gid in set(catalog) | set(history) | set(bids) | set(asks):
         recent, older = split_by_window(history.get(gid, []), now)
-        sale_median, sample = robust_median([e["price"] for e in recent])
-        stale_median, stale_sample = robust_median([e["price"] for e in older])
+
+        # Sanity-check sales against the standing order book before averaging.
+        # A mistyped listing produces a genuine sale record ("1,000 blood runes
+        # for 1gp" when the seller meant 1gp each of 1,000), and no property of
+        # the sale itself flags it — but live bids an order of magnitude higher
+        # do. Symmetric with the guard on listings in blend().
+        ref = book_reference(bids.get(gid, []), asks.get(gid, []))
+        floor = ref / ERROR_RATIO if ref else None
+        ceiling = ref * ERROR_RATIO if ref else None
+
+        sale_median, sample = robust_median(
+            [e["price"] for e in recent], floor=floor, ceiling=ceiling)
+        stale_median, stale_sample = robust_median(
+            [e["price"] for e in older], floor=floor, ceiling=ceiling)
         best_bid, best_ask, mid = price_from_book(bids.get(gid, []), asks.get(gid, []))
 
         # A wildly-out-of-line ask with nothing to check it against is usually a

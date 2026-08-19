@@ -23,7 +23,7 @@
   "100": {
     "category": "herblore",
     "cost": 25,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Ranarr) (noted)",
     "notedOf": "99",
     "slug": "cert_ranarrvial",
     "tradeable": true
@@ -103,7 +103,7 @@
   "101": {
     "category": "herblore",
     "cost": 40,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Irit)",
     "slug": "iritvial",
     "tradeable": true
   },
@@ -185,7 +185,7 @@
   "102": {
     "category": "herblore",
     "cost": 40,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Irit) (noted)",
     "notedOf": "101",
     "slug": "cert_iritvial",
     "tradeable": true
@@ -268,7 +268,7 @@
   "103": {
     "category": "herblore",
     "cost": 48,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Avantoe)",
     "slug": "avantoevial",
     "tradeable": true
   },
@@ -352,7 +352,7 @@
   "104": {
     "category": "herblore",
     "cost": 48,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Avantoe) (noted)",
     "notedOf": "103",
     "slug": "cert_avantoevial",
     "tradeable": true
@@ -445,7 +445,7 @@
   "105": {
     "category": "herblore",
     "cost": 54,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Kwuarm)",
     "slug": "kwuarmvial",
     "tradeable": true
   },
@@ -534,7 +534,7 @@
   "106": {
     "category": "herblore",
     "cost": 54,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Kwuarm) (noted)",
     "notedOf": "105",
     "slug": "cert_kwuarmvial",
     "tradeable": true
@@ -617,7 +617,7 @@
   "107": {
     "category": "herblore",
     "cost": 65,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Cadantine)",
     "slug": "cadantinevial",
     "tradeable": true
   },
@@ -699,7 +699,7 @@
   "108": {
     "category": "herblore",
     "cost": 65,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Cadantine) (noted)",
     "notedOf": "107",
     "slug": "cert_cadantinevial",
     "tradeable": true
@@ -782,7 +782,7 @@
   "109": {
     "category": "herblore",
     "cost": 70,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Dwarf weed)",
     "slug": "dwarfweedvial",
     "tradeable": true
   },
@@ -872,7 +872,7 @@
   "110": {
     "category": "herblore",
     "cost": 70,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Dwarf weed) (noted)",
     "notedOf": "109",
     "slug": "cert_dwarfweedvial",
     "tradeable": true
@@ -955,7 +955,7 @@
   "111": {
     "category": "herblore",
     "cost": 25,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Torstol)",
     "slug": "torstolvial",
     "tradeable": true
   },
@@ -1037,7 +1037,7 @@
   "112": {
     "category": "herblore",
     "cost": 25,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Torstol) (noted)",
     "notedOf": "111",
     "slug": "cert_torstolvial",
     "tradeable": true
@@ -4840,7 +4840,7 @@
     "tradeable": true
   },
   "1575": {
-    "category": "other",
+    "category": "junk",
     "cost": 350,
     "name": "Cat training medal",
     "slug": "felinemedal",
@@ -5343,7 +5343,7 @@
     "tradeable": true
   },
   "1636": {
-    "category": "jewellery",
+    "category": "equipment",
     "cost": 350,
     "name": "Gold ring (noted)",
     "notedOf": "1635",
@@ -5358,7 +5358,7 @@
     "tradeable": true
   },
   "1638": {
-    "category": "jewellery",
+    "category": "gems",
     "cost": 900,
     "name": "Sapphire ring (noted)",
     "notedOf": "1637",
@@ -5381,7 +5381,7 @@
     "tradeable": true
   },
   "1640": {
-    "category": "jewellery",
+    "category": "gems",
     "cost": 1275,
     "name": "Emerald ring (noted)",
     "notedOf": "1639",
@@ -5396,7 +5396,7 @@
     "tradeable": true
   },
   "1642": {
-    "category": "jewellery",
+    "category": "gems",
     "cost": 2025,
     "name": "Ruby ring (noted)",
     "notedOf": "1641",
@@ -5411,7 +5411,7 @@
     "tradeable": true
   },
   "1644": {
-    "category": "jewellery",
+    "category": "gems",
     "cost": 3525,
     "name": "Diamond ring (noted)",
     "notedOf": "1643",
@@ -5426,7 +5426,7 @@
     "tradeable": true
   },
   "1646": {
-    "category": "jewellery",
+    "category": "gems",
     "cost": 17625,
     "name": "Dragonstone ring (noted)",
     "notedOf": "1645",
@@ -5434,14 +5434,14 @@
     "tradeable": true
   },
   "1647": {
-    "category": "jewellery",
+    "category": "equipment",
     "cost": 0,
     "name": "Black ring",
     "slug": "black_ring",
     "tradeable": true
   },
   "1648": {
-    "category": "jewellery",
+    "category": "other",
     "cost": 0,
     "name": "Black ring (noted)",
     "notedOf": "1647",
@@ -5449,7 +5449,7 @@
     "tradeable": true
   },
   "1649": {
-    "category": "jewellery",
+    "category": "other",
     "cost": 0,
     "name": "Sapphire ring",
     "slug": "invis_ring1",
@@ -5463,28 +5463,28 @@
     "tradeable": true
   },
   "1650": {
-    "category": "jewellery",
+    "category": "other",
     "cost": 0,
     "name": "Emerald ring",
     "slug": "invis_ring2",
     "tradeable": true
   },
   "1651": {
-    "category": "jewellery",
+    "category": "other",
     "cost": 0,
     "name": "Ruby ring",
     "slug": "invis_ring3",
     "tradeable": true
   },
   "1652": {
-    "category": "jewellery",
+    "category": "other",
     "cost": 0,
     "name": "Diamond ring",
     "slug": "invis_ring4",
     "tradeable": true
   },
   "1653": {
-    "category": "jewellery",
+    "category": "other",
     "cost": 0,
     "name": "Dragonstone ring",
     "slug": "invis_ring5",
@@ -6628,14 +6628,14 @@
     "tradeable": true
   },
   "1791": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 2,
     "name": "Unfired bowl",
     "slug": "bowl_unfired",
     "tradeable": true
   },
   "1792": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 2,
     "name": "Unfired bowl (noted)",
     "notedOf": "1791",
@@ -7249,7 +7249,7 @@
     "tradeable": true
   },
   "1869": {
-    "category": "weapons",
+    "category": "food",
     "cost": 3,
     "name": "Chopped tomato",
     "slug": "bowl_tomato",
@@ -7263,7 +7263,7 @@
     "tradeable": true
   },
   "1870": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 3,
     "name": "Chopped tomato (noted)",
     "notedOf": "1869",
@@ -7271,14 +7271,14 @@
     "tradeable": true
   },
   "1871": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 3,
     "name": "Chopped onion",
     "slug": "bowl_onion",
     "tradeable": true
   },
   "1872": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 3,
     "name": "Chopped onion (noted)",
     "notedOf": "1871",
@@ -7286,14 +7286,14 @@
     "tradeable": true
   },
   "1873": {
-    "category": "weapons",
+    "category": "food",
     "cost": 5,
     "name": "Chopped ugthanki",
     "slug": "bowl_ugthanki",
     "tradeable": true
   },
   "1874": {
-    "category": "weapons",
+    "category": "food",
     "cost": 5,
     "name": "Chopped ugthanki (noted)",
     "notedOf": "1873",
@@ -7301,14 +7301,14 @@
     "tradeable": true
   },
   "1875": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 5,
     "name": "Onion & tomato",
     "slug": "bowl_oniontomato",
     "tradeable": true
   },
   "1876": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 5,
     "name": "Onion & tomato (noted)",
     "notedOf": "1875",
@@ -7316,14 +7316,14 @@
     "tradeable": true
   },
   "1877": {
-    "category": "weapons",
+    "category": "food",
     "cost": 7,
     "name": "Ugthanki & onion",
     "slug": "bowl_ugthankionion",
     "tradeable": true
   },
   "1878": {
-    "category": "weapons",
+    "category": "food",
     "cost": 7,
     "name": "Ugthanki & onion (noted)",
     "notedOf": "1877",
@@ -7331,7 +7331,7 @@
     "tradeable": true
   },
   "1879": {
-    "category": "weapons",
+    "category": "food",
     "cost": 7,
     "name": "Ugthanki & tomato",
     "slug": "bowl_ugthankitomato",
@@ -7346,7 +7346,7 @@
     "tradeable": true
   },
   "1880": {
-    "category": "weapons",
+    "category": "food",
     "cost": 7,
     "name": "Ugthanki & tomato (noted)",
     "notedOf": "1879",
@@ -7354,14 +7354,14 @@
     "tradeable": true
   },
   "1881": {
-    "category": "weapons",
+    "category": "food",
     "cost": 9,
     "name": "Kebab mix",
     "slug": "bowl_oniontomugthanki",
     "tradeable": true
   },
   "1882": {
-    "category": "weapons",
+    "category": "food",
     "cost": 9,
     "name": "Kebab mix (noted)",
     "notedOf": "1881",
@@ -7691,14 +7691,14 @@
     "tradeable": true
   },
   "1921": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 4,
     "name": "Bowl of water",
     "slug": "bowl_water",
     "tradeable": true
   },
   "1922": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 4,
     "name": "Bowl of water (noted)",
     "notedOf": "1921",
@@ -7706,14 +7706,14 @@
     "tradeable": true
   },
   "1923": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 4,
     "name": "Bowl",
     "slug": "bowl_empty",
     "tradeable": true
   },
   "1924": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 4,
     "name": "Bowl (noted)",
     "notedOf": "1923",
@@ -8195,7 +8195,7 @@
     "tradeable": true
   },
   "1982": {
-    "category": "other",
+    "category": "food",
     "cost": 4,
     "name": "Tomato",
     "slug": "tomato",
@@ -9304,7 +9304,7 @@
     "tradeable": true
   },
   "2114": {
-    "category": "other",
+    "category": "food",
     "cost": 1,
     "name": "Pineapple",
     "slug": "pineapple",
@@ -9319,7 +9319,7 @@
     "tradeable": true
   },
   "2116": {
-    "category": "other",
+    "category": "food",
     "cost": 1,
     "name": "Pineapple chunks",
     "slug": "pineapple_chunks",
@@ -9334,14 +9334,14 @@
     "tradeable": true
   },
   "2118": {
-    "category": "jewellery",
+    "category": "food",
     "cost": 1,
     "name": "Pineapple ring",
     "slug": "pineapple_ring",
     "tradeable": true
   },
   "2119": {
-    "category": "jewellery",
+    "category": "other",
     "cost": 1,
     "name": "Pineapple ring (noted)",
     "notedOf": "2118",
@@ -9789,14 +9789,14 @@
     "tradeable": true
   },
   "2173": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 2,
     "name": "Odd gnomebowl",
     "slug": "spoilt_gnomebowl",
     "tradeable": true
   },
   "2174": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 2,
     "name": "Odd gnomebowl (noted)",
     "notedOf": "2173",
@@ -9804,14 +9804,14 @@
     "tradeable": true
   },
   "2175": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 1,
     "name": "Burnt gnomebowl",
     "slug": "burnt_gnomebowl",
     "tradeable": true
   },
   "2176": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 1,
     "name": "Burnt gnomebowl (noted)",
     "notedOf": "2175",
@@ -9819,14 +9819,14 @@
     "tradeable": true
   },
   "2177": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 2,
     "name": "Half baked bowl",
     "slug": "half_baked_bowl",
     "tradeable": false
   },
   "2178": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 2,
     "name": "Raw gnomebowl",
     "slug": "raw_gnomebowl",
@@ -9916,7 +9916,7 @@
     "tradeable": true
   },
   "2189": {
-    "category": "other",
+    "category": "junk",
     "cost": 0,
     "name": "Unfinished bowl",
     "slug": "unfinished_worm_hole",
@@ -9938,7 +9938,7 @@
     "tradeable": true
   },
   "2191": {
-    "category": "other",
+    "category": "junk",
     "cost": 2,
     "name": "Worm hole",
     "slug": "worm_hole",
@@ -10289,7 +10289,7 @@
     "tradeable": true
   },
   "2233": {
-    "category": "other",
+    "category": "junk",
     "cost": 150,
     "name": "Worm hole",
     "slug": "premade_worm_hole",
@@ -10588,7 +10588,7 @@
     "tradeable": true
   },
   "227": {
-    "category": "crafting",
+    "category": "herblore",
     "cost": 2,
     "name": "Vial of water",
     "slug": "vial_water",
@@ -10753,7 +10753,7 @@
     "tradeable": true
   },
   "229": {
-    "category": "crafting",
+    "category": "herblore",
     "cost": 2,
     "name": "Vial",
     "slug": "vial_empty",
@@ -10858,7 +10858,7 @@
     "tradeable": true
   },
   "2301": {
-    "category": "other",
+    "category": "food",
     "cost": 100,
     "name": "Pineapple pizza",
     "slug": "pineapple_pizza",
@@ -10873,7 +10873,7 @@
     "tradeable": true
   },
   "2303": {
-    "category": "other",
+    "category": "food",
     "cost": 50,
     "name": "1/2pineapple pizza",
     "slug": "half_pineapple_pizza",
@@ -11571,7 +11571,7 @@
   "2389": {
     "category": "herblore",
     "cost": 0,
-    "name": "Vial",
+    "name": "Vial (Jangerberries)",
     "slug": "jangervial",
     "tradeable": false
   },
@@ -11585,7 +11585,7 @@
   "2390": {
     "category": "herblore",
     "cost": 0,
-    "name": "Vial",
+    "name": "Vial (Guam + jangerberries)",
     "slug": "guamjangervial",
     "tradeable": false
   },
@@ -12341,14 +12341,14 @@
   "2483": {
     "category": "herblore",
     "cost": 68,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Lantadyme)",
     "slug": "lantadymevial",
     "tradeable": true
   },
   "2484": {
     "category": "herblore",
     "cost": 68,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Lantadyme) (noted)",
     "notedOf": "2483",
     "slug": "cert_lantadymevial",
     "tradeable": true
@@ -12641,7 +12641,7 @@
     "tradeable": true
   },
   "2518": {
-    "category": "other",
+    "category": "junk",
     "cost": 1,
     "name": "Rotten tomato",
     "slug": "rotten_tomato",
@@ -15595,14 +15595,14 @@
     "tradeable": false
   },
   "2888": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 1,
     "name": "A stone bowl",
     "slug": "elemental_workshop_lava_bowl",
     "tradeable": false
   },
   "2889": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 1,
     "name": "A stone bowl",
     "slug": "elemental_workshop_lava_bowl_full",
@@ -16199,14 +16199,14 @@
     "tradeable": true
   },
   "2961": {
-    "category": "weapons",
+    "category": "crafting",
     "cost": 175,
     "name": "Silver sickle",
     "slug": "silver_sickle",
     "tradeable": true
   },
   "2962": {
-    "category": "weapons",
+    "category": "other",
     "cost": 175,
     "name": "Silver sickle (noted)",
     "notedOf": "2961",
@@ -16214,21 +16214,21 @@
     "tradeable": true
   },
   "2963": {
-    "category": "weapons",
+    "category": "crafting",
     "cost": 250,
     "name": "Silver sickle(b)",
     "slug": "silver_sickle_blessed",
     "tradeable": false
   },
   "2964": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 4,
     "name": "Washing bowl",
     "slug": "bowl_empty_filliman",
     "tradeable": true
   },
   "2965": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 4,
     "name": "Washing bowl (noted)",
     "notedOf": "2964",
@@ -16538,14 +16538,14 @@
   "3002": {
     "category": "herblore",
     "cost": 48,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Toadflax)",
     "slug": "toadflaxvial",
     "tradeable": true
   },
   "3003": {
     "category": "herblore",
     "cost": 48,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Toadflax) (noted)",
     "notedOf": "3002",
     "slug": "cert_toadflaxvial",
     "tradeable": true
@@ -16553,14 +16553,14 @@
   "3004": {
     "category": "herblore",
     "cost": 59,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Snapdragon)",
     "slug": "snapdragonvial",
     "tradeable": true
   },
   "3005": {
     "category": "herblore",
     "cost": 59,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Snapdragon) (noted)",
     "notedOf": "3004",
     "slug": "cert_snapdragonvial",
     "tradeable": true
@@ -19172,7 +19172,7 @@
     "tradeable": true
   },
   "3327": {
-    "category": "other",
+    "category": "junk",
     "cost": 300,
     "name": "Myre snelm",
     "slug": "snelm_round_swamp",
@@ -19187,7 +19187,7 @@
     "tradeable": true
   },
   "3329": {
-    "category": "other",
+    "category": "junk",
     "cost": 300,
     "name": "Blood'n'tar snelm",
     "slug": "snelm_round_red+black",
@@ -19209,7 +19209,7 @@
     "tradeable": true
   },
   "3331": {
-    "category": "other",
+    "category": "junk",
     "cost": 300,
     "name": "Ochre snelm",
     "slug": "snelm_round_yellow",
@@ -19224,7 +19224,7 @@
     "tradeable": true
   },
   "3333": {
-    "category": "other",
+    "category": "junk",
     "cost": 300,
     "name": "Bruise blue snelm",
     "slug": "snelm_round_blue",
@@ -19239,7 +19239,7 @@
     "tradeable": true
   },
   "3335": {
-    "category": "other",
+    "category": "junk",
     "cost": 300,
     "name": "Broken bark snelm",
     "slug": "snelm_round_orange",
@@ -19254,7 +19254,7 @@
     "tradeable": true
   },
   "3337": {
-    "category": "other",
+    "category": "junk",
     "cost": 300,
     "name": "Myre snelm",
     "slug": "snelm_point_swamp",
@@ -19269,7 +19269,7 @@
     "tradeable": true
   },
   "3339": {
-    "category": "other",
+    "category": "junk",
     "cost": 300,
     "name": "Blood'n'tar snelm",
     "slug": "snelm_point_red+black",
@@ -19292,7 +19292,7 @@
     "tradeable": true
   },
   "3341": {
-    "category": "other",
+    "category": "junk",
     "cost": 300,
     "name": "Ochre snelm",
     "slug": "snelm_point_yellow",
@@ -19307,7 +19307,7 @@
     "tradeable": true
   },
   "3343": {
-    "category": "other",
+    "category": "junk",
     "cost": 300,
     "name": "Bruise blue snelm",
     "slug": "snelm_point_blue",
@@ -19833,14 +19833,14 @@
   "3406": {
     "category": "herblore",
     "cost": 11,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Ashes)",
     "slug": "ashesvial",
     "tradeable": true
   },
   "3407": {
     "category": "herblore",
     "cost": 11,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Ashes) (noted)",
     "notedOf": "3406",
     "slug": "cert_ashesvial",
     "tradeable": true
@@ -21986,7 +21986,7 @@
     "tradeable": true
   },
   "3678": {
-    "category": "equipment",
+    "category": "crafting",
     "cost": 10000,
     "name": "Flamtaer hammer",
     "slug": "flamtaer_hammer",
@@ -22187,7 +22187,7 @@
     "tradeable": false
   },
   "3702": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 0,
     "name": "Custom bow string",
     "slug": "viking_bowstring",
@@ -26410,49 +26410,49 @@
     "tradeable": true
   },
   "720": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 10,
     "name": "Sketch",
     "slug": "goldbowlpic",
     "tradeable": false
   },
   "721": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 700,
     "name": "Gold bowl",
     "slug": "goldbowl_empty",
     "tradeable": false
   },
   "722": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 700,
     "name": "Blessed gold bowl",
     "slug": "goldbowlbless_empty",
     "tradeable": false
   },
   "723": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 700,
     "name": "Golden bowl",
     "slug": "goldbowl_water",
     "tradeable": false
   },
   "724": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 700,
     "name": "Golden bowl",
     "slug": "goldbowl_pure",
     "tradeable": false
   },
   "725": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 700,
     "name": "Golden bowl",
     "slug": "goldbowlbless_water",
     "tradeable": false
   },
   "726": {
-    "category": "weapons",
+    "category": "equipment",
     "cost": 700,
     "name": "Golden bowl",
     "slug": "goldbowlbless_pure",
@@ -26496,7 +26496,7 @@
     "tradeable": false
   },
   "731": {
-    "category": "crafting",
+    "category": "herblore",
     "cost": 0,
     "name": "Enchanted vial",
     "slug": "vial_enchanted",
@@ -26651,7 +26651,7 @@
     "tradeable": false
   },
   "751": {
-    "category": "other",
+    "category": "junk",
     "cost": 0,
     "name": "Gnomeball",
     "slug": "ball_gnomeball_game",
@@ -26827,7 +26827,7 @@
     "tradeable": false
   },
   "773": {
-    "category": "jewellery",
+    "category": "gems",
     "cost": 2025,
     "name": "'perfect' ring",
     "slug": "perfect_ruby_ring",
@@ -27009,7 +27009,7 @@
     "tradeable": true
   },
   "797": {
-    "category": "weapons",
+    "category": "herblore",
     "cost": 0,
     "name": "Herbbowl",
     "slug": "herbbowl",
@@ -27957,7 +27957,7 @@
   "91": {
     "category": "herblore",
     "cost": 3,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Guam)",
     "slug": "guamvial",
     "tradeable": true
   },
@@ -28034,7 +28034,7 @@
   "92": {
     "category": "herblore",
     "cost": 3,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Guam) (noted)",
     "notedOf": "91",
     "slug": "cert_guamvial",
     "tradeable": true
@@ -28112,7 +28112,7 @@
   "93": {
     "category": "herblore",
     "cost": 5,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Marrentill)",
     "slug": "marrentillvial",
     "tradeable": true
   },
@@ -28189,7 +28189,7 @@
   "94": {
     "category": "herblore",
     "cost": 5,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Marrentill) (noted)",
     "notedOf": "93",
     "slug": "cert_marrentillvial",
     "tradeable": true
@@ -28270,7 +28270,7 @@
   "95": {
     "category": "herblore",
     "cost": 11,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Tarromin)",
     "slug": "tarrominvial",
     "tradeable": true
   },
@@ -28352,7 +28352,7 @@
   "96": {
     "category": "herblore",
     "cost": 11,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Tarromin) (noted)",
     "notedOf": "95",
     "slug": "cert_tarrominvial",
     "tradeable": true
@@ -28437,7 +28437,7 @@
   "97": {
     "category": "herblore",
     "cost": 20,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Harralander)",
     "slug": "harralandervial",
     "tradeable": true
   },
@@ -28479,7 +28479,7 @@
     "tradeable": true
   },
   "975": {
-    "category": "other",
+    "category": "junk",
     "cost": 40,
     "name": "Machete",
     "slug": "machette",
@@ -28518,7 +28518,7 @@
   "98": {
     "category": "herblore",
     "cost": 20,
-    "name": "Unfinished potion (noted)",
+    "name": "Unfinished potion (noted) (Harralander) (noted)",
     "notedOf": "97",
     "slug": "cert_harralandervial",
     "tradeable": true
@@ -28603,7 +28603,7 @@
   "99": {
     "category": "herblore",
     "cost": 25,
-    "name": "Unfinished potion",
+    "name": "Unfinished potion (Ranarr)",
     "slug": "ranarrvial",
     "tradeable": true
   },

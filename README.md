@@ -67,7 +67,7 @@ Price per item, best available evidence first:
 | `stale` | No recent trade, but it has sold before — a real old price beats a guess |
 | `alch` | No market data; high alch (`cost × 0.6`) minus the nature rune to cast it |
 | `vendor` | Worth less than the rune needed to alch it; low alch / shop value (`cost × 0.4`) |
-| `unfinished` | An unfinished potion, priced as its herb plus a vial of water |
+| `unfinished` | An unfinished potion, priced from its materials (herb + vial of water) |
 | `junk` | Vendor tools and clothing nobody trades — deliberately 0 |
 | `container` | A filled bucket, priced as the empty one |
 | *untradeable* | Can't be sold — counted as 0, not reported as a gap |
@@ -115,6 +115,14 @@ sets under the body, super sets under one of the supers. Those are real coin sal
 nothing in the data marks them as bundles — the history just goes bimodal, and a median
 lands between singles and sets. `BUNDLE_CAPS` in `lc_items.py` rejects the high cluster;
 they're calibrated from sale history and documented for retuning.
+
+**Sales are sanity-checked against the order book.** A mistyped listing produces a
+*genuine* sale record — someone selling 1,000 blood runes who enters the total instead of the
+per-unit price records a real 1gp sale, and nothing about the sale itself marks it as wrong.
+Four people bidding 800-900 each do. Any sale more than 10x away from the mean of standing
+offers is dropped before the median is taken. This is the mirror of the guard on listings,
+and it catches cases the internal outlier trim can't — that trim only works when the bad
+values are a minority.
 
 **Bids and asks are not equal evidence.** A one-sided *ask* is just someone's asking price —
 one absurd listing (a chaos talisman at 350k when every other talisman trades under 10k) can

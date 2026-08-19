@@ -48,7 +48,7 @@
     charge: 'Charges',
     cloth: 'Fine cloth',
     stale: 'Old sale',
-    unfinished: 'Herb + vial',
+    unfinished: 'Materials',
     junk: 'Junk',
     noted: 'Noted',
     alch: 'Alch est.',
