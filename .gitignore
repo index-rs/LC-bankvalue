@@ -1,0 +1,11 @@
+# Personal save files — never publish these.
+# They contain real character data (stats, position, full bank contents).
+savs/
+*.sav
+
+# Local scraper run state (resume markers), not shared data.
+data/.backfill-state.json
+
+__pycache__/
+*.pyc
+.DS_Store

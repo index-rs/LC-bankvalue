@@ -1,0 +1,38 @@
+/* theme-editorial.css — warm charcoal palette, lifted from LC-roadmap's
+   inline oklch tokens. Space Grotesk headings, gold/blue accents,
+   rounder cards. (Visual language only — LC-roadmap's .dc.html/support.js
+   component framework is not reused here.) */
+
+:root[data-theme="editorial"] {
+  --bg-0: oklch(0.17 0.014 55);
+  --bg-1: oklch(0.195 0.015 55);
+  --bg-2: oklch(0.225 0.016 55);
+  --bg-3: oklch(0.27 0.016 55);
+  --bg-4: oklch(0.32 0.018 55);
+
+  --border-1: oklch(0.27 0.017 55);
+  --border-2: oklch(0.32 0.02 55);
+  --border-3: oklch(0.4 0.022 55);
+
+  --text-0: oklch(0.95 0.01 60);
+  --text-1: oklch(0.82 0.012 60);
+  --text-2: oklch(0.62 0.015 60);
+  --text-3: oklch(0.5 0.015 60);
+
+  --accent:   oklch(0.78 0.15 75);  /* gold */
+  --accent-2: oklch(0.72 0.1 210);  /* blue */
+  --gold:     oklch(0.78 0.15 75);
+  --red:      oklch(0.65 0.18 25);
+  --blue:     oklch(0.72 0.1 210);
+  --green:    oklch(0.72 0.14 145);
+  --teal:     oklch(0.75 0.11 185);
+  --violet:   oklch(0.7 0.13 300);
+  --amber:    oklch(0.8 0.13 85);
+
+  --font-sans: 'IBM Plex Sans', -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-heading: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+}

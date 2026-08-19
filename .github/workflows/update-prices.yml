@@ -1,0 +1,41 @@
+name: Update prices
+
+on:
+  schedule:
+    # 04:15 UTC daily — off the hour to avoid the top-of-hour stampede.
+    - cron: '15 4 * * *'
+  workflow_dispatch:
+
+# Only one price run at a time; a queued run would just fight over data/.
+concurrency:
+  group: update-prices
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # No dependencies to install — the scrapers use only the standard library.
+      - name: Refresh market prices
+        run: python scripts/scrape_prices.py
+
+      - name: Commit updated price data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/prices.json data/history.json data/items.json
+          if git diff --staged --quiet; then
+            echo "No price changes to commit."
+          else
+            git commit -m "chore(data): refresh market prices [skip ci]"
+            git push
+          fi

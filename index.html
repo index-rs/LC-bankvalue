@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lost City Bank Value Calculator</title>
+<meta name="description" content="Estimate your Lost City (2004scape) bank's value in gp — upload your .sav file, everything runs in your browser." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/theme-terminal.css">
+<link rel="stylesheet" href="css/theme-editorial.css">
+<link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="page-header">
+    <div>
+      <h1>Lost City Bank Value Calculator</h1>
+      <p class="subtitle">What your bank, inventory and gear are worth in gp</p>
+    </div>
+    <div class="theme-toggle" role="group" aria-label="Theme">
+      <button type="button" data-theme-btn="terminal">Terminal</button>
+      <button type="button" data-theme-btn="editorial">Editorial</button>
+    </div>
+  </div>
+
+  <div class="dropzone" id="dropzone">
+    <p class="dz-title">Drop your .sav file here</p>
+    <p class="dz-sub">Or click to browse.</p>
+    <div class="dz-actions">
+      <span class="btn primary">Choose file</span>
+    </div>
+    <input type="file" id="sav-input" accept=".sav" />
+  </div>
+  <p class="privacy-note">
+    Read and parsed in your browser &mdash; the file is never uploaded.
+    &nbsp;·&nbsp;
+    <button type="button" class="btn link" id="sample-btn">View a sample report &rarr;</button>
+  </p>
+
+  <div class="status" id="status"></div>
+
+  <div class="report" id="report"></div>
+
+  <footer class="site-footer">
+    Price data from <a href="https://markets.lostcity.rs" target="_blank" rel="noopener">Lost City Markets</a>.
+    Unofficial fan tool, not affiliated with the Lost City project.
+  </footer>
+</div>
+
+<script src="js/theme.js"></script>
+<script src="js/packet.js"></script>
+<script src="js/savParser.js"></script>
+<script src="js/report.js"></script>
+<script src="js/sample-data.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
