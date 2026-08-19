@@ -295,7 +295,6 @@
         </div>
         <div class="report-meta">${metaBits.join(' &middot; ')}</div>
       </div>
-      ${sourceBits.length > 1 ? `<div class="source-strip">${sourceBits.join('')}</div>` : ''}
       ${
         r.askOnlyTotal > 0 && r.askOnlyTotal / (r.grandTotal || 1) >= 0.02
           ? `<div class="caveat">${fmtCompact(r.askOnlyTotal)} gp (${((r.askOnlyTotal / r.grandTotal) * 100).toFixed(0)}% of the total)
@@ -303,9 +302,12 @@
              Nothing proves anyone pays it; treat those lines as an upper bound.</div>`
           : ''
       }
-      <div class="category-controls">
-        <button type="button" class="btn tiny" data-expand-all>Expand all</button>
-        <button type="button" class="btn tiny" data-collapse-all>Collapse all</button>
+      <div class="report-toolbar">
+        <div class="source-strip">${sourceBits.length > 1 ? sourceBits.join('') : ''}</div>
+        <div class="category-controls">
+          <button type="button" class="btn tiny" data-expand-all>Expand all</button>
+          <button type="button" class="btn tiny" data-collapse-all>Collapse all</button>
+        </div>
       </div>
       <div class="categories"></div>
     `;
