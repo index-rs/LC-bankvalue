@@ -9,6 +9,7 @@
 //   dose      potion priced per-dose from its dose family's best-sampled variant
 //   charge    charged jewellery priced off its family's fully-charged variant
 //   cloth     splitbark, priced from the fine cloth it takes to make
+//   enchant   plain gem jewellery, capped at what its enchanted form sells for
 //   stale     no recent trade, but it has sold before — old price beats a guess
 //   noted     a noted (cert_) item, priced from its base item
 //   alch      no market data; high alch value less the nature rune to cast it
@@ -33,7 +34,9 @@
     equipment: 'Armour',
     weapons: 'Weapons',
     jewellery: 'Jewellery',
-    crafting: 'Crafting / Fletching',
+    treasure_trails: 'Treasure Trails',
+    crafting: 'Crafting',
+    fletching: 'Fletching',
     bones: 'Bones',
     seeds: 'Seeds',
     tools: 'Tools',
@@ -47,6 +50,7 @@
     dose: 'Per-dose',
     charge: 'Charges',
     cloth: 'Fine cloth',
+    enchant: 'Enchant cap',
     stale: 'Old sale',
     unfinished: 'Materials',
     junk: 'Junk',
@@ -58,8 +62,8 @@
   };
 
   const VALUED_TIERS = new Set([
-    'market', 'bid', 'ask', 'dose', 'charge', 'cloth', 'stale', 'noted',
-    'alch', 'vendor', 'unfinished',
+    'market', 'bid', 'ask', 'dose', 'charge', 'cloth', 'enchant', 'stale',
+    'noted', 'alch', 'vendor', 'unfinished',
   ]);
 
   function fmtGp(n) {
@@ -95,7 +99,9 @@
     equipment: 'var(--teal)',
     weapons: 'var(--red)',
     jewellery: 'var(--amber)',
+    treasure_trails: 'var(--gold)',
     crafting: 'var(--amber)',
+    fletching: 'var(--green)',
     bones: 'var(--text-2)',
     seeds: 'var(--green)',
     tools: 'var(--text-2)',

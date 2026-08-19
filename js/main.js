@@ -32,6 +32,24 @@
     return null;
   }
 
+  // Audit mode — a synthetic "bank" holding one of every item in the catalog,
+  // built client-side so it can never drift from data/items.json.
+  //
+  // This is the regression harness for pricing and categorisation: every item
+  // renders through the real report path, so a mispriced or miscategorised item
+  // is visible rather than waiting for someone to happen to hold one. Sorting
+  // is by row value, and at one-of-each that IS the unit price — so the top of
+  // each category is exactly where a bad price shows up first.
+  //
+  //   ?audit        every tradeable item
+  //   ?audit=all    plus untradeables, so quest junk is checked too
+  function auditBank(mode) {
+    const all = mode === 'all';
+    return Object.keys(itemsDb)
+      .filter((gid) => all || itemsDb[gid].tradeable)
+      .map((gid) => ({ id: Number(gid), count: 1 }));
+  }
+
   function init() {
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('sav-input');
@@ -82,6 +100,26 @@
           })
           .catch((err) => setStatus(`Could not load price data: ${err.message}`, 'error'));
       });
+    }
+
+    const auditMode = new URLSearchParams(location.search).get('audit');
+    if (auditMode !== null && reportEl) {
+      setStatus('Building the audit bank…', 'info');
+      loadData()
+        .then(() => {
+          const bank = auditBank(auditMode);
+          const rows = window.BankReport.buildRows({ bank }, itemsDb, pricesDb);
+          const r = window.BankReport.renderReport(reportEl, rows, {
+            priceAsOf: priceAsOf(),
+            scopeLabel: 'Audit — one of every item',
+          });
+          setStatus(
+            `Audit bank: ${bank.length} catalog items, ${r.itemCount} rows ` +
+            `(×1 each, so every row total is its unit price).`,
+            'ok'
+          );
+        })
+        .catch((err) => setStatus(`Could not load price data: ${err.message}`, 'error'));
     }
 
     function handleFile(file) {

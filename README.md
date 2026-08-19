@@ -26,7 +26,7 @@ Two data files are committed to the repo and served as static JSON:
 |---|---|---|---|
 | `data/items.json` | `scripts/build_catalog.py` | rarely (on content updates) | Every item in the game: id, name, alch cost, category, tradeable flag |
 | `data/prices.json` | `scripts/scrape_prices.py` | daily, via GitHub Actions | Current value per item, with a confidence tier |
-| `data/history.json` | `scrape_prices.py` + `backfill_history.py` | daily / occasionally | Completed sales, 28-day window for current pricing plus older ones as a fallback |
+| `data/history.json` | `scrape_prices.py` + `backfill_history.py` | daily / occasionally | Completed sales, 60-day window for current pricing plus older ones as a fallback |
 
 ### The item catalog is authoritative, not guessed
 
@@ -63,6 +63,8 @@ Price per item, best available evidence first:
 | `ask` | Only a standing sell listing — what a seller *hopes* to get. Nothing proves anyone pays it |
 | `dose` | Potion priced per-dose from its dose family's best-sampled variant |
 | `charge` | Charged jewellery priced off its family's fully-charged variant |
+| `enchant` | Plain gem jewellery, capped at what its enchanted form sells for |
+| `sameAs` | Worth exactly what another item is worth — filled buckets, broken tools, tool heads, tanned leather |
 | `noted` | A noted (`cert_`) item, priced from its base item |
 | `stale` | No recent trade, but it has sold before — a real old price beats a guess |
 | `alch` | No market data; high alch (`cost × 0.6`) minus the nature rune to cast it |
@@ -86,6 +88,13 @@ glory price every charge level (uncharged included) at the glory(4) price, since
 is free at the Fountain of Heroes; rings of dueling and games necklaces scale with charges
 remaining, since those are consumed rather than recharged.
 
+**Unenchanted jewellery is capped at its enchanted form.** Enchanting is slow, fiddly work
+— runes, magic level, a lot of clicking — so nobody pays a premium for the plain piece. When
+a thin market quotes one higher (a sapphire necklace at 1,000gp beside a games necklace(8) at
+975) that's noise, and the enchanted item's price is the better answer for both. The cap only
+bites upward; trading below the enchanted form is normal and left alone. See `ENCHANT_PRODUCT`
+in `lc_items.py`.
+
 **Categories follow how players think, not how slugs are spelled.** Rune *equipment*
 (`rune_platebody`) is not a *rune* (`naturerune`) — the two look alike as strings and rune
 gear was burying the actual runes. Herblore holds herbs, secondaries and unfinished potions;
@@ -97,9 +106,32 @@ hammers, needles, moulds, fishing rods, wizard robes — sell for a few gp from 
 store and are never actively traded. Counting them adds noise, not value. A toggle in the
 report reveals them along with untradeables.
 
+**Treasure Trails have their own category.** Clue rewards are priced by scarcity, not by
+their (usually identical) combat stats: a gilded platebody is rune armour that alchs for 38k
+and sells for 30M. Scattered through Armour and Other they made a bank's most valuable
+holdings the hardest to find. Build 274 carries the 2004 reward table — black/adamant/rune
+trimmed (t) and gold-trimmed (g) sets, the three rune god sets, gilded rune, the god book
+torn pages, and the cosmetic headwear and boots. The bronze/iron/steel/mithril trimmed sets
+and the heraldic items came later and aren't in this build; see the OSRS wiki's
+[Ornamental armour](https://oldschool.runescape.wiki/w/Ornamental_armour) and
+[Gilded equipment](https://oldschool.runescape.wiki/w/Gilded_equipment) pages for the full
+modern table.
+
+**Some families are priced by fiat, not by the market.** Thrown weapons, low-tier bolts and
+bolt tips take vendor price; the melee families nobody trades — claws, warhammers, maces,
+daggers, halberds, battleaxes, spears, longswords — take alch value, dragon excepted, since
+those genuinely trade. A handful of listings on a mithril halberd says more about the lister
+than the item.
+
+**Fletching is its own category.** Bow string, arrow shafts, arrowheads, headless arrows and
+every bow below magic-shortbow tier (strung or not) are fletching *stock*, not gear anyone
+fights with — the magic shortbow is the one bow that stays in Weapons. Unstrung amulets remain
+in Crafting, and unstrung items are renamed ("Unstrung yew shortbow") since the game gives them
+the same name as the finished article at a very different price.
+
 **Categories:** Coins, Rares, Runes, Runecrafting, Ammunition, Weapons, Armour, Jewellery,
-Potions, Herblore, Crafting / Fletching, Food, Logs, Ores & Bars, Gems, Bones, Seeds, Other,
-Junk. Each gets a colour-coded bar showing its share of the total, and there are
+Potions, Herblore, Crafting, Fletching, Treasure Trails, Food, Logs, Ores & Bars, Gems,
+Bones, Seeds, Other, Junk. Each gets a colour-coded bar showing its share of the total, and there are
 expand/collapse-all controls.
 
 **Variants fold into their base item.** Poisoned weapons and dragon leather barely trade on
@@ -123,6 +155,19 @@ Four people bidding 800-900 each do. Any sale more than 10x away from the mean o
 offers is dropped before the median is taken. This is the mirror of the guard on listings,
 and it catches cases the internal outlier trim can't — that trim only works when the bad
 values are a minority.
+
+That check is *conditional*, because the order book can be the broken side. A single
+1,000,000,000gp ask on an adamant platebody (t) set a floor of 100M, threw away all ten
+genuine 15k-45k sales, and left nothing for the ask guard downstream to check that ask
+against — so the typo became the price. When the reference rejects **every** sale, the
+reference is the suspect and the unfiltered sales are used instead — but only when they
+corroborate each other (`MIN_CORROBORATION`, 2+ surviving their own trim). One lone sale that
+the whole order book disagrees with really is more likely to be the mistake.
+
+**The current-price window is 60 days.** Most of this catalog is thin. A 28-day window left
+slow movers — adamant darts, trimmed armour — with no sale median at all, which is precisely
+when a stray listing gets to set the price unopposed. Two months of sales still describes a
+current price here, and turns a lot of `stale` rows into `market` ones.
 
 **Bids and asks are not equal evidence.** A one-sided *ask* is just someone's asking price —
 one absurd listing (a chaos talisman at 350k when every other talisman trades under 10k) can
@@ -190,6 +235,18 @@ scripts/  build_catalog.py, scrape_prices.py, lc_market.py, lc_items.py
 `savs/` holds real save files used for local testing. It is **git-ignored** —
 saves contain real character data (stats, position, full bank contents) and are never
 committed or published.
+
+### Audit mode
+
+Open the page with `?audit` for a synthetic bank holding **one of every tradeable item**
+(`?audit=all` includes untradeables). The bank is built in-browser from `data/items.json`, so
+it can never drift from the catalog.
+
+This is the regression harness for pricing and categorisation. Every item renders through the
+real report path, so a mispriced or miscategorised item is visible immediately instead of
+waiting for someone to happen to hold one. At one-of-each, a row's total *is* its unit price —
+so the top of each category is exactly where a bad price shows up first, and the tier badges
+show at a glance which items are resting on thin evidence.
 
 ## Credits
 

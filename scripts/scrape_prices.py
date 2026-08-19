@@ -9,7 +9,7 @@ Reads three feeds (~56 requests total for a full market snapshot):
   /?tab=sell  active sell listings            -> best ask (what sellers want)
 
 Pricing model (per item, best evidence wins):
-  sale  = median of completed coin sales inside a 28-day window
+  sale  = median of completed coin sales inside a 60-day window
   mid   = (best_bid + best_ask) / 2, from the live order book
   price = 0.75*sale + 0.25*mid when both exist  (sales dominate: they're money
           that changed hands, a listing is only an intention)
@@ -20,7 +20,8 @@ Pricing model (per item, best evidence wins):
 Derived prices fill the long tail: potions per-dose across their dose family,
 charged jewellery off its fully-charged variant, splitbark from fine cloth,
 noted items from their base item. BUNDLE_CAPS reject set listings posted under
-a single item's slug (full rune sets under "rune platebody", etc).
+a single item's slug (full rune sets under "rune platebody", etc), and plain
+gem jewellery is capped at its enchanted form's price (ENCHANT_PRODUCT).
 
 Deep sale history for slow-moving items comes from backfill_history.py.
 
@@ -38,9 +39,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import lc_market as mkt          # noqa: E402
 from lc_items import (   # noqa: E402
-    BUNDLE_CAPS, CONTAINER_BASE, FINE_CLOTH_SLUG, SPLITBARK_CLOTH,
-    VIAL_WATER_SLUG, categorize, is_vendor_default, parse_charges, parse_dose,
-    unfinished_potion_herb,
+    BUNDLE_CAPS, ENCHANT_PRODUCT, FINE_CLOTH_SLUG, SAME_AS_BASE,
+    SPLITBARK_CLOTH, UNID_HERB, VIAL_WATER_SLUG, categorize, is_alch_default,
+    is_vendor_default, parse_charges, parse_dose, unfinished_potion_herb,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -54,12 +55,17 @@ COINS_GID = "995"
 NATURE_RUNE_GID = "561"
 NATURE_RUNE_FALLBACK = 342
 
-HISTORY_DAYS = 28     # rolling window that counts as a current "market" price
+HISTORY_DAYS = 60     # rolling window that counts as a current "market" price.
+                      # Two months, not one: most of this catalog is thin, and
+                      # a 28-day window left slow movers (adamant darts, trimmed
+                      # armour) with no sale median at all — which is exactly
+                      # when a stray listing gets to set the price unopposed.
 HISTORY_KEEP_DAYS = 365   # older sales are kept as a last-resort "stale" price
 HISTORY_MAX_PER_ITEM = 24
 OUTLIER_LO = 0.2      # drop sales below 0.2x the raw median
 OUTLIER_HI = 5.0      # ...and above 5x — kills fat-finger listings without
                       # needing the old scraper's hand-tuned per-item caps
+MIN_CORROBORATION = 2 # sales needed before they may overrule the order book
 
 SALE_WEIGHT = 0.75    # completed sales vs. order book, when both exist
 ERROR_RATIO = 10.0    # a listing >=10x (or <=1/10) the sale price is a typo,
@@ -165,23 +171,46 @@ def split_by_window(events, now):
     return recent, older
 
 
+def _trimmed_median(vals):
+    raw = statistics.median(vals)
+    trimmed = [v for v in vals if raw * OUTLIER_LO <= v <= raw * OUTLIER_HI] or vals
+    return statistics.median(trimmed), len(trimmed)
+
+
 def robust_median(values, floor=None, ceiling=None):
     """Median with a light outlier trim. Returns (value, sample_size).
 
     `floor`/`ceiling` reject values against an independent reference (the order
     book) before the trim. The internal trim only works when the bad values are
     a minority; a reference catches them even when they aren't.
+
+    But the reference can be the broken one, and then the filter is circular:
+    a single 1,000,000,000gp ask on an adamant platebody (t) sets a floor of
+    100M, throws away all ten genuine 15k-45k sales, and leaves nothing for the
+    ask guard downstream to check that ask against — so the typo becomes the
+    price. When the reference rejects EVERY sale, fall back to the unfiltered
+    ones instead.
+
+    That fallback is deliberately conditional. Sales only get to overrule the
+    book when they corroborate each other (MIN_CORROBORATION+ surviving their
+    own trim); one lone sale that the entire order book disagrees with really is
+    more likely to be the mistake — someone typing the total instead of the
+    unit price on 1,000 blood runes.
     """
     vals = [v for v in values if v and v > 0]
-    if floor is not None:
-        vals = [v for v in vals if v >= floor]
-    if ceiling is not None:
-        vals = [v for v in vals if v <= ceiling]
     if not vals:
         return None, 0
-    raw = statistics.median(vals)
-    trimmed = [v for v in vals if raw * OUTLIER_LO <= v <= raw * OUTLIER_HI] or vals
-    return statistics.median(trimmed), len(trimmed)
+
+    bounded = vals
+    if floor is not None:
+        bounded = [v for v in bounded if v >= floor]
+    if ceiling is not None:
+        bounded = [v for v in bounded if v <= ceiling]
+
+    if not bounded:
+        median, sample = _trimmed_median(vals)
+        return (median, sample) if sample >= MIN_CORROBORATION else (None, 0)
+    return _trimmed_median(bounded)
 
 
 def book_reference(bid_list, ask_list):
@@ -505,18 +534,26 @@ def apply_junk_zeroing(catalog, prices, now_iso):
     """Junk is worth 0 by fiat — vendor tools and clothing nobody trades."""
     zeroed = 0
     for gid, item in catalog.items():
-        if item.get("category") != "junk":
+        # A rare is never junk, whatever a keyword rule concluded — writing a
+        # partyhat down to zero is far worse than leaving one oddity in place.
+        if item.get("category") != "junk" or item.get("rare"):
             continue
         prices[gid] = {"price": 0, "tier": "junk", "sampleSize": 0, "asOf": now_iso}
         zeroed += 1
     return zeroed
 
 
-def apply_container_pricing(catalog, prices, now_iso):
-    """A bucket of water is a bucket someone filled; price it as the empty one."""
+def apply_same_as_base(catalog, prices, now_iso):
+    """Items worth exactly what another item is worth. See SAME_AS_BASE.
+
+    A bucket of water is a bucket someone filled; a broken rune pickaxe is a
+    rune pickaxe someone has to fix; tanned leather is the hide it came from.
+    Only one side of each pair trades, so the other would otherwise land on an
+    alch guess.
+    """
     by_slug = {i.get("slug"): g for g, i in catalog.items()}
     filled = 0
-    for slug, base_slug in CONTAINER_BASE.items():
+    for slug, base_slug in SAME_AS_BASE.items():
         gid, base_gid = by_slug.get(slug), by_slug.get(base_slug)
         if not gid or not base_gid or base_gid not in prices:
             continue
@@ -524,10 +561,60 @@ def apply_container_pricing(catalog, prices, now_iso):
         prices[gid] = {
             "price": base["price"], "tier": base["tier"],
             "sampleSize": base.get("sampleSize", 0), "asOf": now_iso,
-            "containerOf": base_gid,
+            "sameAs": base_slug,
         }
         filled += 1
     return filled
+
+
+def apply_unidentified_herb_pricing(catalog, prices, now_iso):
+    """An unidentified herb is that herb before you looked at it.
+
+    They barely trade on their own and are all named just "Herb", so whatever
+    stray quote exists is noise next to the identified herb's real price.
+    Always overrides, for the same reason poison variants do.
+    """
+    by_slug = {i.get("slug"): g for g, i in catalog.items()}
+    filled = 0
+    for slug, herb_slug in UNID_HERB.items():
+        gid, herb_gid = by_slug.get(slug), by_slug.get(herb_slug)
+        if not gid or not herb_gid or herb_gid not in prices:
+            continue
+        herb = prices[herb_gid]
+        prices[gid] = {
+            "price": herb["price"], "tier": herb["tier"],
+            "sampleSize": herb.get("sampleSize", 0), "asOf": now_iso,
+            "identifiedAs": herb_slug,
+        }
+        filled += 1
+    return filled
+
+
+def apply_alch_defaults(catalog, prices, now_iso):
+    """Force alch pricing on the melee families nobody actually trades.
+
+    A steel mace or a mithril halberd has no market — the odd listing that
+    exists says more about the lister than the item, and alch value is the real
+    floor. Dragon weapons are excluded; those genuinely trade. See
+    ALCH_FAMILY_RE in lc_items.py.
+    """
+    nature = (prices.get(NATURE_RUNE_GID) or {}).get("price", NATURE_RUNE_FALLBACK)
+    forced = 0
+    for gid, item in catalog.items():
+        if not is_alch_default(item.get("slug")) or not item.get("tradeable", True):
+            continue
+        cost = item.get("cost") or 0
+        if cost <= 0:
+            continue
+        net_alch = max(1, round(cost * 0.6)) - nature
+        if net_alch > 0:
+            prices[gid] = {"price": net_alch, "tier": "alch",
+                           "sampleSize": 0, "asOf": now_iso}
+        else:
+            prices[gid] = {"price": max(1, round(cost * 0.4)), "tier": "vendor",
+                           "sampleSize": 0, "asOf": now_iso}
+        forced += 1
+    return forced
 
 
 def apply_vendor_defaults(catalog, prices, now_iso):
@@ -547,6 +634,40 @@ def apply_vendor_defaults(catalog, prices, now_iso):
         }
         forced += 1
     return forced
+
+
+def apply_enchant_caps(catalog, prices, now_iso):
+    """Cap plain gem jewellery at what its enchanted form sells for.
+
+    Enchanting is tedious — runes, magic level, a lot of clicking — so nobody
+    pays a premium for the unenchanted piece. When a thin market quotes one
+    above its enchanted counterpart (a sapphire necklace at 1,000gp beside a
+    games necklace(8) at 975) that's noise, and the enchanted item's price is
+    the better answer for both. See ENCHANT_PRODUCT in lc_items.py.
+
+    One-directional: an unenchanted piece trading below its enchanted form is
+    normal and left alone.
+    """
+    by_slug = {i.get("slug"): g for g, i in catalog.items()}
+    capped = 0
+    for slug, product_slug in ENCHANT_PRODUCT.items():
+        gid, product_gid = by_slug.get(slug), by_slug.get(product_slug)
+        if not gid or not product_gid:
+            continue
+        entry, product = prices.get(gid), prices.get(product_gid)
+        if not entry or not product or entry["price"] <= product["price"]:
+            continue
+        prices[gid] = {
+            "price": product["price"],
+            "tier": "enchant",
+            "sampleSize": 0,
+            "asOf": now_iso,
+            "enchantCap": product_slug,
+            "uncappedPrice": entry["price"],
+            "uncappedTier": entry["tier"],
+        }
+        capped += 1
+    return capped
 
 
 def apply_noted_pricing(catalog, prices, now_iso):
@@ -688,7 +809,10 @@ def main():
     alch_filled, vendor_filled = apply_alch_fallback(items_db, prices, now_iso)
     junk_zeroed = apply_junk_zeroing(items_db, prices, now_iso)
     vendor_forced = apply_vendor_defaults(items_db, prices, now_iso)
-    container_filled = apply_container_pricing(items_db, prices, now_iso)
+    container_filled = apply_same_as_base(items_db, prices, now_iso)
+    alch_forced = apply_alch_defaults(items_db, prices, now_iso)
+    unid_filled = apply_unidentified_herb_pricing(items_db, prices, now_iso)
+    enchant_capped = apply_enchant_caps(items_db, prices, now_iso)
     # Variants and notes resolve LAST: they mirror a base item's final price,
     # so every fallback must already have been applied to that base.
     variant_filled = apply_variant_pricing(items_db, prices, now_iso)
@@ -711,7 +835,9 @@ def main():
     print(f"  ({dose_filled} by dose, {charge_filled} by charges, {cloth_filled} by cloth, "
           f"{unf_filled} unfinished, {variant_filled} variants, {noted_filled} noted, "
           f"{alch_filled} alch, {vendor_filled}+{vendor_forced} vendor, "
-          f"{container_filled} containers, {junk_zeroed} junk)", flush=True)
+          f"{container_filled} same-as-base, {junk_zeroed} junk, "
+          f"{alch_forced} forced alch, {unid_filled} unidentified herbs, "
+          f"{enchant_capped} enchant-capped)", flush=True)
 
     ITEMS_PATH.write_text(json.dumps(items_db, indent=2, sort_keys=True), encoding="utf-8")
     PRICES_PATH.write_text(json.dumps(prices, indent=2, sort_keys=True), encoding="utf-8")
