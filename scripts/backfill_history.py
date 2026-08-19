@@ -38,6 +38,7 @@ DATA_DIR = ROOT / "data"
 ITEMS_PATH = DATA_DIR / "items.json"
 PRICES_PATH = DATA_DIR / "prices.json"
 HISTORY_PATH = DATA_DIR / "history.json"
+BOOK_PATH = DATA_DIR / "book.json"
 STATE_PATH = DATA_DIR / ".backfill-state.json"
 
 # Tiers that mean "we already have a decent price, don't spend a request here".
@@ -72,6 +73,7 @@ def main():
         sys.exit(1)
     prices = load_json(PRICES_PATH)
     history = load_json(HISTORY_PATH)
+    book = load_json(BOOK_PATH)
     state = load_json(STATE_PATH, {"done": []})
     done = set(state.get("done", []))
 
@@ -105,7 +107,7 @@ def main():
     try:
         for n, (gid, slug) in enumerate(targets, 1):
             try:
-                item, sales = mkt.fetch_item_history(slug)
+                item, sales, bids, asks = mkt.fetch_item_history(slug)
             except Exception as e:
                 print(f"  [{n}/{len(targets)}] {slug:<30} error: {e}", flush=True)
                 continue
@@ -113,6 +115,13 @@ def main():
             cap = BUNDLE_CAPS.get(slug)
             if cap:
                 sales = [s for s in sales if s["price"] <= cap]
+                bids = [b for b in bids if b <= cap]
+                asks = [a for a in asks if a <= cap]
+
+            # Standing offers found here feed the same bid/ask logic the main
+            # scraper uses, so a quiet item still gets a real price.
+            if bids or asks:
+                book[gid] = {"bids": bids, "asks": asks}
 
             if sales:
                 bucket = history.setdefault(gid, [])
@@ -130,19 +139,20 @@ def main():
 
             done.add(gid)
             if n % SAVE_EVERY == 0:
-                flush(history, done)
+                flush(history, done, book)
             if n < len(targets):
                 time.sleep(mkt.RATE)
     except KeyboardInterrupt:
         print("\ninterrupted — saving progress", flush=True)
 
-    flush(history, done)
+    flush(history, done, book)
     print(f"\nDone: {found} items with sale history, {added} new sales recorded.", flush=True)
     print("Now re-run scripts/scrape_prices.py to fold these into prices.json.", flush=True)
 
 
-def flush(history, done):
+def flush(history, done, book):
     HISTORY_PATH.write_text(json.dumps(history, indent=2, sort_keys=True), encoding="utf-8")
+    BOOK_PATH.write_text(json.dumps(book, indent=2, sort_keys=True), encoding="utf-8")
     STATE_PATH.write_text(
         json.dumps({"done": sorted(done), "updated": datetime.now(timezone.utc).isoformat()}),
         encoding="utf-8",

@@ -262,12 +262,22 @@ a { color: var(--accent-2); }
 }
 .category-bar {
   flex: 1;
-  height: 6px;
-  border-radius: 3px;
+  min-width: 80px;
+  height: 12px;
+  border-radius: 2px;
   background: var(--bg-3);
+  border: 1px solid var(--border-1);
   overflow: hidden;
 }
-.category-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+/* Width is the category's share of the grand total: 50% of the bank fills
+   half the track. */
+.category-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 1px;
+  transition: width .2s ease;
+}
 .category-pct {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -433,4 +443,15 @@ footer.site-footer {
   font-size: 10.5px;
   color: var(--text-3);
   margin-left: 6px;
+}
+
+.category-controls {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+.btn.tiny {
+  font-size: 10.5px;
+  padding: 4px 9px;
+  letter-spacing: 0.04em;
 }

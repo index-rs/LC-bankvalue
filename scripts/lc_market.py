@@ -126,22 +126,21 @@ def walk_feed(path, max_pages=40, label=""):
 
 
 def fetch_item_history(slug):
-    """Per-item page -> (item_dict, [ {price, qty, soldAt} ]).
+    """Per-item page -> (item_dict, sales, bids, asks).
 
-    The global /sales feed only covers a rolling ~24h. An item page carries its
-    own sold-listing history going back months, which is the only way to price
-    anything that trades slowly (body runes sell at 14gp consistently, but a
-    couple of times a month — invisible to the daily feed, so they were falling
-    back to a 2gp alch value).
+    An item page is the complete picture for one item: months of sold listings
+    *and* the currently active buy/sell offers. Both matter — the global /sales
+    feed only reaches back ~24h, and the paginated buy/sell tabs can miss a
+    quiet item entirely (adamantite ore had a standing 1k buy offer and a 1k
+    sale four days old, and we had neither).
     """
     props = fetch_props(f"{BASE}/items/{urllib.parse.quote(slug)}")
     if props is None:
-        return None, []
+        return None, [], [], []
     item = props.get("item") or {}
-    sold = (props.get("soldListings") or {}).get("data", []) or []
 
     sales = []
-    for listing in sold:
+    for listing in (props.get("soldListings") or {}).get("data", []) or []:
         price = unit_price(listing)
         if price is None:
             continue
@@ -150,7 +149,15 @@ def fetch_item_history(slug):
             "qty": listing.get("quantity") or 1,
             "soldAt": listing.get("soldAt") or listing.get("updatedAt"),
         })
-    return item, sales
+
+    bids, asks = [], []
+    for listing in (props.get("listings") or {}).get("data", []) or []:
+        price = unit_price(listing)
+        if price is None or listing.get("soldAt"):
+            continue
+        (bids if listing.get("type") == "buy" else asks).append(price)
+
+    return item, sales, bids, asks
 
 
 def lookup_item(slug):

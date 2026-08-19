@@ -38,8 +38,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import lc_market as mkt          # noqa: E402
 from lc_items import (   # noqa: E402
-    BUNDLE_CAPS, FINE_CLOTH_SLUG, SPLITBARK_CLOTH, VIAL_WATER_SLUG,
-    categorize, parse_charges, parse_dose, unfinished_potion_herb,
+    BUNDLE_CAPS, CONTAINER_BASE, FINE_CLOTH_SLUG, SPLITBARK_CLOTH,
+    VIAL_WATER_SLUG, categorize, is_vendor_default, parse_charges, parse_dose,
+    unfinished_potion_herb,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -47,6 +48,7 @@ DATA_DIR = ROOT / "data"
 ITEMS_PATH = DATA_DIR / "items.json"
 PRICES_PATH = DATA_DIR / "prices.json"
 HISTORY_PATH = DATA_DIR / "history.json"
+BOOK_PATH = DATA_DIR / "book.json"
 
 COINS_GID = "995"
 NATURE_RUNE_GID = "561"
@@ -421,6 +423,8 @@ def apply_variant_pricing(catalog, prices, now_iso):
         base_price = prices.get(base)
         if not base_price:
             continue
+        # Always override. A poisoned dart's own listing is noise — they aren't
+        # actively sold, so whatever quote exists is worse than the base price.
         prices[gid] = {
             "price": base_price["price"],
             "tier": base_price["tier"],
@@ -476,16 +480,55 @@ def apply_junk_zeroing(catalog, prices, now_iso):
     return zeroed
 
 
+def apply_container_pricing(catalog, prices, now_iso):
+    """A bucket of water is a bucket someone filled; price it as the empty one."""
+    by_slug = {i.get("slug"): g for g, i in catalog.items()}
+    filled = 0
+    for slug, base_slug in CONTAINER_BASE.items():
+        gid, base_gid = by_slug.get(slug), by_slug.get(base_slug)
+        if not gid or not base_gid or base_gid not in prices:
+            continue
+        base = prices[base_gid]
+        prices[gid] = {
+            "price": base["price"], "tier": base["tier"],
+            "sampleSize": base.get("sampleSize", 0), "asOf": now_iso,
+            "containerOf": base_gid,
+        }
+        filled += 1
+    return filled
+
+
+def apply_vendor_defaults(catalog, prices, now_iso):
+    """Force low-alch pricing on items nobody trades in bulk.
+
+    A stray ask on a silver sickle or a javelin says nothing about what it's
+    worth; the shop price does. See VENDOR_DEFAULT_SLUGS in lc_items.py.
+    """
+    forced = 0
+    for gid, item in catalog.items():
+        if not is_vendor_default(item.get("slug")) or not item.get("tradeable", True):
+            continue
+        cost = item.get("cost") or 0
+        prices[gid] = {
+            "price": max(1, round(cost * 0.4)), "tier": "vendor",
+            "sampleSize": 0, "asOf": now_iso,
+        }
+        forced += 1
+    return forced
+
+
 def apply_noted_pricing(catalog, prices, now_iso):
     """Noted (cert_x) items are worth exactly what their base item is worth."""
     filled = 0
     for gid, item in catalog.items():
         base = item.get("notedOf")
-        if not base or gid in prices:
+        if not base:
             continue
         base_price = prices.get(base)
         if not base_price:
             continue
+        # Always override: a noted item IS its base item, so any fallback that
+        # landed on it earlier is strictly worse than the base's final price.
         prices[gid] = {
             "price": base_price["price"],
             "tier": base_price["tier"],
@@ -524,6 +567,10 @@ def apply_alch_fallback(catalog, prices, now_iso):
 
     for gid, item in catalog.items():
         if gid in prices or not item.get("tradeable", True) or item.get("rare"):
+            continue
+        # Noted items and poison/leather variants mirror a base item's price,
+        # which is resolved after this pass — don't let a guess claim them first.
+        if item.get("notedOf") or item.get("pricedAs"):
             continue
         cost = item.get("cost") or 0
         if cost <= 0:
@@ -589,6 +636,15 @@ def main():
     for item in items_db.values():
         item["category"] = categorize(item.get("slug", ""), item.get("name", ""), False)
 
+    # Standing offers captured by backfill_history.py, for items the paginated
+    # buy/sell feeds don't reach. Live feed data always wins.
+    book = load_json(BOOK_PATH)
+    for gid, sides in book.items():
+        if gid not in bids and sides.get("bids"):
+            bids[gid] = sides["bids"]
+        if gid not in asks and sides.get("asks"):
+            asks[gid] = sides["asks"]
+
     history = merge_history(history, sales)
     now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -597,10 +653,14 @@ def main():
     charge_filled = apply_charge_normalization(items_db, prices, now_iso)
     cloth_filled = apply_splitbark_pricing(items_db, prices, now_iso)
     unf_filled = apply_unfinished_potion_pricing(items_db, prices, now_iso)
-    variant_filled = apply_variant_pricing(items_db, prices, now_iso)
-    noted_filled = apply_noted_pricing(items_db, prices, now_iso)
     alch_filled, vendor_filled = apply_alch_fallback(items_db, prices, now_iso)
     junk_zeroed = apply_junk_zeroing(items_db, prices, now_iso)
+    vendor_forced = apply_vendor_defaults(items_db, prices, now_iso)
+    container_filled = apply_container_pricing(items_db, prices, now_iso)
+    # Variants and notes resolve LAST: they mirror a base item's final price,
+    # so every fallback must already have been applied to that base.
+    variant_filled = apply_variant_pricing(items_db, prices, now_iso)
+    noted_filled = apply_noted_pricing(items_db, prices, now_iso)
 
     # Coins are exactly 1gp — never rely on seeing a coins-for-coins listing.
     items_db[COINS_GID] = {"slug": "coins", "name": "Coins", "cost": 1,
@@ -618,7 +678,8 @@ def main():
         print(f"    {tier:<10} {by_tier[tier]}", flush=True)
     print(f"  ({dose_filled} by dose, {charge_filled} by charges, {cloth_filled} by cloth, "
           f"{unf_filled} unfinished, {variant_filled} variants, {noted_filled} noted, "
-          f"{alch_filled} alch, {vendor_filled} vendor, {junk_zeroed} junk)", flush=True)
+          f"{alch_filled} alch, {vendor_filled}+{vendor_forced} vendor, "
+          f"{container_filled} containers, {junk_zeroed} junk)", flush=True)
 
     ITEMS_PATH.write_text(json.dumps(items_db, indent=2, sort_keys=True), encoding="utf-8")
     PRICES_PATH.write_text(json.dumps(prices, indent=2, sort_keys=True), encoding="utf-8")

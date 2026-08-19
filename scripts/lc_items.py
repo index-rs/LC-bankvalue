@@ -23,6 +23,31 @@ EQUIP_KEYWORDS = (
     "partyhat", "halo", "boater", "scarf", "cane", "sceptre",
 )
 AMMO_KEYWORDS = ("arrow", "bolt", "dart", "javelin", "throwing", "cannonball")
+
+# Weapons get their own category — melee, ranged, staves, cannon parts.
+WEAPON_KEYWORDS = (
+    "dagger", "sword", "scimitar", "battleaxe", "_axe", "mace", "warhammer",
+    "spear", "halberd", "claws", "hatchet", "pickaxe", "whip", "flail",
+    "staff", "wand", "bow", "crossbow", "sceptre", "sickle", "godsword",
+    "mcannon", "dragonfire",
+)
+# Jewellery: rings, amulets, necklaces, holy symbols and emblems.
+JEWEL_KEYWORDS = (
+    "ring_of", "amulet", "necklace", "holy_symbol", "unholy_symbol",
+    "_emblem", "symbol_of", "_ring",
+)
+# Fletching intermediates live with crafting.
+FLETCH_KEYWORDS = ("unstrung", "arrowheads", "arrow_shaft", "bow_string")
+# Bows below magic tier — plus magic longbows — are fletching stock rather
+# than gear anyone actually fights with.
+FLETCH_BOWS = {
+    "shortbow", "longbow",
+    "oak_shortbow", "oak_longbow",
+    "willow_shortbow", "willow_longbow",
+    "maple_shortbow", "maple_longbow",
+    "yew_shortbow", "yew_longbow",
+    "magic_longbow",
+}
 # Plain tools that would otherwise be caught by a broader keyword rule
 # ("knife" as ammo, "lobster_pot"/"harpoon" as food, "pot_empty" as food).
 TOOL_SLUGS = {
@@ -85,12 +110,28 @@ _override("food", [
     "tangled_toads_legs", "equa_toads_legs", "premade_tangled_toads_legs",
     "seasoned_toads_legs", "spicy_toads_legs", "toads_legs",
 ])
-_override("crafting", ["swamp_paste", "swamppaste", "rawswamppaste"])
+_override("crafting", [
+    "swamp_paste", "swamppaste", "rawswamppaste",
+    "arrow_shaft", "ogre_arrow_shaft",
+])
 _override("runecrafting", ["blankrune"])
+_override("jewellery", ["blessedstar", "stringstar"])
 _override("equipment", [
     "splitbark_helm", "splitbark_body", "splitbark_legs",
     "splitbark_gauntlets", "splitbark_greaves",
-    "elemental_shield",
+    # "Dragonfire shield" — its slug contains "antidragon", which was landing
+    # it in Potions.
+    "antidragonbreathshield",
+])
+_override("herblore", [
+    # "_bar" was sending chocolate bars to Ores & Bars.
+    "chocolate_bar", "chocolate_dust",
+])
+_override("other", [
+    "mithril_seed",
+    # Buckets and pots are supplies people genuinely stock, not junk.
+    "bucket", "bucket_empty", "bucket_water", "bucket_milk", "bucket_sand",
+    "pot_empty", "cooking_pot", "jug_empty",
 ])
 
 # Talismans are runecrafting, but "digtalisman" is a quest item.
@@ -117,10 +158,18 @@ JUNK_SLUGS = {
     "boots_wizard",
     "fremennik_cloak", "fremennik_shirt", "fremennik_boots", "fremennik_blade",
     # misc
-    "petes_candlestick", "candlestick", "pot_of_cream", "cream",
-    "elemental_shield",
+    "pot_of_cream", "cream",
+    "elemental_shield", "black_robe", "black_robe_top", "black_robe_bottom",
+    "crossbow",          # the plain vendor crossbow
     "bolt", "bolts",
 }
+# Whole families that are vendor-bought for coppers. A fremennik cloak was
+# being valued at 100k off one stale listing; they cost about 1k from an NPC.
+JUNK_PREFIXES = (
+    "fremennik_",
+    "viking_cloak_", "viking_top_",   # Fremennik cloaks/shirts, ~100gp from an NPC
+    "petecandlestick", "petes_",
+)
 JUNK_SUFFIXES = ("_mould",)
 JUNK_KEYWORDS = ("_apron", "_bead", "bead_", "unlit_candle", "lit_candle")
 
@@ -135,6 +184,8 @@ def is_junk(slug):
         return True
     if s.startswith(FLOWER_PREFIX):
         return s not in FLOWER_KEEP
+    if s.startswith(JUNK_PREFIXES):
+        return True
     if s.endswith(JUNK_SUFFIXES):
         return True
     if any(k in s for k in JUNK_KEYWORDS):
@@ -265,12 +316,22 @@ def categorize(slug, name="", is_set=False):
     # Unfinished potions ("guamvial", "ranarrvial") are herblore intermediates.
     if s.endswith("vial") and s not in ("vial", "vial_water", "vial_empty"):
         return "herblore"
+    # Fletching stock first: an unstrung yew longbow is material, and bows
+    # below magic tier aren't gear anyone actually fights with.
+    if any(k in s for k in FLETCH_KEYWORDS) or s in FLETCH_BOWS:
+        return "crafting"
     # Thrown weapons: a tiered knife ("rune_knife") is ammunition, while a bare
     # "knife" is the cooking/fletching tool and is junk.
     if any(k in s for k in AMMO_KEYWORDS) or TIERED_KNIFE_RE.match(s):
         return "ammunition"
+    if any(k in s for k in JEWEL_KEYWORDS):
+        return "jewellery"
+    if any(k in s for k in WEAPON_KEYWORDS):
+        return "weapons"
     # Dragonhide armour is worn; raw hide and leather stay crafting materials.
-    if "dragonhide" in s and any(k in s for k in ("_body", "_chaps", "_vambraces", "_coif")):
+    if ("dragonhide" in s or "dragon_vambraces" in s) and any(
+        k in s for k in ("_body", "_chaps", "_vambraces", "_coif")
+    ):
         return "equipment"
     if any(k in s for k in GEM_KEYWORDS):
         return "gems"
@@ -332,9 +393,13 @@ HIDE_COLOURS = {
     "red_dragonhide_body": "Red", "black_dragonhide_body": "Black",
     "dragonhide_chaps": "Green", "blue_dragonhide_chaps": "Blue",
     "red_dragonhide_chaps": "Red", "black_dragonhide_chaps": "Black",
-    "dragonhide_vambraces": "Green", "blue_dragonhide_vambraces": "Blue",
-    "red_dragonhide_vambraces": "Red", "black_dragonhide_vambraces": "Black",
+    "dragon_vambraces": "Green", "blue_dragon_vambraces": "Blue",
+    "red_dragon_vambraces": "Red", "black_dragon_vambraces": "Black",
 }
+
+# Torn pages are all named "Torn page N" across three different god books;
+# the slug's g/s/z is the only thing telling them apart.
+TORN_PAGE_GODS = {"g": "Guthix", "s": "Saradomin", "z": "Zamorak"}
 
 
 def base_variant(slug):
@@ -349,9 +414,23 @@ def base_variant(slug):
 
 
 def disambiguate_name(slug, name):
-    """Dragonhide items all share a name ('Dragonhide body' x4). Add the colour."""
+    """Add back detail the game's own names drop.
+
+    Dragonhide items all share a name ("Dragonhide body" x4) and torn pages all
+    read "Torn page N" across three god books, so neither is identifiable in a
+    bank listing without the colour or god.
+    """
+    if not name:
+        return name
+
+    if slug.startswith("holy_book_") and "_page" in slug:
+        god = TORN_PAGE_GODS.get(slug.split("_")[2][:1])
+        if god and god.lower() not in name.lower():
+            return f"{name} ({god})"
+        return name
+
     colour = HIDE_COLOURS.get(slug)
-    if not colour or not name:
+    if not colour:
         return name
     if name.lower().startswith(colour.lower()):
         return name
@@ -387,3 +466,32 @@ def unfinished_potion_herb(slug):
         return None
     stem = s[: -len("vial")]
     return UNF_HERB_ALIASES.get(stem, stem)
+
+
+# ---------------------------------------------------------------------
+# Items that default to vendor (low alch) price regardless of listings.
+# Nobody buys these in bulk and they aren't worth alching, so an ask-only
+# quote on one is noise rather than signal.
+# ---------------------------------------------------------------------
+VENDOR_DEFAULT_SLUGS = {
+    "silver_sickle", "silver_sickle_blessed",
+    "hardleather_body",
+    "stringstar",        # unblessed / unstrung symbol
+    "unstrung_symbol", "unstrung_emblem",
+}
+JAVELIN_RE = re.compile(
+    r"^((bronze|iron|steel|black|mithril|adamant|rune)_)?javelin(_p)?$"
+)
+
+
+def is_vendor_default(slug):
+    s = (slug or "").lower()
+    return s in VENDOR_DEFAULT_SLUGS or bool(JAVELIN_RE.match(s))
+
+
+# Bucket/pot variants that price as their plain empty container: a bucket of
+# water is a bucket someone filled up, and only the empty one really trades.
+CONTAINER_BASE = {
+    "bucket_water": "bucket_empty",
+    "bucket_milk": "bucket_empty",
+}

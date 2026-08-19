@@ -30,8 +30,10 @@
     logs: 'Logs',
     food: 'Food',
     gems: 'Gems',
-    equipment: 'Equipment',
-    crafting: 'Crafting',
+    equipment: 'Armour',
+    weapons: 'Weapons',
+    jewellery: 'Jewellery',
+    crafting: 'Crafting / Fletching',
     bones: 'Bones',
     seeds: 'Seeds',
     tools: 'Tools',
@@ -91,6 +93,8 @@
     food: 'var(--red)',
     gems: 'var(--violet)',
     equipment: 'var(--teal)',
+    weapons: 'var(--red)',
+    jewellery: 'var(--amber)',
     crafting: 'var(--amber)',
     bones: 'var(--text-2)',
     seeds: 'var(--green)',
@@ -129,7 +133,14 @@
     merged.forEach((qty, gid) => {
       const item = itemsDb[String(gid)];
       const base = item && item.pricedAs;
-      if (!base || !merged.has(Number(base))) return;
+      if (!base || Number(base) === gid) return;
+      // Create the base row if the player holds only the variant — someone with
+      // adamant dart(p) and no plain darts should still see one "Adamant dart"
+      // line, not a separately (mis)priced poisoned entry.
+      if (!merged.has(Number(base))) {
+        merged.set(Number(base), 0);
+        sources.set(Number(base), {});
+      }
       const notes = variantNotes.get(Number(base)) || {};
       const label = item.variant || 'variant';
       notes[label] = (notes[label] || 0) + qty;
@@ -286,6 +297,10 @@
              Nothing proves anyone pays it; treat those lines as an upper bound.</div>`
           : ''
       }
+      <div class="category-controls">
+        <button type="button" class="btn tiny" data-expand-all>Expand all</button>
+        <button type="button" class="btn tiny" data-collapse-all>Collapse all</button>
+      </div>
       <div class="categories"></div>
     `;
 
@@ -364,6 +379,13 @@
       `;
       container.appendChild(panel);
     }
+
+    const setAllOpen = (open) =>
+      container.querySelectorAll('.category').forEach((c) => c.classList.toggle('open', open));
+    const expandBtn = container.querySelector('[data-expand-all]');
+    const collapseBtn = container.querySelector('[data-collapse-all]');
+    if (expandBtn) expandBtn.addEventListener('click', () => setAllOpen(true));
+    if (collapseBtn) collapseBtn.addEventListener('click', () => setAllOpen(false));
 
     const toggle = container.querySelector('[data-toggle-untradeable]');
     if (toggle) {

@@ -69,6 +69,7 @@ Price per item, best available evidence first:
 | `vendor` | Worth less than the rune needed to alch it; low alch / shop value (`cost × 0.4`) |
 | `unfinished` | An unfinished potion, priced as its herb plus a vial of water |
 | `junk` | Vendor tools and clothing nobody trades — deliberately 0 |
+| `container` | A filled bucket, priced as the empty one |
 | *untradeable* | Can't be sold — counted as 0, not reported as a gap |
 | *unknown* | Tradeable but genuinely no price on file |
 
@@ -96,9 +97,16 @@ hammers, needles, moulds, fishing rods, wizard robes — sell for a few gp from 
 store and are never actively traded. Counting them adds noise, not value. A toggle in the
 report reveals them along with untradeables.
 
+**Categories:** Coins, Rares, Runes, Runecrafting, Ammunition, Weapons, Armour, Jewellery,
+Potions, Herblore, Crafting / Fletching, Food, Logs, Ores & Bars, Gems, Bones, Seeds, Other,
+Junk. Each gets a colour-coded bar showing its share of the total, and there are
+expand/collapse-all controls.
+
 **Variants fold into their base item.** Poisoned weapons and dragon leather barely trade on
 their own, so they're priced as (and displayed with) their base: a bank holding 5,000 rune
-arrows and 200 poisoned ones shows one row reading `Rune arrow ×5,200 +200 poisoned`.
+arrows and 200 poisoned ones shows one row reading `Rune arrow ×5,200 +200 poisoned`. This
+holds even when only the variant is held — 774 poisoned adamant darts and no plain ones still
+render as a single `Adamant dart +774 poisoned` line at the plain dart's price.
 Dragonhide items all share a name in the game data, so the colour is added back to
 distinguish them.
 
@@ -143,6 +151,11 @@ python scripts/scrape_prices.py     # refresh prices (fast, daily)
 ~24 hours of trades, so anything that sells a few times a month was falling back to alch —
 body runes trade at a steady 14gp but were being valued at 2. It walks per-item pages
 (one request each, ~0.8s apart) and is resumable, so Ctrl-C is safe.
+
+Each item page carries **both** months of sale history and the item's currently standing
+buy/sell offers, so it also catches quiet items the paginated feeds miss entirely —
+adamantite ore had a live 1,000gp buy offer and a 1,000gp sale and was still being priced at
+its 160gp vendor value. Standing offers land in `data/book.json`; live feed data always wins.
 
 To preview the site:
 
