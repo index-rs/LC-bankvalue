@@ -873,8 +873,12 @@ VENDOR_DEFAULT_SLUGS = {
     "mithril_thrownaxe", "adamnt_thrownaxe", "rune_thrownaxe",
     "bolt", "bolts", "barbed_bolt", "barbed_bolts",
     "opal_bolttips", "pearl_bolttips", "barbed_bolttips",
-    # The blank battlestaff; the elemental ones trade properly on their own.
+    # The blank battlestaff; the elemental battlestaves trade properly on
+    # their own.
     "battlestaff",
+    # The basic elemental staves: any magic shop stocks them, so nobody buys
+    # them in bulk off another player.
+    "staff_of_air", "staff_of_water", "staff_of_earth", "staff_of_fire",
 }
 JAVELIN_RE = re.compile(
     r"^((bronze|iron|steel|black|mithril|adamant|rune)_)?javelin(_p)?$"

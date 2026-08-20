@@ -2882,56 +2882,55 @@
   },
   "1381": {
     "asOf": "2026-08-20T17:29:44Z",
-    "price": 561,
+    "price": 600,
     "sampleSize": 0,
-    "tier": "alch"
+    "tier": "vendor"
   },
   "1382": {
     "asOf": "2026-08-20T17:29:44Z",
     "notedFrom": "1381",
-    "price": 561,
+    "price": 600,
     "sampleSize": 0,
-    "tier": "alch"
+    "tier": "vendor"
   },
   "1383": {
     "asOf": "2026-08-20T17:29:44Z",
-    "lastSold": "2026-06-04",
-    "price": 1250,
-    "sampleSize": 2,
-    "tier": "stale"
+    "price": 600,
+    "sampleSize": 0,
+    "tier": "vendor"
   },
   "1384": {
     "asOf": "2026-08-20T17:29:44Z",
     "notedFrom": "1383",
-    "price": 1250,
-    "sampleSize": 2,
-    "tier": "stale"
+    "price": 600,
+    "sampleSize": 0,
+    "tier": "vendor"
   },
   "1385": {
     "asOf": "2026-08-20T17:29:44Z",
-    "price": 561,
+    "price": 600,
     "sampleSize": 0,
-    "tier": "alch"
+    "tier": "vendor"
   },
   "1386": {
     "asOf": "2026-08-20T17:29:44Z",
     "notedFrom": "1385",
-    "price": 561,
+    "price": 600,
     "sampleSize": 0,
-    "tier": "alch"
+    "tier": "vendor"
   },
   "1387": {
     "asOf": "2026-08-20T17:29:44Z",
-    "price": 561,
+    "price": 600,
     "sampleSize": 0,
-    "tier": "alch"
+    "tier": "vendor"
   },
   "1388": {
     "asOf": "2026-08-20T17:29:44Z",
     "notedFrom": "1387",
-    "price": 561,
+    "price": 600,
     "sampleSize": 0,
-    "tier": "alch"
+    "tier": "vendor"
   },
   "1389": {
     "asOf": "2026-08-20T17:29:44Z",
