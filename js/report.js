@@ -10,6 +10,8 @@
 //   charge    charged jewellery priced off its family's fully-charged variant
 //   cloth     splitbark, priced from the fine cloth it takes to make
 //   enchant   plain gem jewellery, capped at what its enchanted form sells for
+//   fixed     hand-set price — the market reads this item wrong (cannon parts
+//             trade as a whole cannon, soul runes off a single outlier bid)
 //   stale     no recent trade, but it has sold before — old price beats a guess
 //   noted     a noted (cert_) item, priced from its base item
 //   alch      no market data; high alch value less the nature rune to cast it
@@ -51,6 +53,7 @@
     charge: 'Charges',
     cloth: 'Fine cloth',
     enchant: 'Enchant cap',
+    fixed: 'Fixed',
     stale: 'Old sale',
     unfinished: 'Materials',
     junk: 'Junk',
@@ -62,8 +65,8 @@
   };
 
   const VALUED_TIERS = new Set([
-    'market', 'bid', 'ask', 'dose', 'charge', 'cloth', 'enchant', 'stale',
-    'noted', 'alch', 'vendor', 'unfinished',
+    'market', 'bid', 'ask', 'dose', 'charge', 'cloth', 'enchant', 'fixed',
+    'stale', 'noted', 'alch', 'vendor', 'unfinished',
   ]);
 
   function fmtGp(n) {

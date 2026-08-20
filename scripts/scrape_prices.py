@@ -22,6 +22,8 @@ charged jewellery off its fully-charged variant, splitbark from fine cloth,
 noted items from their base item. BUNDLE_CAPS reject set listings posted under
 a single item's slug (full rune sets under "rune platebody", etc), and plain
 gem jewellery is capped at its enchanted form's price (ENCHANT_PRODUCT).
+FIXED_PRICES hand-sets the few items no rule reads correctly (cannon parts,
+soul runes) and overrides everything else.
 
 Deep sale history for slow-moving items comes from backfill_history.py.
 
@@ -39,7 +41,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import lc_market as mkt          # noqa: E402
 from lc_items import (   # noqa: E402
-    BUNDLE_CAPS, ENCHANT_PRODUCT, FINE_CLOTH_SLUG, SAME_AS_BASE,
+    BUNDLE_CAPS, ENCHANT_PRODUCT, FINE_CLOTH_SLUG, FIXED_PRICES, SAME_AS_BASE,
     SPLITBARK_CLOTH, UNID_HERB, VIAL_WATER_SLUG, categorize, is_alch_default,
     is_vendor_default, parse_charges, parse_dose, unfinished_potion_herb,
 )
@@ -448,8 +450,13 @@ def apply_charge_normalization(catalog, prices, now_iso):
             if gid == anchor_gid:
                 continue
             existing = prices.get(gid)
-            # Keep a variant's own price when it has real completed-sale evidence.
-            if existing and existing["tier"] == "market" and existing.get("sampleSize", 0) >= 3:
+            # Keep a variant's own price when it has real completed-sale
+            # evidence — but only where charges are the product. Under the
+            # "full" model every level is the same item, so its own sales are
+            # the same market as the anchor's, quoted thinner.
+            if (spec["model"] == "proportional" and existing
+                    and existing["tier"] == "market"
+                    and existing.get("sampleSize", 0) >= 3):
                 continue
             if spec["model"] == "full":
                 value = anchor
@@ -670,6 +677,32 @@ def apply_enchant_caps(catalog, prices, now_iso):
     return capped
 
 
+def apply_fixed_prices(catalog, prices, now_iso):
+    """Hand-set prices that override every other tier.
+
+    A handful of items the market reads wrong no matter which fallback catches
+    them — cannon parts priced as a whole cannon, soul runes off a single
+    outlier bid. See FIXED_PRICES in lc_items.py.
+    """
+    by_slug = {i.get("slug"): g for g, i in catalog.items()}
+    forced = 0
+    for slug, price in FIXED_PRICES.items():
+        gid = by_slug.get(slug)
+        if not gid:
+            continue
+        previous = prices.get(gid)
+        prices[gid] = {
+            "price": price,
+            "tier": "fixed",
+            "sampleSize": 0,
+            "asOf": now_iso,
+            "replacedPrice": previous["price"] if previous else None,
+            "replacedTier": previous["tier"] if previous else None,
+        }
+        forced += 1
+    return forced
+
+
 def apply_noted_pricing(catalog, prices, now_iso):
     """Noted (cert_x) items are worth exactly what their base item is worth."""
     filled = 0
@@ -813,6 +846,8 @@ def main():
     alch_forced = apply_alch_defaults(items_db, prices, now_iso)
     unid_filled = apply_unidentified_herb_pricing(items_db, prices, now_iso)
     enchant_capped = apply_enchant_caps(items_db, prices, now_iso)
+    # Hand-set prices beat every tier above, including live market data.
+    fixed_forced = apply_fixed_prices(items_db, prices, now_iso)
     # Variants and notes resolve LAST: they mirror a base item's final price,
     # so every fallback must already have been applied to that base.
     variant_filled = apply_variant_pricing(items_db, prices, now_iso)
@@ -837,7 +872,7 @@ def main():
           f"{alch_filled} alch, {vendor_filled}+{vendor_forced} vendor, "
           f"{container_filled} same-as-base, {junk_zeroed} junk, "
           f"{alch_forced} forced alch, {unid_filled} unidentified herbs, "
-          f"{enchant_capped} enchant-capped)", flush=True)
+          f"{enchant_capped} enchant-capped, {fixed_forced} fixed)", flush=True)
 
     ITEMS_PATH.write_text(json.dumps(items_db, indent=2, sort_keys=True), encoding="utf-8")
     PRICES_PATH.write_text(json.dumps(prices, indent=2, sort_keys=True), encoding="utf-8")

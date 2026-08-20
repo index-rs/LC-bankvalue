@@ -354,6 +354,7 @@ a { color: var(--accent-2); }
 .tier-stale { color: var(--text-2); background: var(--bg-3); }
 .tier-charge { color: var(--blue); background: color-mix(in oklab, var(--blue) 14%, transparent); }
 .tier-enchant { color: var(--blue); background: color-mix(in oklab, var(--blue) 14%, transparent); }
+.tier-fixed { color: var(--teal); background: color-mix(in oklab, var(--teal) 16%, transparent); }
 .tier-noted { color: var(--text-2); background: var(--bg-3); }
 .tier-alch { color: var(--gold); background: color-mix(in oklab, var(--gold) 16%, transparent); }
 .tier-unfinished { color: var(--green); background: color-mix(in oklab, var(--green) 12%, transparent); }

@@ -64,6 +64,7 @@ Price per item, best available evidence first:
 | `dose` | Potion priced per-dose from its dose family's best-sampled variant |
 | `charge` | Charged jewellery priced off its family's fully-charged variant |
 | `enchant` | Plain gem jewellery, capped at what its enchanted form sells for |
+| `fixed` | A hand-set price, overriding every tier below and the live market too |
 | `sameAs` | Worth exactly what another item is worth — filled buckets, broken tools, tool heads, tanned leather |
 | `noted` | A noted (`cert_`) item, priced from its base item |
 | `stale` | No recent trade, but it has sold before — a real old price beats a guess |
@@ -86,7 +87,9 @@ fills in dose variants that never trade on their own.
 partial ones would otherwise fall back to alch and be wildly wrong. Two models: amulets of
 glory price every charge level (uncharged included) at the glory(4) price, since recharging
 is free at the Fountain of Heroes; rings of dueling and games necklaces scale with charges
-remaining, since those are consumed rather than recharged.
+remaining, since those are consumed rather than recharged. Under the glory model the anchor
+wins even where the variant has sales of its own — an uncharged glory going for less is buyers
+pricing in the walk to the fountain, not a different item.
 
 **Unenchanted jewellery is capped at its enchanted form.** Enchanting is slow, fiddly work
 — runes, magic level, a lot of clicking — so nobody pays a premium for the plain piece. When
@@ -116,6 +119,13 @@ and the heraldic items came later and aren't in this build; see the OSRS wiki's
 [Ornamental armour](https://oldschool.runescape.wiki/w/Ornamental_armour) and
 [Gilded equipment](https://oldschool.runescape.wiki/w/Gilded_equipment) pages for the full
 modern table.
+
+**A few items carry a hand-set price.** Cannon parts trade as a four-piece set, so whichever
+part a sale happened to be posted under swallowed the whole cannon's price (a base at 650k
+beside a furnace sitting on its 112k alch value); soul runes see so few sales that one whale
+bid dragged the median. Both are pinned: 180k a cannon part, 1,500 a soul rune. The table is
+`FIXED_PRICES` in `lc_items.py` and is meant to stay short — a price that merely looks off
+belongs in a fallback rule, since anything listed here stops tracking the market entirely.
 
 **Some families are priced by fiat, not by the market.** Thrown weapons, low-tier bolts and
 bolt tips take vendor price; the melee families nobody trades — claws, warhammers, maces,

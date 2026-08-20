@@ -102,7 +102,8 @@ FOOD_SLUGS = {
     "fruit_batta", "worm_batta", "worm_crunchies", "chocchip_crunchies",
 }
 
-GEM_KEYWORDS = ("sapphire", "emerald", "ruby", "diamond", "dragonstone", "opal", "jade")
+GEM_KEYWORDS = ("sapphire", "emerald", "ruby", "diamond", "dragonstone", "opal",
+                "jade", "topaz")
 SEED_KEYWORDS = ("seed",)
 BONE_KEYWORDS = ("bones", "ashes")
 CRAFTING_KEYWORDS = (
@@ -479,7 +480,10 @@ SPLITBARK_CLOTH = {
 #   "full"         every charge level is worth the full max-charge price.
 #                  Glories recharge free at the Fountain of Heroes, so an
 #                  uncharged one is worth essentially what a charged one is.
-#                  Applies to the bare, uncharged slug too.
+#                  Applies to the bare, uncharged slug too, and it wins over
+#                  the variant's own sales: an uncharged glory trading below a
+#                  glory(4) is buyers pricing in a trip to the fountain, not a
+#                  different item.
 #   "proportional" value scales with charges remaining (half charges = half
 #                  worth). Dueling rings and games necklaces can't be recharged
 #                  — you consume them and buy another — so the charges are the
@@ -529,6 +533,28 @@ ENCHANT_PRODUCT = {
     "unstrung_diamond_amulet": "amulet_of_power",
     "strung_dragonstone_amulet": "amulet_of_glory",
     "unstrung_dragonstone_amulet": "amulet_of_glory",
+}
+
+
+# ---------------------------------------------------------------------
+# Fixed prices — a hand-set number that overrides every other tier.
+#
+# Reserved for items whose market reading is broken in a way no fallback fixes:
+# the cannon parts trade as a four-piece set for the whole cannon, so whichever
+# part a sale happened to be posted under swallows the entire price (a cannon
+# base at 650k next to a furnace at its 112k alch value), and soul runes have
+# so few sales that a single whale bid drags the median to absurdity.
+#
+# Keep this table small. Anything here stops tracking the market entirely, so
+# a price that merely looks off belongs in a fallback rule, not in here.
+# ---------------------------------------------------------------------
+FIXED_PRICES = {
+    # The cannon, split four ways: base, stand, barrels, furnace.
+    "twpart1": 180_000,
+    "twpart2": 180_000,
+    "twpart3": 180_000,
+    "twpart4": 180_000,
+    "soulrune": 1_500,
 }
 
 
