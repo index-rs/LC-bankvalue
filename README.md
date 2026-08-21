@@ -152,9 +152,17 @@ modern table.
 **A few items carry a hand-set price.** Cannon parts trade as a four-piece set, so whichever
 part a sale happened to be posted under swallowed the whole cannon's price (a base at 650k
 beside a furnace sitting on its 112k alch value); soul runes see so few sales that one whale
-bid dragged the median. Both are pinned: 180k a cannon part, 1,500 a soul rune. The table is
-`FIXED_PRICES` in `lc_items.py` and is meant to stay short — a price that merely looks off
-belongs in a fallback rule, since anything listed here stops tracking the market entirely.
+bid dragged the median. Both are pinned: 180k a cannon part, 1,500 a soul rune.
+
+The four Fremennik helms are pinned at their 78,000 shop price for a different reason: a
+shop sells all four at that price with stock loose enough that scarcity never lifts them
+above it. Left to the market they disagreed wildly on thin data — the farseer and warrior
+helms have never recorded a sale at all and rested on a 35,662 alch guess, while the archer
+helm read 70,000 from a single sale in June.
+
+The table is `FIXED_PRICES` in `lc_items.py` and is meant to stay short — a price that merely
+looks off belongs in a fallback rule, since anything listed here stops tracking the market
+entirely.
 
 **Some families are priced by fiat, not by the market.** Thrown weapons, low-tier bolts and
 bolt tips take vendor price; the melee families nobody trades — claws, warhammers, maces,

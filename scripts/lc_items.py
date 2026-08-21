@@ -581,6 +581,16 @@ FIXED_PRICES = {
     "twpart3": 180_000,
     "twpart4": 180_000,
     "soulrune": 1_500,
+    # The Fremennik helms. A shop sells all four at 78,000 and the stock isn't
+    # tight enough for scarcity to lift them above it, so that price is the
+    # market. Left to themselves the four disagree wildly for no reason but
+    # thin data: the farseer and warrior helms have never recorded a sale and
+    # were sitting on a 35,662 alch guess, while the archer helm read 70,000
+    # off one sale in June.
+    "viking_helmet_crush": 78_000,     # berserker
+    "viking_helmet_magic": 78_000,     # farseer
+    "viking_helmet_range": 78_000,     # archer
+    "viking_helmet_slash": 78_000,     # warrior
 }
 
 
