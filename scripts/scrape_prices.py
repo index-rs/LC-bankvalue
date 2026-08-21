@@ -75,6 +75,10 @@ MIN_CORROBORATION = 2 # sales needed before they may overrule the order book
 SALE_WEIGHT = 0.75    # completed sales vs. order book, when both exist
 ERROR_RATIO = 10.0    # a listing >=10x (or <=1/10) the sale price is a typo,
                       # not a signal — drop it rather than averaging it in
+ASK_FLOOR_RATIO = 100.0   # how far under the asking price a completed sale may
+                          # sit before it stops being believable. Far looser
+                          # than ERROR_RATIO: sellers ask over the market all
+                          # the time, so only the absurd should be caught here
 
 
 def load_json(path, default=None):
@@ -252,15 +256,45 @@ def robust_median(sales, floor=None, ceiling=None):
     return _trimmed_median(bounded)
 
 
-def book_reference(bid_list, ask_list):
-    """Mean of the standing offers — an independent sanity reference for sales.
+def sale_bounds(bid_list, ask_list):
+    """(floor, ceiling) for completed sales, from the standing order book.
 
     Someone who lists 1,000 blood runes and types the total instead of the
     per-unit price records a real 1gp sale. Nothing in the sale data itself
     marks it as wrong, but four people bidding 800-900 each do.
+
+    Bids and asks don't get equal say here, in either direction:
+
+    *Bids* are real coins on the table, so they bound sales tightly, both ways
+    (ERROR_RATIO). If people are bidding 500, neither a 1gp sale nor a 20,000gp
+    one is telling the truth about this item.
+
+    *Asks* are one seller's hope, and hope can't prove a completed sale was a
+    mistake. Letting an ask set a tight floor read the water talisman at 16,312
+    against a real market of 500-1,000: a lone 10,000gp ask lifted the floor
+    until all 29 units of genuine 500gp sales were rejected as implausibly
+    cheap, leaving two 1-unit sales at 20,000 to set both the price and the
+    outlier window it was judged against. So an ask floors sales only at
+    ASK_FLOOR_RATIO — loose enough that ordinary ask-over-market optimism
+    passes, tight enough to still catch the absurd. That case is real too: with
+    no bids at all, a 1gp sale is the only thing standing between a purple
+    partyhat and being valued at 1gp.
+
+    Asks set no ceiling. A seller asking high is not evidence that high sales
+    are wrong, and an absurd ask has its own guard downstream.
     """
-    quotes = list(bid_list or []) + list(ask_list or [])
-    return sum(quotes) / len(quotes) if quotes else None
+    floors, ceilings = [], []
+    if bid_list:
+        bid_ref = sum(bid_list) / len(bid_list)
+        floors.append(bid_ref / ERROR_RATIO)
+        ceilings.append(bid_ref * ERROR_RATIO)
+    if ask_list:
+        ask_ref = sum(ask_list) / len(ask_list)
+        floors.append(ask_ref / ASK_FLOOR_RATIO)
+    # The most permissive floor wins: each is a separate argument for throwing
+    # a sale out, and a sale only has to survive the weakest of them.
+    return (min(floors) if floors else None,
+            min(ceilings) if ceilings else None)
 
 
 def price_from_book(bid_list, ask_list):
@@ -305,9 +339,7 @@ def compute_prices(catalog, history, bids, asks, now_iso):
         # for 1gp" when the seller meant 1gp each of 1,000), and no property of
         # the sale itself flags it — but live bids an order of magnitude higher
         # do. Symmetric with the guard on listings in blend().
-        ref = book_reference(bids.get(gid, []), asks.get(gid, []))
-        floor = ref / ERROR_RATIO if ref else None
-        ceiling = ref * ERROR_RATIO if ref else None
+        floor, ceiling = sale_bounds(bids.get(gid, []), asks.get(gid, []))
 
         sale_median, sample, units = robust_median(
             [(e["price"], e.get("qty") or 1) for e in recent],
@@ -317,13 +349,20 @@ def compute_prices(catalog, history, bids, asks, now_iso):
             floor=floor, ceiling=ceiling)
         best_bid, best_ask, mid = price_from_book(bids.get(gid, []), asks.get(gid, []))
 
-        # A wildly-out-of-line ask with nothing to check it against is usually a
-        # listing typo. If we have *any* sale on record — even an old one — use
-        # it as the reality check the recent window couldn't provide.
+        # A wildly-out-of-line standing offer is usually a typo or a troll. If
+        # we have *any* sale on record — even an old one — use it as the
+        # reality check, and apply it to both sides of the book.
+        #
+        # Both sides, because the damage isn't symmetric only in theory: a
+        # santa hat sat at 110,000,084 because someone had a 169gp bid standing
+        # against a 220,000,000 ask, and the mid of those two is meaningless.
+        # Sales at 170-220M were on file the whole time.
         reference = sale_median if sale_median is not None else stale_median
-        if reference is not None and best_ask and best_ask > reference * ERROR_RATIO:
-            best_ask = None
-            _, _, mid = price_from_book(bids.get(gid, []), [])
+        if reference is not None:
+            lo, hi = reference / ERROR_RATIO, reference * ERROR_RATIO
+            sane_bids = [b for b in bids.get(gid, []) if lo <= b <= hi]
+            sane_asks = [a for a in asks.get(gid, []) if lo <= a <= hi]
+            best_bid, best_ask, mid = price_from_book(sane_bids, sane_asks)
 
         value, tier = blend(mid, sale_median)
 

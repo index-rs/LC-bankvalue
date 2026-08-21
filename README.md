@@ -231,6 +231,20 @@ real and the depth is not, so `BULK_UNSELLABLE` marks the stack down by half. It
 constant standing in for per-item traded volume, which the price file now records (`volume`)
 but doesn't yet spend.
 
+**A standing offer far from where an item actually sells is a typo or a troll**, on either
+side of the book. A santa hat read 110,000,084gp — the midpoint of a 169gp bid and a
+220,000,000gp ask — with real 170-220M sales on file the whole time. Offers more than
+`ERROR_RATIO` away from what the item has sold for are dropped before the mid is taken.
+
+The mirror of that guard, sales checked against the book, treats the two sides differently.
+Bids are real coins, so they bound sales tightly in both directions. Asks only floor them,
+and loosely (`ASK_FLOOR_RATIO`): sellers ask over the market constantly, and letting one do
+the tight job read the water talisman at 16,312 against a real 500-1,000 market — a lone
+10,000gp ask rejected all 29 units of genuine 500gp sales as implausibly cheap, leaving two
+1-unit sales at 20,000 to set both the price and the window it was judged against. The loose
+ask floor still earns its place: with no bids at all, it's the only thing standing between a
+purple partyhat and a 1gp sale.
+
 **Bids and asks are not equal evidence.** A one-sided *ask* is just someone's asking price —
 one absurd listing (a chaos talisman at 350k when every other talisman trades under 10k) can
 move a whole bank's total. Ask-only values are kept, because for some items they're the only
@@ -266,6 +280,21 @@ python scripts/scrape_prices.py     # refresh prices (fast, daily)
 ~24 hours of trades, so anything that sells a few times a month was falling back to alch —
 body runes trade at a steady 14gp but were being valued at 2. It walks per-item pages
 (one request each, ~0.8s apart) and is resumable, so Ctrl-C is safe.
+
+**What gets deepened is decided by evidence, never by tier.** This used to skip anything
+already reading `market`, which meant a bad price protected itself from the data that would
+have corrected it: molten glass caught a single 50,000gp novelty sale, became `market`, and
+so was never eligible to have its real market read — 3,600 units at 1,900-2,000, sitting
+unread on its own item page the whole time. Now an item is deepened unless its price is a
+`market` one off three or more sales with at least one inside 30 days. Prices copied from
+another item (dose variants, noted items, filled buckets) are skipped, since the evidence
+lives on the item they copy from; `recipe`, `unfinished` and `cloth` prices are *not*,
+because each of those rules steps aside for a real market price and should be allowed to.
+
+**It's a rolling refresh, not a one-shot.** State records when each item was last looked at,
+so a `--limit`ed run takes the least recently checked. The daily workflow spends 40 lookups
+(~32s) before each price refresh, which drains the backlog and stops it re-forming. Molten
+glass was the first thing it fixed: `recipe 1,612` became `market 1,988` off nine sales.
 
 Each item page carries **both** months of sale history and the item's currently standing
 buy/sell offers, so it also catches quiet items the paginated feeds miss entirely —

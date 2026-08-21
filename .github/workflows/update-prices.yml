@@ -25,6 +25,15 @@ jobs:
           python-version: '3.12'
 
       # No dependencies to install — the scrapers use only the standard library.
+
+      # Deepen a slice of the catalog before pricing. The paginated feeds only
+      # reach back ~24h, so anything trading slower than that needs its own
+      # item page read. 40 pages is ~32s on top of the ~1min the price refresh
+      # already spends, and the rotation covers every item that needs it within
+      # a few weeks — then keeps going, so a stale price can't settle in.
+      - name: Deepen sale history for a slice of the catalog
+        run: python scripts/backfill_history.py --limit 40
+
       - name: Refresh market prices
         run: python scripts/scrape_prices.py
 
@@ -32,7 +41,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/prices.json data/history.json data/items.json
+          git add data/prices.json data/history.json data/items.json data/book.json data/.backfill-state.json
           if git diff --staged --quiet; then
             echo "No price changes to commit."
           else
