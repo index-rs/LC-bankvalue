@@ -122,6 +122,16 @@ DOSE_RE = re.compile(r"^(\d)dose(.+)$")
 # against 400gp for the 3-dose).
 DOSE_ALIASES = {"strength4": (4, "1strength")}
 
+# Sacred oil numbers its doses as a suffix ("sacred_oil4") rather than the
+# usual "4dose..." prefix, so it was invisible to the dose machinery: the (4)
+# read 2,500 off 1,406 traded units while the (3), (2) and (1) fell to vendor
+# value at 36, 30 and 24 — 625gp a dose against 12. Serum 207 and waterskins
+# share the naming but have no market on any variant, so they'd gain nothing
+# from being folded in and would move category on the way.
+for _n in (1, 2, 3, 4):
+    DOSE_ALIASES[f"sacred_oil{_n}"] = (_n, "sacred_oil")
+del _n
+
 # ---------------------------------------------------------------------
 # Explicit per-slug category overrides. These beat every keyword rule, for
 # items whose slug or name doesn't reflect how players actually think about

@@ -32,7 +32,9 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lc_items import base_variant, categorize, disambiguate_name  # noqa: E402
+from lc_items import (   # noqa: E402
+    base_variant, categorize, disambiguate_name, parse_dose,
+)
 
 CONTENT_TARBALL = "https://github.com/LostCityRS/Content/archive/refs/heads/274.tar.gz"
 USER_AGENT = "LC-bankvalue/0.1 catalog-builder"
@@ -170,6 +172,13 @@ def main():
             entry["notedOf"] = str(noted_of)
         if base_slug in RARE_SLUGS:
             entry["rare"] = True
+
+        # Dose membership, so the report can pour a potion family into a single
+        # row measured in doses without re-implementing the slug rules in JS.
+        doses, dose_family = parse_dose(base_slug)
+        if doses:
+            entry["doses"] = doses
+            entry["doseFamily"] = dose_family
 
         # Poisoned weapons and dragon leather are priced and displayed as their
         # base item; the report folds them into that row with a "+N poisoned"

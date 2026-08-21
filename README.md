@@ -61,7 +61,7 @@ Price per item, best available evidence first:
 | `market` | Blended from order-book mid `(bid+ask)/2` and the quantity-weighted median of recent completed coin sales |
 | `bid` | Only a standing buy offer — a real floor, someone is offering that |
 | `ask` | Only a standing sell listing — what a seller *hopes* to get. Nothing proves anyone pays it |
-| `dose` | Potion priced per-dose from its dose family's best-sampled variant |
+| `dose` | Potion priced per-dose off its family's 3-dose variant, where nearly all the trading happens |
 | `charge` | Charged jewellery priced off its family's fully-charged variant |
 | `enchant` | Plain gem jewellery, capped at what its enchanted form sells for |
 | `fixed` | A hand-set price, overriding every tier below and the live market too |
@@ -81,9 +81,26 @@ Price per item, best available evidence first:
 Every line in the report shows its tier, so an estimate is never presented as a
 market fact.
 
-**Potions are priced per dose.** A bank holding 1×(4), 100×(3) and 1×(1) of the same potion
-holds 104 doses; pricing every variant off one shared per-dose rate is more accurate and
-fills in dose variants that never trade on their own.
+**Potions are poured into doses.** A bank holding 1×(4), 100×(3) and 1×(1) of the same
+potion holds 104 doses, and every dose of a potion is the same thing — so the whole family
+gets one per-dose rate and the report shows it as a single row measured in doses
+(`Super strength · 343×(4), 4×(3), 1×(2) · ×1,386 doses · ≈347 ×(4) · 1,558 /dose`). That
+cuts a real bank's Potions section from 35 rows to 12. Doses are the honest unit but nobody
+stocks a bank in them, so each row also carries what the pile comes to in 4-dose potions —
+`=` when it divides evenly, `≈` when it doesn't.
+
+**The 3-dose variant sets that rate.** Potions are brewed as (3)s and there's no easy way to
+decant, so that's where the trading is — 87% of all dose-family volume — and the other
+variants are byproducts whose thin markets say more about scarcity than about what a dose is
+worth. Super strength(4) was the proof: two month-old sales totalling 89 units priced it at
+3,000 while super strength(3) had four recent sales and a live 3,500 bid, so a (4) came out
+worth *less* than a (3) it strictly contains. Families that never trade as (3)s fall back to
+their best-evidenced variant — the agility potion only ever sells as a (4).
+
+Sacred oil hid the same bug behind its naming: it numbers doses as a suffix
+(`sacred_oil4`), which the dose parser didn't recognise, so the (4) read 2,500 off 1,406
+traded units while the (3), (2) and (1) fell to vendor value — 625gp a dose against 12.
+Serum 207 and waterskins share that naming but have no market on any variant.
 
 **Charged jewellery is normalised.** Only the fully-charged variant trades in volume, so
 partial ones would otherwise fall back to alch and be wildly wrong. Two models: amulets of

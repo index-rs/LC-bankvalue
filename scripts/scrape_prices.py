@@ -17,7 +17,7 @@ Pricing model (per item, best evidence wins):
         -> else sale, else bid, else ask, else an older "stale" sale,
            else high alch minus a nature rune, else vendor/low-alch (cost * 0.4)
 
-Derived prices fill the long tail: potions per-dose across their dose family,
+Derived prices fill the long tail: potions per-dose off their family's 3-dose variant,
 charged jewellery off its fully-charged variant, splitbark from fine cloth,
 noted items from their base item. BUNDLE_CAPS reject set listings posted under
 a single item's slug (full rune sets under "rune platebody", etc), and plain
@@ -408,9 +408,19 @@ def apply_dose_normalization(catalog, prices, now_iso):
     """Price potions per-dose across their whole dose family.
 
     A bank holding 1x(4), 100x(3) and 1x(1) of the same potion is really
-    holding 104 doses; pricing every variant off a shared per-dose rate is
-    both more accurate and fills in variants that never trade on their own.
-    The per-dose rate comes from the best-sampled priced variant in the family.
+    holding 104 doses, and every dose of a potion is the same thing. One rate
+    prices the whole family.
+
+    That rate comes from the 3-dose variant. Potions are *brewed* as (3)s and
+    there's no easy way to decant, so that's where the trading is — 87% of all
+    dose-family volume — and the other variants are byproducts whose thin
+    markets say more about scarcity than about what a dose is worth. Super
+    strength(4) was the proof: two month-old sales, 89 units, priced it at
+    3,000 while super strength(3) had a live 3,500 bid and four recent sales.
+    A (4) is strictly more potion than a (3); it cannot be worth less.
+
+    Families that never trade as (3)s (agility potion only sells as a (4)) fall
+    back to whichever variant has the strongest evidence.
     """
     families = {}
     for gid, item in catalog.items():
@@ -420,34 +430,40 @@ def apply_dose_normalization(catalog, prices, now_iso):
 
     filled = 0
     for family, members in families.items():
-        # Pick the variant with the strongest evidence as the per-dose anchor.
-        best = None
-        for gid, doses in members:
+        def usable(gid):
             p = prices.get(gid)
-            if not p or p["tier"] not in ("market", "bid", "ask"):
-                continue
-            score = (p["tier"] == "market", p.get("sampleSize", 0))
-            if best is None or score > best[0]:
-                best = (score, p["price"] / doses, gid)
-        if best is None:
-            continue
+            return p if p and p["tier"] in ("market", "bid", "ask") else None
 
-        per_dose, anchor_gid = best[1], best[2]
+        # The 3-dose variant is the anchor wherever it has a live price at all.
+        anchor = next((g for g, d in members if d == 3 and usable(g)), None)
+        if anchor is None:
+            # No (3) trading: fall back to the best-evidenced variant.
+            best = None
+            for gid, doses in members:
+                p = usable(gid)
+                if not p:
+                    continue
+                score = (p["tier"] == "market", p.get("sampleSize", 0))
+                if best is None or score > best[0]:
+                    best = (score, gid)
+            if best is None:
+                continue
+            anchor = best[1]
+
+        anchor_doses = next(d for g, d in members if g == anchor)
+        per_dose = prices[anchor]["price"] / anchor_doses
         for gid, doses in members:
-            existing = prices.get(gid)
-            # Don't override a variant that has solid market evidence of its own.
-            if existing and existing["tier"] == "market" and existing.get("sampleSize", 0) >= 2:
+            if gid == anchor:
                 continue
             prices[gid] = {
                 "price": max(1, round(per_dose * doses)),
                 "tier": "dose",
                 "sampleSize": 0,
                 "asOf": now_iso,
-                "doseAnchor": catalog.get(anchor_gid, {}).get("slug"),
+                "doseAnchor": catalog.get(anchor, {}).get("slug"),
                 "perDose": round(per_dose, 2),
             }
-            if gid != anchor_gid:
-                filled += 1
+            filled += 1
     return filled
 
 
@@ -938,8 +954,19 @@ def main():
 
     # Re-derive categories — categorize() is a pure function of slug/name, so a
     # rules change must propagate to the whole catalog, not just today's traders.
+    # Dose membership rides along for the same reason: the report reads it to
+    # pour a potion family into one row, and it must not go stale.
     for item in items_db.values():
-        item["category"] = categorize(item.get("slug", ""), item.get("name", ""), False)
+        slug = item.get("slug", "")
+        item["category"] = categorize(slug, item.get("name", ""), False)
+        base = slug[len("cert_"):] if slug.startswith("cert_") else slug
+        doses, dose_family = parse_dose(base)
+        if doses:
+            item["doses"] = doses
+            item["doseFamily"] = dose_family
+        else:
+            item.pop("doses", None)
+            item.pop("doseFamily", None)
 
     # Standing offers captured by backfill_history.py, for items the paginated
     # buy/sell feeds don't reach. Live feed data always wins.

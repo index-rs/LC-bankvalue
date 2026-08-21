@@ -1120,6 +1120,8 @@
   "113": {
     "category": "herblore",
     "cost": 14,
+    "doseFamily": "1strength",
+    "doses": 4,
     "name": "Strength potion(4)",
     "slug": "strength4",
     "tradeable": true
@@ -1202,6 +1204,8 @@
   "114": {
     "category": "herblore",
     "cost": 14,
+    "doseFamily": "1strength",
+    "doses": 4,
     "name": "Strength potion(4) (noted)",
     "notedOf": "113",
     "slug": "cert_strength4",
@@ -1285,6 +1289,8 @@
   "115": {
     "category": "potions",
     "cost": 13,
+    "doseFamily": "1strength",
+    "doses": 3,
     "name": "Strength potion(3)",
     "slug": "3dose1strength",
     "tradeable": true
@@ -1367,6 +1373,8 @@
   "116": {
     "category": "potions",
     "cost": 13,
+    "doseFamily": "1strength",
+    "doses": 3,
     "name": "Strength potion(3) (noted)",
     "notedOf": "115",
     "slug": "cert_3dose1strength",
@@ -1450,6 +1458,8 @@
   "117": {
     "category": "potions",
     "cost": 13,
+    "doseFamily": "1strength",
+    "doses": 2,
     "name": "Strength potion(2)",
     "slug": "2dose1strength",
     "tradeable": true
@@ -1532,6 +1542,8 @@
   "118": {
     "category": "potions",
     "cost": 13,
+    "doseFamily": "1strength",
+    "doses": 2,
     "name": "Strength potion(2) (noted)",
     "notedOf": "117",
     "slug": "cert_2dose1strength",
@@ -1615,6 +1627,8 @@
   "119": {
     "category": "potions",
     "cost": 11,
+    "doseFamily": "1strength",
+    "doses": 1,
     "name": "Strength potion(1)",
     "slug": "1dose1strength",
     "tradeable": true
@@ -1704,6 +1718,8 @@
   "120": {
     "category": "potions",
     "cost": 11,
+    "doseFamily": "1strength",
+    "doses": 1,
     "name": "Strength potion(1) (noted)",
     "notedOf": "119",
     "slug": "cert_1dose1strength",
@@ -1787,6 +1803,8 @@
   "121": {
     "category": "potions",
     "cost": 12,
+    "doseFamily": "1attack",
+    "doses": 3,
     "name": "Attack potion(3)",
     "slug": "3dose1attack",
     "tradeable": true
@@ -1871,6 +1889,8 @@
   "122": {
     "category": "potions",
     "cost": 12,
+    "doseFamily": "1attack",
+    "doses": 3,
     "name": "Attack potion(3) (noted)",
     "notedOf": "121",
     "slug": "cert_3dose1attack",
@@ -1974,6 +1994,8 @@
   "123": {
     "category": "potions",
     "cost": 9,
+    "doseFamily": "1attack",
+    "doses": 2,
     "name": "Attack potion(2)",
     "slug": "2dose1attack",
     "tradeable": true
@@ -2066,6 +2088,8 @@
   "124": {
     "category": "potions",
     "cost": 9,
+    "doseFamily": "1attack",
+    "doses": 2,
     "name": "Attack potion(2) (noted)",
     "notedOf": "123",
     "slug": "cert_2dose1attack",
@@ -2149,6 +2173,8 @@
   "125": {
     "category": "potions",
     "cost": 6,
+    "doseFamily": "1attack",
+    "doses": 1,
     "name": "Attack potion(1)",
     "slug": "1dose1attack",
     "tradeable": true
@@ -2249,6 +2275,8 @@
   "126": {
     "category": "potions",
     "cost": 6,
+    "doseFamily": "1attack",
+    "doses": 1,
     "name": "Attack potion(1) (noted)",
     "notedOf": "125",
     "slug": "cert_1dose1attack",
@@ -2342,6 +2370,8 @@
   "127": {
     "category": "potions",
     "cost": 88,
+    "doseFamily": "statrestore",
+    "doses": 3,
     "name": "Restore potion(3)",
     "slug": "3dosestatrestore",
     "tradeable": true
@@ -2424,6 +2454,8 @@
   "128": {
     "category": "potions",
     "cost": 88,
+    "doseFamily": "statrestore",
+    "doses": 3,
     "name": "Restore potion(3) (noted)",
     "notedOf": "127",
     "slug": "cert_3dosestatrestore",
@@ -2507,6 +2539,8 @@
   "129": {
     "category": "potions",
     "cost": 66,
+    "doseFamily": "statrestore",
+    "doses": 2,
     "name": "Restore potion(2)",
     "slug": "2dosestatrestore",
     "tradeable": true
@@ -2597,6 +2631,8 @@
   "130": {
     "category": "potions",
     "cost": 66,
+    "doseFamily": "statrestore",
+    "doses": 2,
     "name": "Restore potion(2) (noted)",
     "notedOf": "129",
     "slug": "cert_2dosestatrestore",
@@ -2680,6 +2716,8 @@
   "131": {
     "category": "potions",
     "cost": 44,
+    "doseFamily": "statrestore",
+    "doses": 1,
     "name": "Restore potion(1)",
     "slug": "1dosestatrestore",
     "tradeable": true
@@ -2762,6 +2800,8 @@
   "132": {
     "category": "potions",
     "cost": 44,
+    "doseFamily": "statrestore",
+    "doses": 1,
     "name": "Restore potion(1) (noted)",
     "notedOf": "131",
     "slug": "cert_1dosestatrestore",
@@ -2845,6 +2885,8 @@
   "133": {
     "category": "potions",
     "cost": 120,
+    "doseFamily": "1defense",
+    "doses": 3,
     "name": "Defence potion(3)",
     "slug": "3dose1defense",
     "tradeable": true
@@ -2927,6 +2969,8 @@
   "134": {
     "category": "potions",
     "cost": 120,
+    "doseFamily": "1defense",
+    "doses": 3,
     "name": "Defence potion(3) (noted)",
     "notedOf": "133",
     "slug": "cert_3dose1defense",
@@ -3010,6 +3054,8 @@
   "135": {
     "category": "potions",
     "cost": 90,
+    "doseFamily": "1defense",
+    "doses": 2,
     "name": "Defence potion(2)",
     "slug": "2dose1defense",
     "tradeable": true
@@ -3092,6 +3138,8 @@
   "136": {
     "category": "potions",
     "cost": 90,
+    "doseFamily": "1defense",
+    "doses": 2,
     "name": "Defence potion(2) (noted)",
     "notedOf": "135",
     "slug": "cert_2dose1defense",
@@ -3175,6 +3223,8 @@
   "137": {
     "category": "potions",
     "cost": 60,
+    "doseFamily": "1defense",
+    "doses": 1,
     "name": "Defence potion(1)",
     "slug": "1dose1defense",
     "tradeable": true
@@ -3257,6 +3307,8 @@
   "138": {
     "category": "potions",
     "cost": 60,
+    "doseFamily": "1defense",
+    "doses": 1,
     "name": "Defence potion(1) (noted)",
     "notedOf": "137",
     "slug": "cert_1dose1defense",
@@ -3340,6 +3392,8 @@
   "139": {
     "category": "potions",
     "cost": 152,
+    "doseFamily": "prayerrestore",
+    "doses": 3,
     "name": "Prayer potion(3)",
     "slug": "3doseprayerrestore",
     "tradeable": true
@@ -3429,6 +3483,8 @@
   "140": {
     "category": "potions",
     "cost": 152,
+    "doseFamily": "prayerrestore",
+    "doses": 3,
     "name": "Prayer potion(3) (noted)",
     "notedOf": "139",
     "slug": "cert_3doseprayerrestore",
@@ -3512,6 +3568,8 @@
   "141": {
     "category": "potions",
     "cost": 114,
+    "doseFamily": "prayerrestore",
+    "doses": 2,
     "name": "Prayer potion(2)",
     "slug": "2doseprayerrestore",
     "tradeable": true
@@ -3593,6 +3651,8 @@
   "142": {
     "category": "potions",
     "cost": 114,
+    "doseFamily": "prayerrestore",
+    "doses": 2,
     "name": "Prayer potion(2) (noted)",
     "notedOf": "141",
     "slug": "cert_2doseprayerrestore",
@@ -3676,6 +3736,8 @@
   "143": {
     "category": "potions",
     "cost": 76,
+    "doseFamily": "prayerrestore",
+    "doses": 1,
     "name": "Prayer potion(1)",
     "slug": "1doseprayerrestore",
     "tradeable": true
@@ -3758,6 +3820,8 @@
   "144": {
     "category": "potions",
     "cost": 76,
+    "doseFamily": "prayerrestore",
+    "doses": 1,
     "name": "Prayer potion(1) (noted)",
     "notedOf": "143",
     "slug": "cert_1doseprayerrestore",
@@ -3841,6 +3905,8 @@
   "145": {
     "category": "potions",
     "cost": 180,
+    "doseFamily": "2attack",
+    "doses": 3,
     "name": "Super attack(3)",
     "slug": "3dose2attack",
     "tradeable": true
@@ -3922,6 +3988,8 @@
   "146": {
     "category": "potions",
     "cost": 180,
+    "doseFamily": "2attack",
+    "doses": 3,
     "name": "Super attack(3) (noted)",
     "notedOf": "145",
     "slug": "cert_3dose2attack",
@@ -4002,6 +4070,8 @@
   "147": {
     "category": "potions",
     "cost": 135,
+    "doseFamily": "2attack",
+    "doses": 2,
     "name": "Super attack(2)",
     "slug": "2dose2attack",
     "tradeable": true
@@ -4084,6 +4154,8 @@
   "148": {
     "category": "potions",
     "cost": 135,
+    "doseFamily": "2attack",
+    "doses": 2,
     "name": "Super attack(2) (noted)",
     "notedOf": "147",
     "slug": "cert_2dose2attack",
@@ -4162,6 +4234,8 @@
   "149": {
     "category": "potions",
     "cost": 90,
+    "doseFamily": "2attack",
+    "doses": 1,
     "name": "Super attack(1)",
     "slug": "1dose2attack",
     "tradeable": true
@@ -4246,6 +4320,8 @@
   "150": {
     "category": "potions",
     "cost": 90,
+    "doseFamily": "2attack",
+    "doses": 1,
     "name": "Super attack(1) (noted)",
     "notedOf": "149",
     "slug": "cert_1dose2attack",
@@ -4324,6 +4400,8 @@
   "151": {
     "category": "potions",
     "cost": 200,
+    "doseFamily": "fisherspotion",
+    "doses": 3,
     "name": "Fishing potion(3)",
     "slug": "3dosefisherspotion",
     "tradeable": true
@@ -4405,6 +4483,8 @@
   "152": {
     "category": "potions",
     "cost": 200,
+    "doseFamily": "fisherspotion",
+    "doses": 3,
     "name": "Fishing potion(3) (noted)",
     "notedOf": "151",
     "slug": "cert_3dosefisherspotion",
@@ -4486,6 +4566,8 @@
   "153": {
     "category": "potions",
     "cost": 150,
+    "doseFamily": "fisherspotion",
+    "doses": 2,
     "name": "Fishing potion(2)",
     "slug": "2dosefisherspotion",
     "tradeable": true
@@ -4563,6 +4645,8 @@
   "154": {
     "category": "potions",
     "cost": 150,
+    "doseFamily": "fisherspotion",
+    "doses": 2,
     "name": "Fishing potion(2) (noted)",
     "notedOf": "153",
     "slug": "cert_2dosefisherspotion",
@@ -4642,6 +4726,8 @@
   "155": {
     "category": "potions",
     "cost": 100,
+    "doseFamily": "fisherspotion",
+    "doses": 1,
     "name": "Fishing potion(1)",
     "slug": "1dosefisherspotion",
     "tradeable": true
@@ -4721,6 +4807,8 @@
   "156": {
     "category": "potions",
     "cost": 100,
+    "doseFamily": "fisherspotion",
+    "doses": 1,
     "name": "Fishing potion(1) (noted)",
     "notedOf": "155",
     "slug": "cert_1dosefisherspotion",
@@ -4799,6 +4887,8 @@
   "157": {
     "category": "potions",
     "cost": 220,
+    "doseFamily": "2strength",
+    "doses": 3,
     "name": "Super strength(3)",
     "slug": "3dose2strength",
     "tradeable": true
@@ -4879,6 +4969,8 @@
   "158": {
     "category": "potions",
     "cost": 220,
+    "doseFamily": "2strength",
+    "doses": 3,
     "name": "Super strength(3) (noted)",
     "notedOf": "157",
     "slug": "cert_3dose2strength",
@@ -4958,6 +5050,8 @@
   "159": {
     "category": "potions",
     "cost": 165,
+    "doseFamily": "2strength",
+    "doses": 2,
     "name": "Super strength(2)",
     "slug": "2dose2strength",
     "tradeable": true
@@ -5045,6 +5139,8 @@
   "160": {
     "category": "potions",
     "cost": 165,
+    "doseFamily": "2strength",
+    "doses": 2,
     "name": "Super strength(2) (noted)",
     "notedOf": "159",
     "slug": "cert_2dose2strength",
@@ -5128,6 +5224,8 @@
   "161": {
     "category": "potions",
     "cost": 110,
+    "doseFamily": "2strength",
+    "doses": 1,
     "name": "Super strength(1)",
     "slug": "1dose2strength",
     "tradeable": true
@@ -5210,6 +5308,8 @@
   "162": {
     "category": "potions",
     "cost": 110,
+    "doseFamily": "2strength",
+    "doses": 1,
     "name": "Super strength(1) (noted)",
     "notedOf": "161",
     "slug": "cert_1dose2strength",
@@ -5293,6 +5393,8 @@
   "163": {
     "category": "potions",
     "cost": 264,
+    "doseFamily": "2defense",
+    "doses": 3,
     "name": "Super defence(3)",
     "slug": "3dose2defense",
     "tradeable": true
@@ -5375,6 +5477,8 @@
   "164": {
     "category": "potions",
     "cost": 264,
+    "doseFamily": "2defense",
+    "doses": 3,
     "name": "Super defence(3) (noted)",
     "notedOf": "163",
     "slug": "cert_3dose2defense",
@@ -5458,6 +5562,8 @@
   "165": {
     "category": "potions",
     "cost": 198,
+    "doseFamily": "2defense",
+    "doses": 2,
     "name": "Super defence(2)",
     "slug": "2dose2defense",
     "tradeable": true
@@ -5538,6 +5644,8 @@
   "166": {
     "category": "potions",
     "cost": 198,
+    "doseFamily": "2defense",
+    "doses": 2,
     "name": "Super defence(2) (noted)",
     "notedOf": "165",
     "slug": "cert_2dose2defense",
@@ -5620,6 +5728,8 @@
   "167": {
     "category": "potions",
     "cost": 132,
+    "doseFamily": "2defense",
+    "doses": 1,
     "name": "Super defence(1)",
     "slug": "1dose2defense",
     "tradeable": true
@@ -5700,6 +5810,8 @@
   "168": {
     "category": "potions",
     "cost": 132,
+    "doseFamily": "2defense",
+    "doses": 1,
     "name": "Super defence(1) (noted)",
     "notedOf": "167",
     "slug": "cert_1dose2defense",
@@ -5782,6 +5894,8 @@
   "169": {
     "category": "potions",
     "cost": 288,
+    "doseFamily": "rangerspotion",
+    "doses": 3,
     "name": "Ranging potion(3)",
     "slug": "3doserangerspotion",
     "tradeable": true
@@ -5870,6 +5984,8 @@
   "170": {
     "category": "potions",
     "cost": 288,
+    "doseFamily": "rangerspotion",
+    "doses": 3,
     "name": "Ranging potion(3) (noted)",
     "notedOf": "169",
     "slug": "cert_3doserangerspotion",
@@ -5953,6 +6069,8 @@
   "171": {
     "category": "potions",
     "cost": 216,
+    "doseFamily": "rangerspotion",
+    "doses": 2,
     "name": "Ranging potion(2)",
     "slug": "2doserangerspotion",
     "tradeable": true
@@ -6035,6 +6153,8 @@
   "172": {
     "category": "potions",
     "cost": 216,
+    "doseFamily": "rangerspotion",
+    "doses": 2,
     "name": "Ranging potion(2) (noted)",
     "notedOf": "171",
     "slug": "cert_2doserangerspotion",
@@ -6117,6 +6237,8 @@
   "173": {
     "category": "potions",
     "cost": 144,
+    "doseFamily": "rangerspotion",
+    "doses": 1,
     "name": "Ranging potion(1)",
     "slug": "1doserangerspotion",
     "tradeable": true
@@ -6198,6 +6320,8 @@
   "174": {
     "category": "potions",
     "cost": 144,
+    "doseFamily": "rangerspotion",
+    "doses": 1,
     "name": "Ranging potion(1) (noted)",
     "notedOf": "173",
     "slug": "cert_1doserangerspotion",
@@ -6285,6 +6409,8 @@
   "175": {
     "category": "potions",
     "cost": 288,
+    "doseFamily": "antipoison",
+    "doses": 3,
     "name": "Antipoison(3)",
     "slug": "3doseantipoison",
     "tradeable": true
@@ -6367,6 +6493,8 @@
   "176": {
     "category": "potions",
     "cost": 288,
+    "doseFamily": "antipoison",
+    "doses": 3,
     "name": "Antipoison(3) (noted)",
     "notedOf": "175",
     "slug": "cert_3doseantipoison",
@@ -6450,6 +6578,8 @@
   "177": {
     "category": "potions",
     "cost": 216,
+    "doseFamily": "antipoison",
+    "doses": 2,
     "name": "Antipoison(2)",
     "slug": "2doseantipoison",
     "tradeable": true
@@ -6532,6 +6662,8 @@
   "178": {
     "category": "potions",
     "cost": 216,
+    "doseFamily": "antipoison",
+    "doses": 2,
     "name": "Antipoison(2) (noted)",
     "notedOf": "177",
     "slug": "cert_2doseantipoison",
@@ -6615,6 +6747,8 @@
   "179": {
     "category": "potions",
     "cost": 144,
+    "doseFamily": "antipoison",
+    "doses": 1,
     "name": "Antipoison(1)",
     "slug": "1doseantipoison",
     "tradeable": true
@@ -6702,6 +6836,8 @@
   "180": {
     "category": "potions",
     "cost": 144,
+    "doseFamily": "antipoison",
+    "doses": 1,
     "name": "Antipoison(1) (noted)",
     "notedOf": "179",
     "slug": "cert_1doseantipoison",
@@ -6780,6 +6916,8 @@
   "181": {
     "category": "potions",
     "cost": 288,
+    "doseFamily": "2antipoison",
+    "doses": 3,
     "name": "Superantipoison(3)",
     "slug": "3dose2antipoison",
     "tradeable": true
@@ -6857,6 +6995,8 @@
   "182": {
     "category": "potions",
     "cost": 288,
+    "doseFamily": "2antipoison",
+    "doses": 3,
     "name": "Superantipoison(3) (noted)",
     "notedOf": "181",
     "slug": "cert_3dose2antipoison",
@@ -6938,6 +7078,8 @@
   "183": {
     "category": "potions",
     "cost": 216,
+    "doseFamily": "2antipoison",
+    "doses": 2,
     "name": "Superantipoison(2)",
     "slug": "2dose2antipoison",
     "tradeable": true
@@ -7020,6 +7162,8 @@
   "184": {
     "category": "potions",
     "cost": 216,
+    "doseFamily": "2antipoison",
+    "doses": 2,
     "name": "Superantipoison(2) (noted)",
     "notedOf": "183",
     "slug": "cert_2dose2antipoison",
@@ -7098,6 +7242,8 @@
   "185": {
     "category": "potions",
     "cost": 144,
+    "doseFamily": "2antipoison",
+    "doses": 1,
     "name": "Superantipoison(1)",
     "slug": "1dose2antipoison",
     "tradeable": true
@@ -7175,6 +7321,8 @@
   "186": {
     "category": "potions",
     "cost": 144,
+    "doseFamily": "2antipoison",
+    "doses": 1,
     "name": "Superantipoison(1) (noted)",
     "notedOf": "185",
     "slug": "cert_1dose2antipoison",
@@ -7423,6 +7571,8 @@
   "189": {
     "category": "potions",
     "cost": 25,
+    "doseFamily": "potionofzamorak",
+    "doses": 3,
     "name": "Zamorak potion(3)",
     "slug": "3dosepotionofzamorak",
     "tradeable": true
@@ -7512,6 +7662,8 @@
   "190": {
     "category": "potions",
     "cost": 25,
+    "doseFamily": "potionofzamorak",
+    "doses": 3,
     "name": "Zamorak potion(3) (noted)",
     "notedOf": "189",
     "slug": "cert_3dosepotionofzamorak",
@@ -7595,6 +7747,8 @@
   "191": {
     "category": "potions",
     "cost": 25,
+    "doseFamily": "potionofzamorak",
+    "doses": 2,
     "name": "Zamorak potion(2)",
     "slug": "2dosepotionofzamorak",
     "tradeable": true
@@ -7677,6 +7831,8 @@
   "192": {
     "category": "potions",
     "cost": 25,
+    "doseFamily": "potionofzamorak",
+    "doses": 2,
     "name": "Zamorak potion(2) (noted)",
     "notedOf": "191",
     "slug": "cert_2dosepotionofzamorak",
@@ -7760,6 +7916,8 @@
   "193": {
     "category": "potions",
     "cost": 25,
+    "doseFamily": "potionofzamorak",
+    "doses": 1,
     "name": "Zamorak potion(1)",
     "slug": "1dosepotionofzamorak",
     "tradeable": true
@@ -7842,6 +8000,8 @@
   "194": {
     "category": "potions",
     "cost": 25,
+    "doseFamily": "potionofzamorak",
+    "doses": 1,
     "name": "Zamorak potion(1) (noted)",
     "notedOf": "193",
     "slug": "cert_1dosepotionofzamorak",
@@ -11883,6 +12043,8 @@
   "2428": {
     "category": "potions",
     "cost": 15,
+    "doseFamily": "1attack",
+    "doses": 4,
     "name": "Attack potion(4)",
     "slug": "4dose1attack",
     "tradeable": true
@@ -11890,6 +12052,8 @@
   "2429": {
     "category": "potions",
     "cost": 15,
+    "doseFamily": "1attack",
+    "doses": 4,
     "name": "Attack potion(4) (noted)",
     "notedOf": "2428",
     "slug": "cert_4dose1attack",
@@ -11905,6 +12069,8 @@
   "2430": {
     "category": "potions",
     "cost": 110,
+    "doseFamily": "statrestore",
+    "doses": 4,
     "name": "Restore potion(4)",
     "slug": "4dosestatrestore",
     "tradeable": true
@@ -11912,6 +12078,8 @@
   "2431": {
     "category": "potions",
     "cost": 110,
+    "doseFamily": "statrestore",
+    "doses": 4,
     "name": "Restore potion(4) (noted)",
     "notedOf": "2430",
     "slug": "cert_4dosestatrestore",
@@ -11920,6 +12088,8 @@
   "2432": {
     "category": "potions",
     "cost": 150,
+    "doseFamily": "1defense",
+    "doses": 4,
     "name": "Defence potion(4)",
     "slug": "4dose1defense",
     "tradeable": true
@@ -11927,6 +12097,8 @@
   "2433": {
     "category": "potions",
     "cost": 150,
+    "doseFamily": "1defense",
+    "doses": 4,
     "name": "Defence potion(4) (noted)",
     "notedOf": "2432",
     "slug": "cert_4dose1defense",
@@ -11935,6 +12107,8 @@
   "2434": {
     "category": "potions",
     "cost": 190,
+    "doseFamily": "prayerrestore",
+    "doses": 4,
     "name": "Prayer potion(4)",
     "slug": "4doseprayerrestore",
     "tradeable": true
@@ -11942,6 +12116,8 @@
   "2435": {
     "category": "potions",
     "cost": 190,
+    "doseFamily": "prayerrestore",
+    "doses": 4,
     "name": "Prayer potion(4) (noted)",
     "notedOf": "2434",
     "slug": "cert_4doseprayerrestore",
@@ -11950,6 +12126,8 @@
   "2436": {
     "category": "potions",
     "cost": 225,
+    "doseFamily": "2attack",
+    "doses": 4,
     "name": "Super attack(4)",
     "slug": "4dose2attack",
     "tradeable": true
@@ -11957,6 +12135,8 @@
   "2437": {
     "category": "potions",
     "cost": 225,
+    "doseFamily": "2attack",
+    "doses": 4,
     "name": "Super attack(4) (noted)",
     "notedOf": "2436",
     "slug": "cert_4dose2attack",
@@ -11965,6 +12145,8 @@
   "2438": {
     "category": "potions",
     "cost": 250,
+    "doseFamily": "fisherspotion",
+    "doses": 4,
     "name": "Fishing potion(4)",
     "slug": "4dosefisherspotion",
     "tradeable": true
@@ -11972,6 +12154,8 @@
   "2439": {
     "category": "potions",
     "cost": 250,
+    "doseFamily": "fisherspotion",
+    "doses": 4,
     "name": "Fishing potion(4) (noted)",
     "notedOf": "2438",
     "slug": "cert_4dosefisherspotion",
@@ -11988,6 +12172,8 @@
   "2440": {
     "category": "potions",
     "cost": 275,
+    "doseFamily": "2strength",
+    "doses": 4,
     "name": "Super strength(4)",
     "slug": "4dose2strength",
     "tradeable": true
@@ -11995,6 +12181,8 @@
   "2441": {
     "category": "potions",
     "cost": 275,
+    "doseFamily": "2strength",
+    "doses": 4,
     "name": "Super strength(4) (noted)",
     "notedOf": "2440",
     "slug": "cert_4dose2strength",
@@ -12003,6 +12191,8 @@
   "2442": {
     "category": "potions",
     "cost": 330,
+    "doseFamily": "2defense",
+    "doses": 4,
     "name": "Super defence(4)",
     "slug": "4dose2defense",
     "tradeable": true
@@ -12010,6 +12200,8 @@
   "2443": {
     "category": "potions",
     "cost": 330,
+    "doseFamily": "2defense",
+    "doses": 4,
     "name": "Super defence(4) (noted)",
     "notedOf": "2442",
     "slug": "cert_4dose2defense",
@@ -12018,6 +12210,8 @@
   "2444": {
     "category": "potions",
     "cost": 360,
+    "doseFamily": "rangerspotion",
+    "doses": 4,
     "name": "Ranging potion(4)",
     "slug": "4doserangerspotion",
     "tradeable": true
@@ -12025,6 +12219,8 @@
   "2445": {
     "category": "potions",
     "cost": 360,
+    "doseFamily": "rangerspotion",
+    "doses": 4,
     "name": "Ranging potion(4) (noted)",
     "notedOf": "2444",
     "slug": "cert_4doserangerspotion",
@@ -12033,6 +12229,8 @@
   "2446": {
     "category": "potions",
     "cost": 360,
+    "doseFamily": "antipoison",
+    "doses": 4,
     "name": "Antipoison(4)",
     "slug": "4doseantipoison",
     "tradeable": true
@@ -12040,6 +12238,8 @@
   "2447": {
     "category": "potions",
     "cost": 360,
+    "doseFamily": "antipoison",
+    "doses": 4,
     "name": "Antipoison(4) (noted)",
     "notedOf": "2446",
     "slug": "cert_4doseantipoison",
@@ -12048,6 +12248,8 @@
   "2448": {
     "category": "potions",
     "cost": 360,
+    "doseFamily": "2antipoison",
+    "doses": 4,
     "name": "Superantipoison(4)",
     "slug": "4dose2antipoison",
     "tradeable": true
@@ -12055,6 +12257,8 @@
   "2449": {
     "category": "potions",
     "cost": 360,
+    "doseFamily": "2antipoison",
+    "doses": 4,
     "name": "Superantipoison(4) (noted)",
     "notedOf": "2448",
     "slug": "cert_4dose2antipoison",
@@ -12070,6 +12274,8 @@
   "2450": {
     "category": "potions",
     "cost": 25,
+    "doseFamily": "potionofzamorak",
+    "doses": 4,
     "name": "Zamorak potion(4)",
     "slug": "4dosepotionofzamorak",
     "tradeable": true
@@ -12077,6 +12283,8 @@
   "2451": {
     "category": "potions",
     "cost": 25,
+    "doseFamily": "potionofzamorak",
+    "doses": 4,
     "name": "Zamorak potion(4) (noted)",
     "notedOf": "2450",
     "slug": "cert_4dosepotionofzamorak",
@@ -12085,6 +12293,8 @@
   "2452": {
     "category": "potions",
     "cost": 330,
+    "doseFamily": "1antidragon",
+    "doses": 4,
     "name": "Antifire potion(4)",
     "slug": "4dose1antidragon",
     "tradeable": true
@@ -12092,6 +12302,8 @@
   "2453": {
     "category": "potions",
     "cost": 330,
+    "doseFamily": "1antidragon",
+    "doses": 4,
     "name": "Antifire potion(4) (noted)",
     "notedOf": "2452",
     "slug": "cert_4dose1antidragon",
@@ -12100,6 +12312,8 @@
   "2454": {
     "category": "potions",
     "cost": 264,
+    "doseFamily": "1antidragon",
+    "doses": 3,
     "name": "Antifire potion(3)",
     "slug": "3dose1antidragon",
     "tradeable": true
@@ -12107,6 +12321,8 @@
   "2455": {
     "category": "potions",
     "cost": 264,
+    "doseFamily": "1antidragon",
+    "doses": 3,
     "name": "Antifire potion(3) (noted)",
     "notedOf": "2454",
     "slug": "cert_3dose1antidragon",
@@ -12115,6 +12331,8 @@
   "2456": {
     "category": "potions",
     "cost": 198,
+    "doseFamily": "1antidragon",
+    "doses": 2,
     "name": "Antifire potion(2)",
     "slug": "2dose1antidragon",
     "tradeable": true
@@ -12122,6 +12340,8 @@
   "2457": {
     "category": "potions",
     "cost": 198,
+    "doseFamily": "1antidragon",
+    "doses": 2,
     "name": "Antifire potion(2) (noted)",
     "notedOf": "2456",
     "slug": "cert_2dose1antidragon",
@@ -12130,6 +12350,8 @@
   "2458": {
     "category": "potions",
     "cost": 132,
+    "doseFamily": "1antidragon",
+    "doses": 1,
     "name": "Antifire potion(1)",
     "slug": "1dose1antidragon",
     "tradeable": true
@@ -12137,6 +12359,8 @@
   "2459": {
     "category": "potions",
     "cost": 132,
+    "doseFamily": "1antidragon",
+    "doses": 1,
     "name": "Antifire potion(1) (noted)",
     "notedOf": "2458",
     "slug": "cert_1dose1antidragon",
@@ -16583,6 +16807,8 @@
   "3008": {
     "category": "potions",
     "cost": 146,
+    "doseFamily": "1energy",
+    "doses": 4,
     "name": "Energy potion(4)",
     "slug": "4dose1energy",
     "tradeable": true
@@ -16590,6 +16816,8 @@
   "3009": {
     "category": "potions",
     "cost": 146,
+    "doseFamily": "1energy",
+    "doses": 4,
     "name": "Energy potion(4) (noted)",
     "notedOf": "3008",
     "slug": "cert_4dose1energy",
@@ -16605,6 +16833,8 @@
   "3010": {
     "category": "potions",
     "cost": 110,
+    "doseFamily": "1energy",
+    "doses": 3,
     "name": "Energy potion(3)",
     "slug": "3dose1energy",
     "tradeable": true
@@ -16612,6 +16842,8 @@
   "3011": {
     "category": "potions",
     "cost": 110,
+    "doseFamily": "1energy",
+    "doses": 3,
     "name": "Energy potion(3) (noted)",
     "notedOf": "3010",
     "slug": "cert_3dose1energy",
@@ -16620,6 +16852,8 @@
   "3012": {
     "category": "potions",
     "cost": 72,
+    "doseFamily": "1energy",
+    "doses": 2,
     "name": "Energy potion(2)",
     "slug": "2dose1energy",
     "tradeable": true
@@ -16627,6 +16861,8 @@
   "3013": {
     "category": "potions",
     "cost": 72,
+    "doseFamily": "1energy",
+    "doses": 2,
     "name": "Energy potion(2) (noted)",
     "notedOf": "3012",
     "slug": "cert_2dose1energy",
@@ -16635,6 +16871,8 @@
   "3014": {
     "category": "potions",
     "cost": 36,
+    "doseFamily": "1energy",
+    "doses": 1,
     "name": "Energy potion(1)",
     "slug": "1dose1energy",
     "tradeable": true
@@ -16642,6 +16880,8 @@
   "3015": {
     "category": "potions",
     "cost": 36,
+    "doseFamily": "1energy",
+    "doses": 1,
     "name": "Energy potion(1) (noted)",
     "notedOf": "3014",
     "slug": "cert_1dose1energy",
@@ -16650,6 +16890,8 @@
   "3016": {
     "category": "potions",
     "cost": 300,
+    "doseFamily": "2energy",
+    "doses": 4,
     "name": "Super energy(4)",
     "slug": "4dose2energy",
     "tradeable": true
@@ -16657,6 +16899,8 @@
   "3017": {
     "category": "potions",
     "cost": 300,
+    "doseFamily": "2energy",
+    "doses": 4,
     "name": "Super energy(4) (noted)",
     "notedOf": "3016",
     "slug": "cert_4dose2energy",
@@ -16665,6 +16909,8 @@
   "3018": {
     "category": "potions",
     "cost": 230,
+    "doseFamily": "2energy",
+    "doses": 3,
     "name": "Super energy(3)",
     "slug": "3dose2energy",
     "tradeable": true
@@ -16672,6 +16918,8 @@
   "3019": {
     "category": "potions",
     "cost": 230,
+    "doseFamily": "2energy",
+    "doses": 3,
     "name": "Super energy(3) (noted)",
     "notedOf": "3018",
     "slug": "cert_3dose2energy",
@@ -16688,6 +16936,8 @@
   "3020": {
     "category": "potions",
     "cost": 160,
+    "doseFamily": "2energy",
+    "doses": 2,
     "name": "Super energy(2)",
     "slug": "2dose2energy",
     "tradeable": true
@@ -16695,6 +16945,8 @@
   "3021": {
     "category": "potions",
     "cost": 160,
+    "doseFamily": "2energy",
+    "doses": 2,
     "name": "Super energy(2) (noted)",
     "notedOf": "3020",
     "slug": "cert_2dose2energy",
@@ -16703,6 +16955,8 @@
   "3022": {
     "category": "potions",
     "cost": 90,
+    "doseFamily": "2energy",
+    "doses": 1,
     "name": "Super energy(1)",
     "slug": "1dose2energy",
     "tradeable": true
@@ -16710,6 +16964,8 @@
   "3023": {
     "category": "potions",
     "cost": 90,
+    "doseFamily": "2energy",
+    "doses": 1,
     "name": "Super energy(1) (noted)",
     "notedOf": "3022",
     "slug": "cert_1dose2energy",
@@ -16718,6 +16974,8 @@
   "3024": {
     "category": "potions",
     "cost": 300,
+    "doseFamily": "2restore",
+    "doses": 4,
     "name": "Super restore(4)",
     "slug": "4dose2restore",
     "tradeable": true
@@ -16725,6 +16983,8 @@
   "3025": {
     "category": "potions",
     "cost": 300,
+    "doseFamily": "2restore",
+    "doses": 4,
     "name": "Super restore(4) (noted)",
     "notedOf": "3024",
     "slug": "cert_4dose2restore",
@@ -16733,6 +16993,8 @@
   "3026": {
     "category": "potions",
     "cost": 240,
+    "doseFamily": "2restore",
+    "doses": 3,
     "name": "Super restore(3)",
     "slug": "3dose2restore",
     "tradeable": true
@@ -16740,6 +17002,8 @@
   "3027": {
     "category": "potions",
     "cost": 240,
+    "doseFamily": "2restore",
+    "doses": 3,
     "name": "Super restore(3) (noted)",
     "notedOf": "3026",
     "slug": "cert_3dose2restore",
@@ -16748,6 +17012,8 @@
   "3028": {
     "category": "potions",
     "cost": 180,
+    "doseFamily": "2restore",
+    "doses": 2,
     "name": "Super restore(2)",
     "slug": "2dose2restore",
     "tradeable": true
@@ -16755,6 +17021,8 @@
   "3029": {
     "category": "potions",
     "cost": 180,
+    "doseFamily": "2restore",
+    "doses": 2,
     "name": "Super restore(2) (noted)",
     "notedOf": "3028",
     "slug": "cert_2dose2restore",
@@ -16770,6 +17038,8 @@
   "3030": {
     "category": "potions",
     "cost": 120,
+    "doseFamily": "2restore",
+    "doses": 1,
     "name": "Super restore(1)",
     "slug": "1dose2restore",
     "tradeable": true
@@ -16777,6 +17047,8 @@
   "3031": {
     "category": "potions",
     "cost": 120,
+    "doseFamily": "2restore",
+    "doses": 1,
     "name": "Super restore(1) (noted)",
     "notedOf": "3030",
     "slug": "cert_1dose2restore",
@@ -16785,6 +17057,8 @@
   "3032": {
     "category": "potions",
     "cost": 200,
+    "doseFamily": "1agility",
+    "doses": 4,
     "name": "Agility potion(4)",
     "slug": "4dose1agility",
     "tradeable": true
@@ -16792,6 +17066,8 @@
   "3033": {
     "category": "potions",
     "cost": 200,
+    "doseFamily": "1agility",
+    "doses": 4,
     "name": "Agility potion(4) (noted)",
     "notedOf": "3032",
     "slug": "cert_4dose1agility",
@@ -16800,6 +17076,8 @@
   "3034": {
     "category": "potions",
     "cost": 150,
+    "doseFamily": "1agility",
+    "doses": 3,
     "name": "Agility potion(3)",
     "slug": "3dose1agility",
     "tradeable": true
@@ -16807,6 +17085,8 @@
   "3035": {
     "category": "potions",
     "cost": 150,
+    "doseFamily": "1agility",
+    "doses": 3,
     "name": "Agility potion(3) (noted)",
     "notedOf": "3034",
     "slug": "cert_3dose1agility",
@@ -16815,6 +17095,8 @@
   "3036": {
     "category": "potions",
     "cost": 50,
+    "doseFamily": "1agility",
+    "doses": 2,
     "name": "Agility potion(2)",
     "slug": "2dose1agility",
     "tradeable": true
@@ -16822,6 +17104,8 @@
   "3037": {
     "category": "potions",
     "cost": 50,
+    "doseFamily": "1agility",
+    "doses": 2,
     "name": "Agility potion(2) (noted)",
     "notedOf": "3036",
     "slug": "cert_2dose1agility",
@@ -16830,6 +17114,8 @@
   "3038": {
     "category": "potions",
     "cost": 50,
+    "doseFamily": "1agility",
+    "doses": 1,
     "name": "Agility potion(1)",
     "slug": "1dose1agility",
     "tradeable": true
@@ -16837,6 +17123,8 @@
   "3039": {
     "category": "potions",
     "cost": 50,
+    "doseFamily": "1agility",
+    "doses": 1,
     "name": "Agility potion(1) (noted)",
     "notedOf": "3038",
     "slug": "cert_1dose1agility",
@@ -16853,6 +17141,8 @@
   "3040": {
     "category": "potions",
     "cost": 300,
+    "doseFamily": "1magic",
+    "doses": 4,
     "name": "Magic potion(4)",
     "slug": "4dose1magic",
     "tradeable": true
@@ -16860,6 +17150,8 @@
   "3041": {
     "category": "potions",
     "cost": 300,
+    "doseFamily": "1magic",
+    "doses": 4,
     "name": "Magic potion(4) (noted)",
     "notedOf": "3040",
     "slug": "cert_4dose1magic",
@@ -16868,6 +17160,8 @@
   "3042": {
     "category": "potions",
     "cost": 250,
+    "doseFamily": "1magic",
+    "doses": 3,
     "name": "Magic potion(3)",
     "slug": "3dose1magic",
     "tradeable": true
@@ -16875,6 +17169,8 @@
   "3043": {
     "category": "potions",
     "cost": 250,
+    "doseFamily": "1magic",
+    "doses": 3,
     "name": "Magic potion(3) (noted)",
     "notedOf": "3042",
     "slug": "cert_3dose1magic",
@@ -16883,6 +17179,8 @@
   "3044": {
     "category": "potions",
     "cost": 200,
+    "doseFamily": "1magic",
+    "doses": 2,
     "name": "Magic potion(2)",
     "slug": "2dose1magic",
     "tradeable": true
@@ -16890,6 +17188,8 @@
   "3045": {
     "category": "potions",
     "cost": 200,
+    "doseFamily": "1magic",
+    "doses": 2,
     "name": "Magic potion(2) (noted)",
     "notedOf": "3044",
     "slug": "cert_2dose1magic",
@@ -16898,6 +17198,8 @@
   "3046": {
     "category": "potions",
     "cost": 150,
+    "doseFamily": "1magic",
+    "doses": 1,
     "name": "Magic potion(1)",
     "slug": "1dose1magic",
     "tradeable": true
@@ -16905,6 +17207,8 @@
   "3047": {
     "category": "potions",
     "cost": 150,
+    "doseFamily": "1magic",
+    "doses": 1,
     "name": "Magic potion(1) (noted)",
     "notedOf": "3046",
     "slug": "cert_1dose1magic",
@@ -20033,6 +20337,8 @@
   "3430": {
     "category": "other",
     "cost": 100,
+    "doseFamily": "sacred_oil",
+    "doses": 4,
     "name": "Sacred oil(4)",
     "slug": "sacred_oil4",
     "tradeable": true
@@ -20040,6 +20346,8 @@
   "3431": {
     "category": "other",
     "cost": 100,
+    "doseFamily": "sacred_oil",
+    "doses": 4,
     "name": "Sacred oil(4) (noted)",
     "notedOf": "3430",
     "slug": "cert_sacred_oil4",
@@ -20048,6 +20356,8 @@
   "3432": {
     "category": "other",
     "cost": 90,
+    "doseFamily": "sacred_oil",
+    "doses": 3,
     "name": "Sacred oil(3)",
     "slug": "sacred_oil3",
     "tradeable": true
@@ -20055,6 +20365,8 @@
   "3433": {
     "category": "other",
     "cost": 90,
+    "doseFamily": "sacred_oil",
+    "doses": 3,
     "name": "Sacred oil(3) (noted)",
     "notedOf": "3432",
     "slug": "cert_sacred_oil3",
@@ -20063,6 +20375,8 @@
   "3434": {
     "category": "other",
     "cost": 75,
+    "doseFamily": "sacred_oil",
+    "doses": 2,
     "name": "Sacred oil(2)",
     "slug": "sacred_oil2",
     "tradeable": true
@@ -20070,6 +20384,8 @@
   "3435": {
     "category": "other",
     "cost": 75,
+    "doseFamily": "sacred_oil",
+    "doses": 2,
     "name": "Sacred oil(2) (noted)",
     "notedOf": "3434",
     "slug": "cert_sacred_oil2",
@@ -20078,6 +20394,8 @@
   "3436": {
     "category": "other",
     "cost": 60,
+    "doseFamily": "sacred_oil",
+    "doses": 1,
     "name": "Sacred oil(1)",
     "slug": "sacred_oil1",
     "tradeable": true
@@ -20085,6 +20403,8 @@
   "3437": {
     "category": "other",
     "cost": 60,
+    "doseFamily": "sacred_oil",
+    "doses": 1,
     "name": "Sacred oil(1) (noted)",
     "notedOf": "3436",
     "slug": "cert_sacred_oil1",

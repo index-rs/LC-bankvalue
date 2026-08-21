@@ -6,7 +6,8 @@
 //   bid       only a standing buy offer — a real floor, weaker than a trade
 //   ask       only a standing sell listing — what someone *hopes* to get; treat
 //             with suspicion, nothing proves anyone pays it
-//   dose      potion priced per-dose from its dose family's best-sampled variant
+//   dose      potion priced per-dose off its family's 3-dose variant, where the
+//             brewing (and so nearly all the trading) actually happens
 //   charge    charged jewellery priced off its family's fully-charged variant
 //   cloth     splitbark, priced from the fine cloth it takes to make
 //   recipe    priced from the materials it's made of (molten glass = sand + ash)
@@ -210,9 +211,75 @@
         tier,
         category: item.rare ? 'rares' : item.category || 'other',
         rare: !!item.rare,
+        doses: item.doses || null,
+        doseFamily: item.doseFamily || null,
       });
     });
-    return rows;
+    return foldDoseFamilies(rows);
+  }
+
+  // Pour a potion family into a single row measured in doses.
+  //
+  // A bank with 343 super strength(4) and 4 super strength(3) holds 1,384
+  // doses of super strength — one holding, spread over a row per dose variant
+  // plus a noted copy of each, at prices that had no business differing, since
+  // every dose of a potion is the same thing. Folding them cuts a real bank's
+  // Potions section from 35 rows to 12.
+  //
+  // The fold is value-neutral by construction: the row's total is the sum of
+  // what each variant was worth, and the unit shown is that total per dose. If
+  // a family's variants ever disagree on a per-dose rate, this reports the
+  // blend rather than papering over it.
+  function foldDoseFamilies(rows) {
+    const families = new Map();
+    const kept = [];
+    rows.forEach((row) => {
+      // Only fold what's actually priced — an unpriced variant folded in at
+      // zero would vanish from the unpriced panel instead of being reported.
+      if (!row.doseFamily || !row.doses || row.rare || !VALUED_TIERS.has(row.tier)
+          || row.unitPrice == null) {
+        kept.push(row);
+        return;
+      }
+      const list = families.get(row.doseFamily) || [];
+      list.push(row);
+      families.set(row.doseFamily, list);
+    });
+
+    families.forEach((members) => {
+      // Even a lone variant folds, so every potion in the report is measured
+      // the same way: 333 restore potion(3) is 999 doses, not 333 of a thing
+      // whose name happens to carry a number.
+      let doses = 0, value = 0;
+      const mix = {};
+      const from = {};
+      members.forEach((m) => {
+        const d = m.qty * m.doses;
+        doses += d;
+        value += m.qty * m.unitPrice;
+        const label = m.tier === 'noted' ? `(${m.doses}) noted` : `(${m.doses})`;
+        mix[label] = (mix[label] || 0) + m.qty;
+        Object.entries(m.from || {}).forEach(([k, v]) => { from[k] = (from[k] || 0) + v * m.doses; });
+      });
+      // Tier of whichever variant carries the most value: a bank holding only
+      // (3)s shows the real market tier, one holding byproduct doses shows
+      // that its number is derived.
+      const lead = members.reduce((a, b) =>
+        (b.qty * b.unitPrice > a.qty * a.unitPrice ? b : a));
+      kept.push({
+        id: lead.id,
+        name: (lead.name || '').replace(/\s*\(noted\)$/, '').replace(/\s*\(\d\)$/, '').trim(),
+        qty: doses,
+        from,
+        variants: null,
+        doseMix: mix,
+        unitPrice: doses ? value / doses : null,
+        tier: lead.tier,
+        category: lead.category,
+        rare: false,
+      });
+    });
+    return kept;
   }
 
   function rowTotal(row) {
@@ -376,9 +443,28 @@
                   .map(([label, n]) => `+${n.toLocaleString('en-US')} ${label}`)
                   .join(', ') + '</span>'
               : ''
+          }${
+            item.doseMix
+              ? ' <span class="variant-note">' +
+                Object.entries(item.doseMix)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([label, n]) => `${n.toLocaleString('en-US')}&times;${label}`)
+                  .join(', ') + '</span>'
+              : ''
           }${srcTag}</span>
-          <span class="item-qty">&times;${item.qty.toLocaleString('en-US')}</span>
-          <span class="item-unit">${valued ? fmtGp(item.unitPrice) + ' ea' : '&mdash;'}</span>
+          <span class="item-qty">&times;${item.qty.toLocaleString('en-US')}${
+            item.doseMix ? ' doses' : ''
+          }${
+            // Doses are the honest unit, but nobody stocks their bank in doses
+            // — show what the pile is in the potions people actually trade.
+            item.doseMix && item.qty >= 4
+              ? `<span class="dose-equiv">${item.qty % 4 === 0 ? '=' : '&asymp;'} ${
+                  Math.round(item.qty / 4).toLocaleString('en-US')} &times;(4)</span>`
+              : ''
+          }</span>
+          <span class="item-unit">${
+            valued ? fmtGp(item.unitPrice) + (item.doseMix ? ' /dose' : ' ea') : '&mdash;'
+          }</span>
           <span class="item-total">${valued ? fmtGp(rowTotal(item)) + ' gp' : '&mdash;'}</span>
         `;
         itemsEl.appendChild(row);
