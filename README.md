@@ -162,6 +162,13 @@ daggers, halberds, battleaxes, spears, longswords — take alch value, dragon ex
 those genuinely trade. A handful of listings on a mithril halberd says more about the lister
 than the item.
 
+The Shilo Village gems are here too — opal, jade and red topaz, cut and uncut. They come out
+of gem rocks by the thousand and have never recorded a coin sale between players, so the only
+thing that ever moves their price is somebody's asking price: a 1,000gp ask appeared on a red
+topaz mid-session, 12x its shop value, which on a bank holding 20,000 of them is 20M out of
+thin air. So is the spinach roll, on three single-unit sales at 1.9M-2.5M against an alch
+base of 1gp.
+
 The risk in that rule runs the other way too. The plain battlestaff sat on this list and was
 valued at 2,800 while it was quietly one of the most liquid items in the game — 500-unit
 blocks changing hands at 7,600-7,750 and standing bids for thousands more. "Any shop stocks
@@ -213,6 +220,12 @@ the whole order book disagrees with really is more likely to be the mistake.
 slow movers — adamant darts, trimmed armour — with no sale median at all, which is precisely
 when a stray listing gets to set the price unopposed. Two months of sales still describes a
 current price here, and turns a lot of `stale` rows into `market` ones.
+
+**Thin evidence doesn't get weighted.** Below three surviving sales the quantity weighting
+is dropped for a plain median, because weighting needs a distribution to weigh — with one or
+two sales the "weighted median" is just whichever side moved more units. Super strength(4)
+showed it: 59 units at 3,000 against 30 at 5,500 came out as 3,000 flat, below the 3-dose
+potion it strictly contains. Two sales support a midpoint and nothing finer.
 
 **Sales are weighted by quantity.** One person buying a single lockpick "for doors" at
 10,000 and someone else moving fifty at 4,900 are not equal evidence about what a lockpick is

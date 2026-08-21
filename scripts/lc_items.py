@@ -940,6 +940,18 @@ VENDOR_DEFAULT_SLUGS = {
     # The basic elemental staves: any magic shop stocks them, so nobody buys
     # them in bulk off another player.
     "staff_of_air", "staff_of_water", "staff_of_earth", "staff_of_fire",
+    # The Shilo Village gems. They come out of gem rocks by the thousand and
+    # have never recorded a single coin sale between players, so the only thing
+    # that ever moves their price is somebody's asking price — a 1,000gp ask on
+    # a red topaz is 12x its shop value and would put 20M on a bank holding
+    # 20,000 of them. The general store is where these actually go.
+    "opal", "jade", "red_topaz",
+    "uncut_opal", "uncut_jade", "uncut_red_topaz",
+    # Spinach roll: three single-unit sales at 1.9M-2.5M on an item with an
+    # alch base of 1gp. There's no collector market behind that — it's a
+    # gnome-cooking oddity nobody wants — and the listings are almost certainly
+    # staged. Its shop value is 1gp and that's the honest number.
+    "spinach_roll",
 }
 JAVELIN_RE = re.compile(
     r"^((bronze|iron|steel|black|mithril|adamant|rune)_)?javelin(_p)?$"

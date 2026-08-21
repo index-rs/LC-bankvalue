@@ -71,6 +71,8 @@ OUTLIER_LO = 0.2      # drop sales below 0.2x the raw median
 OUTLIER_HI = 5.0      # ...and above 5x — kills fat-finger listings without
                       # needing the old scraper's hand-tuned per-item caps
 MIN_CORROBORATION = 2 # sales needed before they may overrule the order book
+MIN_WEIGHTED_SALES = 3    # below this, weight by quantity stops being an average
+                          # and becomes "whichever side moved more units"
 
 SALE_WEIGHT = 0.75    # completed sales vs. order book, when both exist
 ERROR_RATIO = 10.0    # a listing >=10x (or <=1/10) the sale price is a typo,
@@ -206,18 +208,28 @@ def _weighted_median(sales):
 
 
 def _trimmed_median(sales):
-    """(weighted median, surviving sale count, units traded) for [(price, qty)].
+    """(median, surviving sale count, units traded) for [(price, qty)].
 
     The trim anchor is the plain unweighted median, deliberately: letting
     quantity choose the window would hand a single huge trade the power to
     define what counts as an outlier — and the one 1,000,000,000gp sale in
     this dataset is booked against a quantity of two million.
+
+    Below MIN_WEIGHTED_SALES the weighting is dropped entirely. Weighting needs
+    a distribution to weigh; with one or two sales there isn't one, and the
+    "weighted median" degenerates into whichever side happened to move more
+    units. Super strength(4) was the case that showed it: 59 units at 3,000 and
+    30 at 5,500 came out as 3,000 flat, below the 3-dose potion it strictly
+    contains. Two sales support a midpoint and nothing finer.
     """
     prices = [p for p, _ in sales]
     raw = statistics.median(prices)
     kept = [(p, q) for p, q in sales
             if raw * OUTLIER_LO <= p <= raw * OUTLIER_HI] or list(sales)
-    return _weighted_median(kept), len(kept), sum(q for _, q in kept)
+    units = sum(q for _, q in kept)
+    if len(kept) < MIN_WEIGHTED_SALES:
+        return statistics.median([p for p, _ in kept]), len(kept), units
+    return _weighted_median(kept), len(kept), units
 
 
 def robust_median(sales, floor=None, ceiling=None):
