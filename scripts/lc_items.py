@@ -947,6 +947,9 @@ VENDOR_DEFAULT_SLUGS = {
     # 20,000 of them. The general store is where these actually go.
     "opal", "jade", "red_topaz",
     "uncut_opal", "uncut_jade", "uncut_red_topaz",
+    # Coif: stocked by shops, so nobody is buying one off a player. It read
+    # 15,000 off a single 1-unit sale from three months back.
+    "coif",
     # Spinach roll: three single-unit sales at 1.9M-2.5M on an item with an
     # alch base of 1gp. There's no collector market behind that — it's a
     # gnome-cooking oddity nobody wants — and the listings are almost certainly
