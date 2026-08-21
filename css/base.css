@@ -358,6 +358,8 @@ a { color: var(--accent-2); }
 .tier-noted { color: var(--text-2); background: var(--bg-3); }
 .tier-alch { color: var(--gold); background: color-mix(in oklab, var(--gold) 16%, transparent); }
 .tier-unfinished { color: var(--green); background: color-mix(in oklab, var(--green) 12%, transparent); }
+.tier-recipe { color: var(--green); background: color-mix(in oklab, var(--green) 12%, transparent); }
+.tier-bulk { color: var(--gold); background: color-mix(in oklab, var(--gold) 16%, transparent); }
 .tier-junk { color: var(--text-3); background: var(--bg-3); }
 .tier-vendor { color: var(--text-3); background: var(--bg-3); }
 .tier-untradeable { color: var(--text-3); background: var(--bg-3); }

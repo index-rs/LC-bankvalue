@@ -58,20 +58,22 @@ Price per item, best available evidence first:
 
 | Tier | Meaning |
 |---|---|
-| `market` | Blended from order-book mid `(bid+ask)/2` and the median of recent completed coin sales |
+| `market` | Blended from order-book mid `(bid+ask)/2` and the quantity-weighted median of recent completed coin sales |
 | `bid` | Only a standing buy offer — a real floor, someone is offering that |
 | `ask` | Only a standing sell listing — what a seller *hopes* to get. Nothing proves anyone pays it |
 | `dose` | Potion priced per-dose from its dose family's best-sampled variant |
 | `charge` | Charged jewellery priced off its family's fully-charged variant |
 | `enchant` | Plain gem jewellery, capped at what its enchanted form sells for |
 | `fixed` | A hand-set price, overriding every tier below and the live market too |
-| `sameAs` | Worth exactly what another item is worth — filled buckets, broken tools, tool heads, tanned leather |
+| `recipe` | Priced from the materials it's made of — molten glass is a bucket of sand plus soda ash |
+| `bulk` | A real per-unit price with no depth behind it — discounted, since the stack can't be sold at the price one buyer pays for one |
+| `sameAs` | Worth exactly what another item is worth — filled buckets, broken tools, tool heads, tanned leather, soda ash |
 | `noted` | A noted (`cert_`) item, priced from its base item |
 | `stale` | No recent trade, but it has sold before — a real old price beats a guess |
 | `alch` | No market data; high alch (`cost × 0.6`) minus the nature rune to cast it |
 | `vendor` | Worth less than the rune needed to alch it; low alch / shop value (`cost × 0.4`) |
 | `unfinished` | An unfinished potion, priced from its materials (herb + vial of water) |
-| `junk` | Vendor tools and clothing nobody trades — deliberately 0 |
+| `junk` | Vendor tools and clothing nobody trades — shop value, hidden by default |
 | `container` | A filled bucket, priced as the empty one |
 | *untradeable* | Can't be sold — counted as 0, not reported as a gap |
 | *unknown* | Tradeable but genuinely no price on file |
@@ -104,10 +106,20 @@ gear was burying the actual runes. Herblore holds herbs, secondaries and unfinis
 runecrafting holds essence and talismans. Explicit per-slug overrides in `lc_items.py` win
 over every keyword rule.
 
-**Junk is valued at 0 and hidden.** Non-stacking skilling tools and vendor clothing —
-hammers, needles, moulds, fishing rods, wizard robes — sell for a few gp from any general
-store and are never actively traded. Counting them adds noise, not value. A toggle in the
-report reveals them along with untradeables.
+**Junk is priced at shop value and hidden.** Non-stacking skilling tools and vendor
+clothing — hammers, needles, moulds, fishing rods, wizard robes — sell for a few gp from any
+general store and are never actively traded, so whatever thin listing exists on one is noise.
+A shop counter is still a real exit, though, so they carry vendor value rather than a zero:
+one of every junk item in the game comes to about 12k, which can't move a bank's total but
+does mean a stack of 500 buckets is counted. A toggle in the report reveals them along with
+untradeables.
+
+The same list absorbs items whose only market is the occasional single-unit convenience
+sale. Swamp tar was reading 8,500gp off two one-at-a-time trades — it picks up off the ground
+by the hundred, and if anyone did buy it in quantity, collectors would flatten the price
+inside a week. Toad's legs, raw rat meat, ugthanki kebabs and the tool handles (an axe handle
+was worth 5,555gp on the strength of one player who collects them and isn't buying) went the
+same way.
 
 **Treasure Trails have their own category.** Clue rewards are priced by scarcity, not by
 their (usually identical) combat stats: a gilded platebody is rune armour that alchs for 38k
@@ -132,6 +144,12 @@ bolt tips take vendor price; the melee families nobody trades — claws, warhamm
 daggers, halberds, battleaxes, spears, longswords — take alch value, dragon excepted, since
 those genuinely trade. A handful of listings on a mithril halberd says more about the lister
 than the item.
+
+The risk in that rule runs the other way too. The plain battlestaff sat on this list and was
+valued at 2,800 while it was quietly one of the most liquid items in the game — 500-unit
+blocks changing hands at 7,600-7,750 and standing bids for thousands more. "Any shop stocks
+it" is not the same as "nobody buys it from players"; an item only belongs here if the market
+is genuinely absent, not merely inconvenient.
 
 **Fletching is its own category.** Bow string, arrow shafts, arrowheads, headless arrows and
 every bow below magic-shortbow tier (strung or not) are fletching *stock*, not gear anyone
@@ -178,6 +196,23 @@ the whole order book disagrees with really is more likely to be the mistake.
 slow movers — adamant darts, trimmed armour — with no sale median at all, which is precisely
 when a stray listing gets to set the price unopposed. Two months of sales still describes a
 current price here, and turns a lot of `stale` rows into `market` ones.
+
+**Sales are weighted by quantity.** One person buying a single lockpick "for doors" at
+10,000 and someone else moving fifty at 4,900 are not equal evidence about what a lockpick is
+worth, but an unweighted median counts them one apiece — so the convenience trade wins on
+count alone and a bank full of bulk goods gets valued at prices nobody could liquidate into.
+Weighting by units traded puts lockpicks at 4,900 instead of 7,000 and drops the tool's
+worst offenders across the board.
+
+The outlier trim still runs *unweighted*, deliberately. Letting quantity pick the trim window
+would hand a single enormous trade the power to define what counts as an outlier, and the one
+1,000,000,000gp sale in this dataset is booked against a quantity of two million.
+
+**Some items have no bulk market at all.** Lockpicks trade all day at 5-7k, in ones and twos,
+to someone who wants a door opened today: about 85 units in two months. The per-unit price is
+real and the depth is not, so `BULK_UNSELLABLE` marks the stack down by half. It's a blunt
+constant standing in for per-item traded volume, which the price file now records (`volume`)
+but doesn't yet spend.
 
 **Bids and asks are not equal evidence.** A one-sided *ask* is just someone's asking price —
 one absurd listing (a chaos talisman at 350k when every other talisman trades under 10k) can

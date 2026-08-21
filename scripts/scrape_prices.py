@@ -9,7 +9,7 @@ Reads three feeds (~56 requests total for a full market snapshot):
   /?tab=sell  active sell listings            -> best ask (what sellers want)
 
 Pricing model (per item, best evidence wins):
-  sale  = median of completed coin sales inside a 60-day window
+  sale  = quantity-weighted median of completed coin sales in a 60-day window
   mid   = (best_bid + best_ask) / 2, from the live order book
   price = 0.75*sale + 0.25*mid when both exist  (sales dominate: they're money
           that changed hands, a listing is only an intention)
@@ -23,7 +23,9 @@ noted items from their base item. BUNDLE_CAPS reject set listings posted under
 a single item's slug (full rune sets under "rune platebody", etc), and plain
 gem jewellery is capped at its enchanted form's price (ENCHANT_PRODUCT).
 FIXED_PRICES hand-sets the few items no rule reads correctly (cannon parts,
-soul runes) and overrides everything else.
+soul runes) and overrides everything else. MATERIAL_RECIPES prices an item from
+what it's made of, and BULK_UNSELLABLE discounts the handful that only ever
+trade one at a time.
 
 Deep sale history for slow-moving items comes from backfill_history.py.
 
@@ -41,7 +43,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import lc_market as mkt          # noqa: E402
 from lc_items import (   # noqa: E402
-    BUNDLE_CAPS, ENCHANT_PRODUCT, FINE_CLOTH_SLUG, FIXED_PRICES, SAME_AS_BASE,
+    BULK_DISCOUNT, BULK_UNSELLABLE, BUNDLE_CAPS, ENCHANT_PRODUCT,
+    FINE_CLOTH_SLUG, FIXED_PRICES, MATERIAL_RECIPES, SAME_AS_BASE,
     SPLITBARK_CLOTH, UNID_HERB, VIAL_WATER_SLUG, categorize, is_alch_default,
     is_vendor_default, parse_charges, parse_dose, unfinished_potion_herb,
 )
@@ -173,14 +176,48 @@ def split_by_window(events, now):
     return recent, older
 
 
-def _trimmed_median(vals):
-    raw = statistics.median(vals)
-    trimmed = [v for v in vals if raw * OUTLIER_LO <= v <= raw * OUTLIER_HI] or vals
-    return statistics.median(trimmed), len(trimmed)
+def _weighted_median(sales):
+    """Median price weighted by units traded. `sales` is [(price, qty), ...].
+
+    One person buying a single lockpick "for doors" at 10,000 and someone
+    else moving 50 at 4,900 are not equal evidence about what a lockpick is
+    worth: 50 units of agreement outweigh one. Unweighted, the convenience
+    trade wins on count alone, which is how a bank full of bulk goods ends up
+    valued at prices nobody could ever liquidate into.
+    """
+    ordered = sorted(sales)
+    total = sum(q for _, q in ordered)
+    seen = 0
+    for i, (price, qty) in enumerate(ordered):
+        seen += qty
+        # An exact half-and-half split has no middle value, so take the midpoint
+        # of the two it falls between — the same thing a plain median does with
+        # an even sample. Without this, two single-unit sales at 10k and 25k
+        # would read as 10k purely by tie-break, which is a bias, not evidence.
+        if seen * 2 == total and i + 1 < len(ordered):
+            return (price + ordered[i + 1][0]) / 2
+        if seen * 2 > total:
+            return price
+    return ordered[-1][0]
 
 
-def robust_median(values, floor=None, ceiling=None):
-    """Median with a light outlier trim. Returns (value, sample_size).
+def _trimmed_median(sales):
+    """(weighted median, surviving sale count, units traded) for [(price, qty)].
+
+    The trim anchor is the plain unweighted median, deliberately: letting
+    quantity choose the window would hand a single huge trade the power to
+    define what counts as an outlier — and the one 1,000,000,000gp sale in
+    this dataset is booked against a quantity of two million.
+    """
+    prices = [p for p, _ in sales]
+    raw = statistics.median(prices)
+    kept = [(p, q) for p, q in sales
+            if raw * OUTLIER_LO <= p <= raw * OUTLIER_HI] or list(sales)
+    return _weighted_median(kept), len(kept), sum(q for _, q in kept)
+
+
+def robust_median(sales, floor=None, ceiling=None):
+    """Weighted median with a light outlier trim. Returns (value, n, units).
 
     `floor`/`ceiling` reject values against an independent reference (the order
     book) before the trim. The internal trim only works when the bad values are
@@ -199,19 +236,19 @@ def robust_median(values, floor=None, ceiling=None):
     more likely to be the mistake — someone typing the total instead of the
     unit price on 1,000 blood runes.
     """
-    vals = [v for v in values if v and v > 0]
+    vals = [(p, max(1, q)) for p, q in sales if p and p > 0]
     if not vals:
-        return None, 0
+        return None, 0, 0
 
     bounded = vals
     if floor is not None:
-        bounded = [v for v in bounded if v >= floor]
+        bounded = [(p, q) for p, q in bounded if p >= floor]
     if ceiling is not None:
-        bounded = [v for v in bounded if v <= ceiling]
+        bounded = [(p, q) for p, q in bounded if p <= ceiling]
 
     if not bounded:
-        median, sample = _trimmed_median(vals)
-        return (median, sample) if sample >= MIN_CORROBORATION else (None, 0)
+        median, sample, units = _trimmed_median(vals)
+        return (median, sample, units) if sample >= MIN_CORROBORATION else (None, 0, 0)
     return _trimmed_median(bounded)
 
 
@@ -272,10 +309,12 @@ def compute_prices(catalog, history, bids, asks, now_iso):
         floor = ref / ERROR_RATIO if ref else None
         ceiling = ref * ERROR_RATIO if ref else None
 
-        sale_median, sample = robust_median(
-            [e["price"] for e in recent], floor=floor, ceiling=ceiling)
-        stale_median, stale_sample = robust_median(
-            [e["price"] for e in older], floor=floor, ceiling=ceiling)
+        sale_median, sample, units = robust_median(
+            [(e["price"], e.get("qty") or 1) for e in recent],
+            floor=floor, ceiling=ceiling)
+        stale_median, stale_sample, stale_units = robust_median(
+            [(e["price"], e.get("qty") or 1) for e in older],
+            floor=floor, ceiling=ceiling)
         best_bid, best_ask, mid = price_from_book(bids.get(gid, []), asks.get(gid, []))
 
         # A wildly-out-of-line ask with nothing to check it against is usually a
@@ -316,6 +355,11 @@ def compute_prices(catalog, history, bids, asks, now_iso):
             "sampleSize": sample if tier != "stale" else stale_sample,
             "asOf": now_iso,
         }
+        # Units behind the price, not just sales. The gap between the two is
+        # what separates a real bulk market from a handful of one-off trades.
+        traded = units if tier != "stale" else stale_units
+        if traded:
+            entry["volume"] = traded
         if best_bid:
             entry["bestBid"] = round(best_bid)
         if best_ask:
@@ -537,17 +581,92 @@ def apply_unfinished_potion_pricing(catalog, prices, now_iso):
     return filled
 
 
-def apply_junk_zeroing(catalog, prices, now_iso):
-    """Junk is worth 0 by fiat — vendor tools and clothing nobody trades."""
-    zeroed = 0
+def apply_junk_vendor_pricing(catalog, prices, now_iso):
+    """Junk is worth its vendor price — what a general store pays, and no more.
+
+    These used to be zeroed. A shop counter is a real (if small) exit, though,
+    and a player who banked 500 buckets would rather see them counted at 1gp
+    each than written off entirely. It stays a rounding error on any bank —
+    one of every junk item in the game comes to about 12k — so this buys the
+    honesty without letting untraded clutter move the number.
+    """
+    priced = 0
     for gid, item in catalog.items():
         # A rare is never junk, whatever a keyword rule concluded — writing a
-        # partyhat down to zero is far worse than leaving one oddity in place.
+        # partyhat down to shop value is far worse than leaving one oddity in
+        # place.
         if item.get("category") != "junk" or item.get("rare"):
             continue
-        prices[gid] = {"price": 0, "tier": "junk", "sampleSize": 0, "asOf": now_iso}
-        zeroed += 1
-    return zeroed
+        cost = item.get("cost") or 0
+        prices[gid] = {"price": max(1, round(cost * 0.4)) if cost > 0 else 0,
+                       "tier": "junk", "sampleSize": 0, "asOf": now_iso}
+        priced += 1
+    return priced
+
+
+def apply_recipe_pricing(catalog, prices, now_iso):
+    """Price an item from the materials it's made of. See MATERIAL_RECIPES.
+
+    Runs after same-as-base so a component that borrows another item's price
+    (soda ash reads as seaweed) is already resolved. A solidly-sampled market
+    price wins over the recipe — if the item starts trading properly, the
+    market is the better answer and this steps aside.
+    """
+    by_slug = {i.get("slug"): g for g, i in catalog.items()}
+    filled = 0
+    for slug, recipe in MATERIAL_RECIPES.items():
+        gid = by_slug.get(slug)
+        if not gid:
+            continue
+        existing = prices.get(gid)
+        if existing and existing["tier"] == "market" and existing.get("sampleSize", 0) >= 2:
+            continue
+        total = 0
+        for part_slug, count in recipe.items():
+            part_gid = by_slug.get(part_slug)
+            part_price = (prices.get(part_gid) or {}).get("price") if part_gid else None
+            if not part_price:
+                total = None
+                break
+            total += part_price * count
+        if not total:
+            continue
+        prices[gid] = {
+            "price": max(1, round(total)),
+            "tier": "recipe",
+            "sampleSize": 0,
+            "asOf": now_iso,
+            "madeOf": sorted(recipe),
+        }
+        filled += 1
+    return filled
+
+
+def apply_bulk_discount(catalog, prices, now_iso):
+    """Discount items with no bulk market. See BULK_UNSELLABLE in lc_items.py.
+
+    The per-unit price is real — someone genuinely pays 5-7k for a lockpick.
+    There is just no depth behind it: about 85 units traded in two months, one
+    or two at a time. Holding three hundred does not mean holding three hundred
+    times that price, so the whole stack is marked down.
+    """
+    by_slug = {i.get("slug"): g for g, i in catalog.items()}
+    discounted = 0
+    for slug in BULK_UNSELLABLE:
+        gid = by_slug.get(slug)
+        entry = prices.get(gid) if gid else None
+        if not entry or not entry.get("price"):
+            continue
+        prices[gid] = {
+            **entry,
+            "price": max(1, round(entry["price"] * BULK_DISCOUNT)),
+            "tier": "bulk",
+            "asOf": now_iso,
+            "undiscountedPrice": entry["price"],
+            "undiscountedTier": entry["tier"],
+        }
+        discounted += 1
+    return discounted
 
 
 def apply_same_as_base(catalog, prices, now_iso):
@@ -840,12 +959,15 @@ def main():
     cloth_filled = apply_splitbark_pricing(items_db, prices, now_iso)
     unf_filled = apply_unfinished_potion_pricing(items_db, prices, now_iso)
     alch_filled, vendor_filled = apply_alch_fallback(items_db, prices, now_iso)
-    junk_zeroed = apply_junk_zeroing(items_db, prices, now_iso)
+    junk_priced = apply_junk_vendor_pricing(items_db, prices, now_iso)
     vendor_forced = apply_vendor_defaults(items_db, prices, now_iso)
     container_filled = apply_same_as_base(items_db, prices, now_iso)
+    # After same-as-base: a recipe's components may borrow another item's price.
+    recipe_filled = apply_recipe_pricing(items_db, prices, now_iso)
     alch_forced = apply_alch_defaults(items_db, prices, now_iso)
     unid_filled = apply_unidentified_herb_pricing(items_db, prices, now_iso)
     enchant_capped = apply_enchant_caps(items_db, prices, now_iso)
+    bulk_discounted = apply_bulk_discount(items_db, prices, now_iso)
     # Hand-set prices beat every tier above, including live market data.
     fixed_forced = apply_fixed_prices(items_db, prices, now_iso)
     # Variants and notes resolve LAST: they mirror a base item's final price,
@@ -870,7 +992,8 @@ def main():
     print(f"  ({dose_filled} by dose, {charge_filled} by charges, {cloth_filled} by cloth, "
           f"{unf_filled} unfinished, {variant_filled} variants, {noted_filled} noted, "
           f"{alch_filled} alch, {vendor_filled}+{vendor_forced} vendor, "
-          f"{container_filled} same-as-base, {junk_zeroed} junk, "
+          f"{container_filled} same-as-base, {junk_priced} junk, "
+          f"{recipe_filled} from materials, {bulk_discounted} bulk-discounted, "
           f"{alch_forced} forced alch, {unid_filled} unidentified herbs, "
           f"{enchant_capped} enchant-capped, {fixed_forced} fixed)", flush=True)
 

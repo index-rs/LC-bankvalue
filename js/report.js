@@ -9,13 +9,17 @@
 //   dose      potion priced per-dose from its dose family's best-sampled variant
 //   charge    charged jewellery priced off its family's fully-charged variant
 //   cloth     splitbark, priced from the fine cloth it takes to make
+//   recipe    priced from the materials it's made of (molten glass = sand + ash)
 //   enchant   plain gem jewellery, capped at what its enchanted form sells for
+//   bulk      real per-unit price, but no depth behind it — marked down, since
+//             a stack of 300 can't be sold at the price one buyer pays for one
 //   fixed     hand-set price — the market reads this item wrong (cannon parts
 //             trade as a whole cannon, soul runes off a single outlier bid)
 //   stale     no recent trade, but it has sold before — old price beats a guess
 //   noted     a noted (cert_) item, priced from its base item
 //   alch      no market data; high alch value less the nature rune to cast it
 //   vendor    worth less than the rune to alch it; low alch / shop value (cost * 0.4)
+//   junk      vendor tools and clothing nobody trades — shop value, hidden by default
 //   untradeable  can't be sold — counted as 0, not a gap
 //   unknown   tradeable but genuinely no price on file (mostly rares)
 
@@ -52,6 +56,8 @@
     dose: 'Per-dose',
     charge: 'Charges',
     cloth: 'Fine cloth',
+    recipe: 'Materials',
+    bulk: 'No bulk',
     enchant: 'Enchant cap',
     fixed: 'Fixed',
     stale: 'Old sale',
@@ -64,9 +70,11 @@
     unknown: 'No data',
   };
 
+  // Junk counts too: it's only ever shop value, but a bank holding hundreds of
+  // something shouldn't see it written off as literally nothing.
   const VALUED_TIERS = new Set([
     'market', 'bid', 'ask', 'dose', 'charge', 'cloth', 'enchant', 'fixed',
-    'stale', 'noted', 'alch', 'vendor', 'unfinished',
+    'stale', 'noted', 'alch', 'vendor', 'unfinished', 'recipe', 'bulk', 'junk',
   ]);
 
   function fmtGp(n) {

@@ -7369,14 +7369,14 @@
     "tradeable": true
   },
   "1883": {
-    "category": "food",
+    "category": "junk",
     "cost": 20,
     "name": "Ugthanki kebab",
     "slug": "ugthanki_kebab_bad",
     "tradeable": true
   },
   "1884": {
-    "category": "food",
+    "category": "junk",
     "cost": 20,
     "name": "Ugthanki kebab (noted)",
     "notedOf": "1883",
@@ -7384,14 +7384,14 @@
     "tradeable": true
   },
   "1885": {
-    "category": "food",
+    "category": "junk",
     "cost": 20,
     "name": "Ugthanki kebab",
     "slug": "ugthanki_kebab",
     "tradeable": true
   },
   "1886": {
-    "category": "food",
+    "category": "junk",
     "cost": 20,
     "name": "Ugthanki kebab (noted)",
     "notedOf": "1885",
@@ -7833,7 +7833,7 @@
     "tradeable": true
   },
   "1939": {
-    "category": "other",
+    "category": "junk",
     "cost": 1,
     "name": "Swamp tar",
     "slug": "swamp_tar",
@@ -9469,14 +9469,14 @@
     "tradeable": true
   },
   "2134": {
-    "category": "food",
+    "category": "junk",
     "cost": 1,
     "name": "Raw rat meat",
     "slug": "raw_rat_meat",
     "tradeable": true
   },
   "2135": {
-    "category": "food",
+    "category": "junk",
     "cost": 1,
     "name": "Raw rat meat (noted)",
     "notedOf": "2134",
@@ -9618,14 +9618,14 @@
     "tradeable": true
   },
   "2152": {
-    "category": "food",
+    "category": "junk",
     "cost": 2,
     "name": "Toad's legs",
     "slug": "toads_legs",
     "tradeable": true
   },
   "2153": {
-    "category": "food",
+    "category": "junk",
     "cost": 2,
     "name": "Toad's legs (noted)",
     "notedOf": "2152",
@@ -24340,14 +24340,14 @@
     "tradeable": true
   },
   "466": {
-    "category": "weapons",
+    "category": "junk",
     "cost": 1,
     "name": "Pickaxe handle",
     "slug": "macro_pickaxehandle",
     "tradeable": true
   },
   "467": {
-    "category": "weapons",
+    "category": "junk",
     "cost": 1,
     "name": "Pickaxe handle (noted)",
     "notedOf": "466",
@@ -24557,14 +24557,14 @@
     "tradeable": true
   },
   "492": {
-    "category": "weapons",
+    "category": "junk",
     "cost": 1,
     "name": "Axe handle",
     "slug": "macro_hatchethandle",
     "tradeable": true
   },
   "493": {
-    "category": "weapons",
+    "category": "junk",
     "cost": 1,
     "name": "Axe handle (noted)",
     "notedOf": "492",

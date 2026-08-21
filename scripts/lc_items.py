@@ -142,9 +142,11 @@ _override("herblore", [
     "unicorn_horn", "cave_unicorn_horn", "unicorn_horn_dust", "ground_unicorn_horn",
     "sinister_key",
 ])
+# The cooked gnome dishes are food; the plain legs are junk (see JUNK_SLUGS),
+# so they are deliberately absent here — an override would outrank that.
 _override("food", [
     "tangled_toads_legs", "equa_toads_legs", "premade_tangled_toads_legs",
-    "seasoned_toads_legs", "spicy_toads_legs", "toads_legs",
+    "seasoned_toads_legs", "spicy_toads_legs",
 ])
 _override("crafting", ["swamp_paste", "swamppaste", "rawswamppaste"])
 _override("fletching", [
@@ -273,8 +275,12 @@ TALISMAN_RE = re.compile(r"^[a-z]+_talisman$")
 
 # ---------------------------------------------------------------------
 # Junk — non-stacking skilling tools and vendor clothing that sell for a
-# few gp from any general store and are never actively traded. Counting
-# them adds noise, not value, so they're valued at 0 and hidden by default.
+# few gp from any general store and are never actively traded. Whatever a
+# thin listing claims, a shop is where these actually go, so they're priced
+# at vendor value and hidden behind a toggle. That's a real (small) number
+# rather than a zero: the whole junk catalogue held one-of-each comes to
+# about 12k, so it can't move a bank's total, but a player who banked 500
+# of something still sees it counted.
 # ---------------------------------------------------------------------
 JUNK_SLUGS = {
     # tools
@@ -320,6 +326,16 @@ JUNK_SLUGS = {
     "fur", "grey_wolf_fur", "silk", "glassblowingpipe", "smashed_glass",
     "charcoal", "hollow_bark", "bronzecraftwire", "woadleaf", "acne_potion",
     "cocktail_shaker", "cocktail_glass_empty",
+    # Ground-gatherable and novelty items whose only "market" is the odd
+    # single-unit convenience sale at a wild multiple of vendor value. Swamp
+    # tar picks up off the ground by the hundred — if anyone actually bought
+    # it in quantity, collectors would flatten the price the same week.
+    "swamp_tar", "toads_legs", "raw_rat_meat",
+    "ugthanki_kebab", "ugthanki_kebab_bad",
+    # Tool handles: the leftover when a hatchet or pickaxe head snaps off.
+    # One player collects them and isn't actively buying, which is not a
+    # market — an axe handle was reading 5,555gp off two novelty sales.
+    "macro_hatchethandle", "macro_pickaxehandle",
 }
 # Whole families that are junk. Prefix-matched, so a new colour or tier of the
 # same vendor item is covered without another edit here.
@@ -557,6 +573,44 @@ FIXED_PRICES = {
     "soulrune": 1_500,
 }
 
+
+
+# ---------------------------------------------------------------------
+# Items priced from what they're made of.
+#
+# Molten glass is a bucket of sand plus soda ash, fused at a furnace. Its own
+# market read is unreliable — the daily feed catches one novelty sale ("will
+# sell 1 for quests") at 25x the bulk price and nothing else — while both
+# inputs trade in the thousands every week. The furnace step grants Crafting
+# xp, which is its own reward, so the finished glass isn't worth a premium
+# over its parts.
+#
+# Applied only when the item has no solid market of its own, so a properly
+# sampled price still wins.
+# ---------------------------------------------------------------------
+MATERIAL_RECIPES = {
+    "molten_glass": {"bucket_sand": 1, "soda_ash": 1},
+}
+
+
+# ---------------------------------------------------------------------
+# Items with no bulk market at all.
+#
+# Lockpicks trade at 5-7k all day — in ones and twos, to someone who wants a
+# door opened today. Roughly 85 units changed hands in two months. A bank
+# holding 300 of them cannot get that price for the 300th, and pricing them
+# at the convenience rate ran whole bank totals up on their own.
+#
+# Quantity-weighting the sale median already pulls these down toward the
+# prices real volume traded at; this is the second half — the depth simply
+# isn't there, whatever the per-unit price says. One constant, deliberately
+# blunt, until per-item traded volume drives it properly.
+# ---------------------------------------------------------------------
+BULK_DISCOUNT = 0.5
+BULK_UNSELLABLE = {
+    "lockpick",
+    "weapon_poison",
+}
 
 
 def parse_charges(slug):
@@ -873,9 +927,6 @@ VENDOR_DEFAULT_SLUGS = {
     "mithril_thrownaxe", "adamnt_thrownaxe", "rune_thrownaxe",
     "bolt", "bolts", "barbed_bolt", "barbed_bolts",
     "opal_bolttips", "pearl_bolttips", "barbed_bolttips",
-    # The blank battlestaff; the elemental battlestaves trade properly on
-    # their own.
-    "battlestaff",
     # The basic elemental staves: any magic shop stocks them, so nobody buys
     # them in bulk off another player.
     "staff_of_air", "staff_of_water", "staff_of_earth", "staff_of_fire",
@@ -922,6 +973,9 @@ def is_alch_default(slug):
 # otherwise fall back to alch and be badly wrong.
 # ---------------------------------------------------------------------
 SAME_AS_BASE = {
+    # Soda ash is burnt seaweed. Seaweed trades far more often (10 sales to
+    # soda ash's 1), so the seaweed price is the better read on both.
+    "soda_ash": "seaweed",
     "bucket_water": "bucket_empty",
     "bucket_milk": "bucket_empty",
     "pot_flour": "pot_empty",
