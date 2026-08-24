@@ -64,13 +64,17 @@
     if (step.chance) {
       badges.push(`<span class="xp-badge chance" title="${esc(step.note || '')}">estimate</span>`);
     }
+    if (step.quest) {
+      badges.push(`<span class="xp-badge quest" title="Needs ${esc(step.quest)}` +
+                  `">quest</span>`);
+    }
     const eaten = step.eaten && step.eaten.length
-      // Eaten cheapest-first, but listed biggest-first: naming the four
-      // cheapest names four rounding errors, when the stack that actually
-      // vanished is the one worth seeing.
+      // Listed in the order they are actually eaten, because that order is now
+      // a deliberate priority rather than a tiebreak — seeing the bows go
+      // first is the point.
       ? `<div class="xp-step-note">Consumes ${fmt(step.eaten.reduce((s, e) => s + e.n, 0))} ` +
-        `items, cheapest first &mdash; mostly ` +
-        [...step.eaten].sort((a, b) => b.n - a.n).slice(0, 4).map((e) => {
+        `items, in priority order &mdash; ` +
+        step.eaten.slice(0, 4).map((e) => {
           const it = itemsDb[String(e.id)];
           return `${esc(it ? it.name : e.id)} &times;${fmt(e.n)}`;
         }).join(', ') +

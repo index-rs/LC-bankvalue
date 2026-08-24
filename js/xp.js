@@ -67,6 +67,47 @@
     prayer: 'Prayer', magic: 'Magic',
   };
 
+  // What a nature rune is worth spending on, best first.
+  //
+  // The old rule was "cheapest first", chosen so the report could never imply
+  // you would alch your best armour. That is a fine tiebreak and a poor plan:
+  // it spent 39,000 casts on bronze arrows, which pays 1 gp each and is
+  // nothing anyone does. These are the things players actually alch — high
+  // alch value relative to what the item sells for — and within a tier the
+  // most valuable goes first, so a bank holding magic and yew longbows alchs
+  // the magic ones.
+  //
+  // Anything not on the list is still eligible, after all of it, and still
+  // cheapest-first: that half of the old rule was right.
+  const ALCH_PRIORITY = [
+    {
+      label: 'Bows',
+      // Strung or unstrung, every wood. Anchored so it cannot catch
+      // `bow_string` or `bowl_empty`, and `crossbow` fails it too.
+      test: (item) => /(^|_)(short|long)bow$/.test(item.slug),
+    },
+    {
+      label: 'Platebodies',
+      // Rune excluded as asked. Trimmed and god-plate variants live in
+      // treasure_trails and are collector items — alching one is a mistake
+      // however good the alch value looks.
+      test: (item) => item.slug.includes('platebody')
+        && !item.slug.startsWith('rune_platebody')
+        && item.category !== 'treasure_trails',
+    },
+    {
+      label: 'Dragonhide armour',
+      // Bodies, chaps and vambraces — the finished armour, not the raw hides,
+      // which sit in the crafting category and are worth more as leather.
+      test: (item) => item.category === 'equipment'
+        && (item.slug.includes('dragonhide') || item.slug.includes('dragon_vamb')),
+    },
+    {
+      label: 'Gold amulets',
+      test: (item) => /^(un)?strung_gold_amulet$/.test(item.slug),
+    },
+  ];
+
   // Safety rail for the walk. Content has genuine round trips (a bucket of
   // sand becomes molten glass and an empty bucket), so the loop is bounded
   // rather than trusted to run dry. Real banks and the one-of-everything audit
@@ -105,6 +146,10 @@
     const chance = recipe.chance;
     if (!chance) return recipe.xp;
     if (chance.kind === 'flat') return recipe.xp * chance.p;
+    // A random *yield* (ogre arrow shafts: 2-6 per log, xp paid per shaft) is
+    // stored already averaged, so there is nothing to weight here — but it is
+    // still an estimate, and `chance` being set is what makes the report say so.
+    if (chance.kind === 'randomYield') return recipe.xp;
     if (chance.kind === 'level') {
       // `stat_random(skill, low, high)` is an engine command, not Content, so
       // this models it rather than reading it: interpolate low..high across
@@ -160,16 +205,46 @@
     // runes. The target is chosen from the bank rather than invented here, and
     // cheapest-first, so the report never implies you would alch your best
     // armour to make the number bigger.
-    function alchTargets() {
+    function alchTier(item) {
+      for (let i = 0; i < ALCH_PRIORITY.length; i++) {
+        if (ALCH_PRIORITY[i].test(item)) return i;
+      }
+      return ALCH_PRIORITY.length;
+    }
+
+    function alchTargets(recipe) {
+      // A spell cannot be paid for with the same runes it destroys. Content
+      // lets you alch spare fire and nature runes, but only while enough are
+      // left to cast (alchemy.rs2:80-89) — and the cast count here was already
+      // worked out from that stock, so eating any of it would spend the same
+      // runes twice.
+      const reagents = new Set(recipe.in.map((i) => i.id));
       const targets = [];
       stock.forEach((qty, id) => {
+        if (reagents.has(id)) return;
         const item = itemsDb[String(id)];
         if (!item || !item.tradeable || item.rare) return;
         if (!item.cost) return; // nothing to alch it for
         if (noAlch && noAlch.has(id)) return; // Content refuses these
-        targets.push({ id, qty, price: unitPrice(id, itemsDb, pricesDb) });
+        // Noted items are not alch targets. They have no config block of
+        // their own in Content — they exist only in obj.pack — so the game
+        // reads their cost as 0 and a cast would pay 1 gp. items.json copies
+        // the base item's cost onto them, which is right for valuing a noted
+        // stack and wrong here.
+        if (item.notedOf) return;
+        targets.push({
+          id,
+          qty,
+          tier: alchTier(item),
+          cost: item.cost,
+          price: unitPrice(id, itemsDb, pricesDb),
+        });
       });
-      return targets.sort((a, b) => a.price - b.price);
+      return targets.sort((a, b) =>
+        (a.tier - b.tier) ||
+        // Inside a priority tier, alch value first. Past the list, back to
+        // cheapest-first, so the leftovers eaten are the ones you'd miss least.
+        (a.tier < ALCH_PRIORITY.length ? b.cost - a.cost : a.price - b.price));
     }
 
     function timesRunnable(recipe) {
@@ -245,6 +320,7 @@
           xp: gained,
           aboveLevel: recipe.level > level,
           chance: recipe.chance || null,
+          quest: recipe.quest || null,
           note: recipe.note || null,
           src: recipe.src,
           in: recipe.in,
@@ -292,7 +368,7 @@
       if (!recipe.anyItem) continue;
       let casts = timesRunnable(recipe);
       if (!casts) continue;
-      const targets = alchTargets();
+      const targets = alchTargets(recipe);
       let available = targets.reduce((sum, t) => sum + t.qty, 0);
       casts = Math.min(casts, available);
       if (!casts) continue;

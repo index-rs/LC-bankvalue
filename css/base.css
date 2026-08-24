@@ -719,3 +719,4 @@ footer.site-footer {
 .xp-alt.is-above { opacity: 0.6; }
 .xp-alt.is-above i { font-style: normal; color: var(--gold); }
 .xp-alt-more { color: var(--text-3); }
+.xp-badge.quest { color: var(--violet); border-color: color-mix(in oklab, var(--violet) 35%, var(--border-2)); }

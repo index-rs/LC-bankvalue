@@ -333,6 +333,9 @@ UNRELEASED = {
 # Filled in as handlers skip them, so a stale entry cannot go unnoticed.
 SKIPPED_UNRELEASED = set()
 
+# quest.enum:22 — the varp these recipes gate on is %chompybird.
+OGRE_QUEST = "Big Chompy Bird Hunting"
+
 # Shape 4: literals in .rs2 bodies. Every entry cites file:line.
 LITERALS = [
     dict(
@@ -349,6 +352,54 @@ LITERALS = [
         out=[("molten_glass", 1), ("bucket_empty", 1)],
         src="scripts/skill_crafting/scripts/glass/glass.rs2:53 "
             "stat_advance(crafting, 200)",
+    ),
+    # The ogre arrow chain (Big Chompy Bird Hunting). Quest-gated, and shipped
+    # anyway: a player knows whether they have done the quest, and leaving it
+    # out made a whole fletching line silently missing. The recipes carry the
+    # quest name so the report can say which one.
+    #
+    # Two of the four have a random yield — `~random_range(2, 6)`, uniform, so
+    # four on average — and their xp is paid per unit produced, which makes
+    # both the yield and the xp expectations rather than counts.
+    dict(
+        key="fletch_ogre_shafts", skill="fletching", level=5, xp=7.2,
+        label="Cut achey tree logs into ogre arrow shafts",
+        inp=[("achey_tree_logs", 1)], out=[("ogre_arrow_shaft", 4)],
+        tools=["knife"], quest=OGRE_QUEST,
+        chance={"kind": "randomYield", "min": 2, "max": 6},
+        note="yields 2-6 shafts at 1.8 xp each (~random_range(2, 6)), so both "
+             "the 4 shafts and the 7.2 xp are averages",
+        src="scripts/skill_fletching/scripts/ogre_arrows.rs2:40 "
+            "stat_advance(fletching, multiply($shaft_count, 18))",
+    ),
+    dict(
+        key="fletch_wolfbone_tips", skill="fletching", level=5, xp=10.0,
+        label="Chisel wolf bones into arrow tips",
+        inp=[("wolf_bones", 1)], out=[("wolfbone_arrowheads", 4)],
+        tools=["chisel"], quest=OGRE_QUEST,
+        chance={"kind": "randomYield", "min": 2, "max": 6},
+        note="yields 2-6 tips at 2.5 xp each, so both numbers are averages. "
+             "The same action also pays the same again in Crafting "
+             "(ogre_arrows.rs2:67) — counted here under Fletching only",
+        src="scripts/skill_fletching/scripts/ogre_arrows.rs2:66 "
+            "stat_advance(fletching, multiply($tip_count, 25))",
+    ),
+    dict(
+        key="fletch_ogre_headless_arrow", skill="fletching", level=5, xp=1.5,
+        label="Attach feathers to ogre arrow shafts",
+        inp=[("ogre_arrow_shaft", 1), ("feather", 4)],
+        out=[("ogre_headless_arrow", 1)], quest=OGRE_QUEST,
+        note="four feathers per shaft, not one (ogre_arrows.rs2:102)",
+        src="scripts/skill_fletching/scripts/ogre_arrows.rs2:107 "
+            "stat_advance(fletching, multiply($arrow_count, 15))",
+    ),
+    dict(
+        key="fletch_ogre_arrow", skill="fletching", level=5, xp=1.0,
+        label="Make ogre arrows",
+        inp=[("ogre_headless_arrow", 1), ("wolfbone_arrowheads", 1)],
+        out=[("ogre_arrow", 1)], quest=OGRE_QUEST,
+        src="scripts/skill_fletching/scripts/ogre_arrows.rs2:144 "
+            "stat_advance(fletching, multiply($arrow_count, 10))",
     ),
     dict(
         key="smith_cannonballs", skill="smithing", level=35, xp=37.5,
@@ -913,6 +964,8 @@ def h_literals(c, r):
             lit["key"], skill=lit["skill"], level=lit["level"], xp=lit["xp"],
             label=lit["label"], inp=lit["inp"], out=lit["out"],
             tools=lit.get("tools", ()), src=lit["src"],
+            chance=lit.get("chance"), note=lit.get("note"),
+            extra={"quest": lit["quest"]} if lit.get("quest") else None,
         )
 
 
@@ -932,9 +985,9 @@ KNOWN_GAPS = [
     "and pays Magic xp *and* Smithing xp off one cast — two skills from one "
     "action, which this schema's one-skill-per-recipe shape cannot express.",
 
-    "Ogre arrows (skill_fletching/scripts/ogre_arrows.rs2) are quest-gated and "
-    "hardcode their xp in five places; left out rather than shipped without "
-    "the quest check.",
+    "Chiselling wolf bones into arrow tips pays Fletching *and* Crafting off "
+    "one action (ogre_arrows.rs2:66-67). Only the Fletching half is counted, "
+    "for the same reason superheat is missing entirely.",
 
     "Cooking recipes that are not dbrow-driven — wine, pizza, cakes, gnome "
     "cooking — are out with the rest of cooking, but note they are separate "

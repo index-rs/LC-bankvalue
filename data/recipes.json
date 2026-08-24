@@ -3,7 +3,7 @@
   "bySkill": {
    "crafting": 77,
    "firemaking": 6,
-   "fletching": 44,
+   "fletching": 48,
    "herblore": 43,
    "magic": 17,
    "prayer": 17,
@@ -11,10 +11,10 @@
    "smithing": 139
   },
   "contentBuild": "274",
-  "count": 353,
+  "count": 357,
   "knownGaps": [
    "Superheat item (magic_spells.dbrow#magic_spell_superheat) smelts an ore and pays Magic xp *and* Smithing xp off one cast \u2014 two skills from one action, which this schema's one-skill-per-recipe shape cannot express.",
-   "Ogre arrows (skill_fletching/scripts/ogre_arrows.rs2) are quest-gated and hardcode their xp in five places; left out rather than shipped without the quest check.",
+   "Chiselling wolf bones into arrow tips pays Fletching *and* Crafting off one action (ogre_arrows.rs2:66-67). Only the Fletching half is counted, for the same reason superheat is missing entirely.",
    "Cooking recipes that are not dbrow-driven \u2014 wine, pizza, cakes, gnome cooking \u2014 are out with the rest of cooking, but note they are separate scripts, so covering cooking later means more than one table.",
    "One-off crafting scripts with a hardcoded xp literal and no config: cape dyeing (dye_cape.rs2:120, 2.5 xp) and snelm carving (snelm.rs2:15, 32.5 xp)."
   ],
@@ -3243,6 +3243,84 @@
    "src": "scripts/skill_fletching/configs/darts/darts.dbrow#fletching_mithril_dart",
    "xp": 11.2
   },
+  "fletch_ogre_arrow": {
+   "in": [
+    {
+     "id": 2865,
+     "n": 1
+    },
+    {
+     "id": 2861,
+     "n": 1
+    }
+   ],
+   "label": "Make ogre arrows",
+   "level": 5,
+   "out": [
+    {
+     "id": 2866,
+     "n": 1
+    }
+   ],
+   "quest": "Big Chompy Bird Hunting",
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/scripts/ogre_arrows.rs2:144 stat_advance(fletching, multiply($arrow_count, 10))",
+   "xp": 1.0
+  },
+  "fletch_ogre_headless_arrow": {
+   "in": [
+    {
+     "id": 2864,
+     "n": 1
+    },
+    {
+     "id": 314,
+     "n": 4
+    }
+   ],
+   "label": "Attach feathers to ogre arrow shafts",
+   "level": 5,
+   "note": "four feathers per shaft, not one (ogre_arrows.rs2:102)",
+   "out": [
+    {
+     "id": 2865,
+     "n": 1
+    }
+   ],
+   "quest": "Big Chompy Bird Hunting",
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/scripts/ogre_arrows.rs2:107 stat_advance(fletching, multiply($arrow_count, 15))",
+   "xp": 1.5
+  },
+  "fletch_ogre_shafts": {
+   "chance": {
+    "kind": "randomYield",
+    "max": 6,
+    "min": 2
+   },
+   "in": [
+    {
+     "id": 2862,
+     "n": 1
+    }
+   ],
+   "label": "Cut achey tree logs into ogre arrow shafts",
+   "level": 5,
+   "note": "yields 2-6 shafts at 1.8 xp each (~random_range(2, 6)), so both the 4 shafts and the 7.2 xp are averages",
+   "out": [
+    {
+     "id": 2864,
+     "n": 4
+    }
+   ],
+   "quest": "Big Chompy Bird Hunting",
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/scripts/ogre_arrows.rs2:40 stat_advance(fletching, multiply($shaft_count, 18))",
+   "tools": [
+    946
+   ],
+   "xp": 7.2
+  },
   "fletch_opal_bolt": {
    "in": [
     {
@@ -3766,6 +3844,35 @@
    "skill": "fletching",
    "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_yew_shortbow",
    "xp": 67.5
+  },
+  "fletch_wolfbone_tips": {
+   "chance": {
+    "kind": "randomYield",
+    "max": 6,
+    "min": 2
+   },
+   "in": [
+    {
+     "id": 2859,
+     "n": 1
+    }
+   ],
+   "label": "Chisel wolf bones into arrow tips",
+   "level": 5,
+   "note": "yields 2-6 tips at 2.5 xp each, so both numbers are averages. The same action also pays the same again in Crafting (ogre_arrows.rs2:67) \u2014 counted here under Fletching only",
+   "out": [
+    {
+     "id": 2861,
+     "n": 4
+    }
+   ],
+   "quest": "Big Chompy Bird Hunting",
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/scripts/ogre_arrows.rs2:66 stat_advance(fletching, multiply($tip_count, 25))",
+   "tools": [
+    1755
+   ],
+   "xp": 10.0
   },
   "herb_identify_ardrigal": {
    "in": [

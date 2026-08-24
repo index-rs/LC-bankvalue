@@ -453,19 +453,57 @@ a missing price. So the gaps are listed in the UI, from `notCovered` in `recipes
 
 Whole missing skills are the easy case. The dangerous omission is a recipe missing from a
 skill that otherwise works, since that still *looks* like an answer — so those are listed
-too, in `knownGaps`. Currently: superheat item (it pays Magic *and* Smithing xp off one
-cast, which the one-skill-per-recipe schema can't express), quest-gated ogre arrows, cape
-dyeing and snelm carving.
+too, in `knownGaps`. Currently: superheat item and the Crafting half of wolf-bone arrow
+tips (both pay two skills off one action, which the one-skill-per-recipe schema can't
+express), cape dyeing and snelm carving.
+
+**Quest content ships.** The ogre arrow chain needs Big Chompy Bird Hunting, and it is
+included rather than dropped — a player knows whether they've done the quest, and leaving
+it out made a whole fletching line silently missing. Those steps carry a `quest` badge
+naming the requirement. Two of the four have a random yield (`~random_range(2, 6)` shafts
+or tips per log or bone, with the xp paid per unit), so their counts and their xp are both
+averages, and they're badged `estimate` alongside the burn-style rolls.
 
 Recipes that *can* fail but are otherwise ordinary are kept, flagged `estimate`, and their
 contribution is tallied separately so the skill header can say how much of itself is an
 expectation: iron smelting (a flat 50% unless you wear a ring of forging), opal/jade/topaz
 cutting, and pottery firing (level-scaled rolls).
 
-Alchemy is the odd one out: it consumes one *arbitrary* item per cast alongside its runes.
-The target is picked out of the bank rather than invented — cheapest first, skipping
-everything Content refuses to alch — and the report says which items it ate and what the
-casts paid back in coins.
+### What alchemy eats
+
+Alchemy is the odd one out: it consumes one *arbitrary* item per cast alongside its runes,
+so the target has to come from the bank rather than be invented.
+
+The first rule was "cheapest first", so the report could never imply you'd alch your best
+armour. Defensible as a tiebreak, useless as a plan — it spent 39,000 casts on bronze
+arrows at 1 gp each, which is nothing anyone does. It now works down the list players
+actually alch, most valuable first inside each tier:
+
+| | matched as |
+|---|---|
+| 1. Bows, strung and unstrung | slug ends `_longbow` / `_shortbow`, anchored so `bow_string` and `bowl_empty` can't sneak in |
+| 2. Platebodies, not rune | slug contains `platebody`, minus `rune_platebody*` and minus the trimmed/god plates in `treasure_trails`, which are collector items |
+| 3. Dragonhide armour | `equipment` category, bodies/chaps/vambraces — not the raw hides, which are worth more as leather |
+| 4. Gold amulets | `strung_gold_amulet` / `unstrung_gold_amulet` |
+
+Anything else is still eligible, after all of that, still cheapest-first. On a real bank
+that turns *"39,036 items, cheapest first — mostly Bronze arrow ×23,761"* into
+*"39,036 items, in priority order — Magic longbow ×26,652"*, and the coins the casts pay
+back go from 58K to 41M.
+
+Two exclusions matter more than they look:
+
+**Noted items are not alch targets.** They have no config block of their own anywhere in
+Content — they exist only as an id and a slug in `obj.pack` — so the game reads their cost
+as 0 and a cast would pay 1 gp. `build_catalog.py` copies the base item's cost onto them,
+which is right for valuing a noted stack in the gp report and wrong here. Without this, a
+bank of noted magic longbows would have gone straight to the top of tier 1 at a price the
+game doesn't agree with.
+
+**A spell can't be paid for with the runes it destroys.** The cast count is worked out from
+the rune stock, so letting those same runes be eaten as targets spends them twice. Content
+does allow alching spare fire and nature runes, but only while enough remain to cast
+(`alchemy.rs2:80-89`).
 
 ## Running the scrapers locally
 
