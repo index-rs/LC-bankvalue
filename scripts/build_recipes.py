@@ -1,0 +1,986 @@
+#!/usr/bin/env python3
+"""
+build_recipes.py — build data/recipes.json from Lost City's own Content repo.
+
+Sibling of build_catalog.py: that one answers "what is this item", this one
+answers "what can you turn it into, and what does the skill pay you for it".
+
+Same discipline, same source of truth: every recipe here is read out of
+LostCityRS/Content build 274, and every recipe carries a `src` naming the file
+and block it came from. Nothing is typed off a wiki.
+
+XP lives in Content in four shapes, and this script reads three of them
+mechanically:
+
+  * `.dbrow` rows against a `.dbtable`   fletching, gem cutting, leather,
+                                         smithing, runecraft, magic
+  * `param=` on the item itself          firemaking (productexp), prayer
+                                         (bone_exp), herblore identify
+  * `.struct` named param bags           smelting, jewellery, spinning,
+                                         pottery, glass, studded, battlestaves,
+                                         herblore brewing
+
+The fourth shape — a literal buried in a `.rs2` script body — cannot be
+extracted, so it is hand-written in LITERALS below with a file:line citation
+per entry, in the same spirit as FIXED_PRICES in lc_items.py. Keep that table
+short and make every line say where it came from.
+
+Two traps worth knowing about, both of which will silently produce a wrong
+answer rather than an error:
+
+  1. **Everything is in tenths.** `stat_advance` takes tenths of an xp point,
+     so `experience=750` is 75.0 xp. Divided out on extraction; recipes.json
+     stores real xp and nothing downstream has to think about it.
+
+  2. **`product,<obj>,<n>` means two different things** depending on which
+     script reads the row. `make_bolts` treats the n in
+     `product,opal_bolt,10` as a batch cap (10 per click, 1 tip -> 1 bolt),
+     while `make_bolt_tips` treats the n in `product,opal_bolttips,12` as a
+     real yield (1 opal -> 12 tips). Same table, same column. Which one applies
+     is a property of the consuming .rs2, so every handler below states its
+     reading explicitly and cites the script it read.
+
+Run this when the game content updates (rarely) — same cadence as
+build_catalog.py.
+
+Usage:
+    python scripts/build_recipes.py
+"""
+
+import io
+import json
+import re
+import sys
+import tarfile
+import urllib.request
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lc_items import disambiguate_name  # noqa: E402
+
+CONTENT_TARBALL = "https://github.com/LostCityRS/Content/archive/refs/heads/274.tar.gz"
+CONTENT_BUILD = "274"
+USER_AGENT = "LC-bankvalue/0.1 recipe-builder"
+
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
+RECIPES_PATH = DATA_DIR / "recipes.json"
+
+# Suffixes worth carrying in memory. .rs2 is included only so the herb-identify
+# handler can read its opheld1 dispatch table; nothing else parses script text.
+WANT = (".obj", ".dbrow", ".dbtable", ".struct", ".param", ".rs2")
+
+
+class BuildError(Exception):
+    """Raised for anything that would silently shrink the recipe set."""
+
+
+# ---------------------------------------------------------------------------
+# Content fetch + parsing
+# ---------------------------------------------------------------------------
+
+def fetch_content_tree():
+    """Download the Content tarball -> (obj.pack text, {relpath: text})."""
+    print(f"downloading {CONTENT_TARBALL} ...", flush=True)
+    req = urllib.request.Request(CONTENT_TARBALL, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=180) as resp:
+        blob = resp.read()
+    print(f"  {len(blob):,} bytes", flush=True)
+
+    obj_pack = None
+    tree = {}
+    with tarfile.open(fileobj=io.BytesIO(blob), mode="r:gz") as tar:
+        for member in tar:
+            if not member.isfile():
+                continue
+            # Strip the "Content-274/" prefix so a `src` citation reads the way
+            # you would type it into the GitHub UI.
+            rel = member.name.split("/", 1)[1] if "/" in member.name else member.name
+            if rel == "pack/obj.pack":
+                obj_pack = tar.extractfile(member).read().decode("utf-8", "replace")
+            elif rel.endswith(WANT):
+                tree[rel] = tar.extractfile(member).read().decode("utf-8", "replace")
+    if obj_pack is None:
+        raise BuildError("pack/obj.pack not found in Content tarball")
+    print(f"  obj.pack + {len(tree)} config/script files", flush=True)
+    return obj_pack, tree
+
+
+def parse_obj_pack(text):
+    """'995=coins' lines -> {slug: game_id}."""
+    mapping = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or "=" not in line:
+            continue
+        gid, slug = line.split("=", 1)
+        try:
+            mapping[slug.strip()] = int(gid)
+        except ValueError:
+            continue
+    return mapping
+
+
+BLOCK_RE = re.compile(r"^\[([^\]]+)\]\s*$")
+
+
+def parse_blocks(text):
+    """
+    '[name]' + 'key=value' config format -> [(name, [(key, value), ...])].
+
+    Key/value pairs are kept as an ordered list rather than a dict because
+    repeats are meaningful: a dbrow can carry several `data=convertobj,...`
+    lines and a struct several params of the same shape.
+    """
+    blocks = []
+    current = None
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("//"):
+            continue
+        m = BLOCK_RE.match(line)
+        if m:
+            current = (m.group(1).strip(), [])
+            blocks.append(current)
+        elif current is not None and "=" in line:
+            key, _, value = line.partition("=")
+            current[1].append((key.strip(), value.strip()))
+    return blocks
+
+
+class Content:
+    """Indexed view of the Content tree, with lookups that fail loudly."""
+
+    def __init__(self, obj_pack_text, tree):
+        self.slug_to_id = parse_obj_pack(obj_pack_text)
+        self.tree = tree
+        self.structs = {}   # name -> (relpath, kv)
+        self.objs = {}      # slug -> (relpath, kv)
+        self.dbrows = {}    # name -> (relpath, table, kv)
+
+        for rel, text in sorted(tree.items()):
+            if rel.endswith(".struct"):
+                for name, kv in parse_blocks(text):
+                    self._put(self.structs, name, rel, kv)
+            elif rel.endswith(".obj"):
+                for name, kv in parse_blocks(text):
+                    self._put(self.objs, name, rel, kv)
+            elif rel.endswith(".dbrow"):
+                for name, kv in parse_blocks(text):
+                    table = next((v for k, v in kv if k == "table"), None)
+                    if table is not None:
+                        self.dbrows[name] = (rel, table, kv)
+
+    @staticmethod
+    def _put(target, name, rel, kv):
+        """
+        First real definition wins. Content ships a partial re-dump under
+        scripts/_unpack/ that repeats ~137 objs with fewer fields; it must
+        never shadow the authoritative config.
+        """
+        if name not in target:
+            target[name] = (rel, kv)
+        elif "_unpack/" in target[name][0] and "_unpack/" not in rel:
+            target[name] = (rel, kv)
+
+    # -- lookups ------------------------------------------------------------
+
+    def oid(self, slug):
+        """Slug -> numeric game id. A missing id is a build failure."""
+        if slug not in self.slug_to_id:
+            raise BuildError(f"item slug not in obj.pack: {slug!r}")
+        return self.slug_to_id[slug]
+
+    def obj_name(self, slug):
+        """
+        Display name for a recipe label, run through the same disambiguation
+        the item catalog uses — otherwise three different recipes all read
+        "Craft dragonhide body" and the step list is unreadable.
+        """
+        found = self.objs.get(slug)
+        raw = None
+        if found:
+            for k, v in found[1]:
+                if k == "name":
+                    raw = v
+                    break
+        if raw is None:
+            raw = slug.replace("_", " ").capitalize()
+        return disambiguate_name(slug, raw) or raw
+
+    def rows(self, table):
+        """All dbrows declaring `table=<table>`, as (name, relpath, kv)."""
+        out = [(n, rel, kv) for n, (rel, t, kv) in self.dbrows.items() if t == table]
+        if not out:
+            raise BuildError(f"no dbrows found for table {table!r}")
+        return sorted(out)
+
+    def structs_in(self, folder):
+        """Structs living under a named config folder, sorted by name."""
+        out = [(n, rel, kv) for n, (rel, kv) in self.structs.items()
+               if f"/{folder}/" in rel]
+        if not out:
+            raise BuildError(f"no structs found under configs/{folder}/ — moved?")
+        return sorted(out)
+
+    def struct_owners(self, param_name):
+        """{struct name: obj slug} for objs carrying `param=<param_name>,<struct>`."""
+        owners = {}
+        for slug, (_rel, kv) in self.objs.items():
+            target = param(kv, param_name)
+            if target:
+                owners[target] = slug
+        if not owners:
+            raise BuildError(f"no objs carry param={param_name}")
+        return owners
+
+
+def vals(kv, key, prefix="data"):
+    """
+    Every `<prefix>=<key>,<rest>` line's remaining fields, one list per line.
+
+    `data=shortbow,unstrung_yew_longbow,70,750`
+        -> [['unstrung_yew_longbow', '70', '750']]
+    """
+    out = []
+    for k, v in kv:
+        if k != prefix:
+            continue
+        head, _, rest = v.partition(",")
+        if head.strip() == key:
+            out.append([p.strip() for p in rest.split(",")] if rest else [])
+    return out
+
+
+def one(kv, key, prefix="data", default=None):
+    """First value of a single-valued column/param, or `default`."""
+    got = vals(kv, key, prefix)
+    if not got or not got[0]:
+        return default
+    return got[0][0]
+
+
+def param(kv, key, default=None):
+    return one(kv, key, prefix="param", default=default)
+
+
+def tenths(raw, default=None):
+    """Content stores xp as tenths; recipes.json stores real xp."""
+    if raw is None:
+        return default
+    return round(int(raw) / 10, 1)
+
+
+# ---------------------------------------------------------------------------
+# The hand-maintained tables
+#
+# These are the parts that will rot when Content updates, so they are kept
+# small, cited, and checked: the build errors out if a slug or block named
+# here stops existing, rather than quietly dropping the recipes.
+# ---------------------------------------------------------------------------
+
+# Second ingredients that live in the consuming .rs2 rather than in the table.
+# Each entry names the inv_del line it was read from.
+CO_INPUT_SRC = {
+    "bow_string": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+    "feather": "skill_fletching/scripts/darts.rs2:53 inv_del(inv, feather, $darts_count)",
+    "headless_arrow": "skill_fletching/scripts/arrows.rs2:79 inv_del(inv, headless_arrow, $arrows_count)",
+    "bolt": "skill_fletching/scripts/bolts.rs2:82 inv_del(inv, bolt, $bolts_count)",
+    "studs": "skill_crafting/scripts/studded/studded.rs2:51 inv_del(inv, studs, 1)",
+    "ball_of_wool": "skill_crafting/scripts/jewellery/stringing.rs2:64 inv_del(inv, ball_of_wool, 1)",
+}
+
+# Gems that dispatch to @make_bolt_tips instead of @make_bolts. This is the one
+# place the same dbrow column changes meaning, and the list is an explicit case
+# label in the script, so it is copied verbatim rather than guessed at.
+BOLT_TIP_INPUTS = {"opal", "smalloysterpearls", "bigoysterpearls"}
+BOLT_TIP_SRC = ("skill_crafting/scripts/gem/uncut_gem.rs2:6 "
+                "case opal, smalloysterpearls, bigoysterpearls : @make_bolt_tips")
+
+# jewellery.struct holds gold-bar and silver-bar recipes in one file with no
+# field distinguishing them; the split is in which script reads the struct.
+# These three are the silver ones, named by the objs that carry
+# crafting_jewelry_struct in silver.obj.
+SILVER_STRUCTS = {"unstrung_symbol", "unstrung_emblem", "silver_sickle"}
+SILVER_SRC = ("skill_crafting/configs/jewellery/silver.obj param=crafting_jewelry_struct "
+              "+ scripts/jewellery/jewellery.rs2:326 inv_del(inv, silver_bar, 1)")
+
+# Shape 4: literals in .rs2 bodies. Every entry cites file:line.
+LITERALS = [
+    dict(
+        key="fletch_headless_arrow", skill="fletching", level=1, xp=1.0,
+        label="Attach feathers to arrow shafts",
+        inp=[("arrow_shaft", 1), ("feather", 1)], out=[("headless_arrow", 1)],
+        src="scripts/skill_fletching/scripts/arrows.rs2:46 "
+            "stat_advance(fletching, multiply($arrow_count, 10))",
+    ),
+    dict(
+        key="craft_molten_glass", skill="crafting", level=1, xp=20.0,
+        label="Melt sand and soda ash into glass",
+        inp=[("bucket_sand", 1), ("soda_ash", 1)],
+        out=[("molten_glass", 1), ("bucket_empty", 1)],
+        src="scripts/skill_crafting/scripts/glass/glass.rs2:53 "
+            "stat_advance(crafting, 200)",
+    ),
+    dict(
+        key="smith_cannonballs", skill="smithing", level=35, xp=37.5,
+        label="Cast steel into cannonballs",
+        inp=[("steel_bar", 1)], out=[("mcannonball", 4)], tools=["ammo_mould"],
+        src="scripts/skill_smithing/scripts/smelting/cannonballs.rs2:42 "
+            "stat_advance(smithing, 375)",
+    ),
+]
+
+# Amulet stringing is a single hardcoded 4 xp for every amulet
+# (stringing.rs2:70), applied to whichever jewellery structs declare a `strung`
+# counterpart — so the xp is a literal but the recipe list is still extracted.
+STRINGING_XP = 4.0
+STRINGING_SRC = ("scripts/skill_crafting/scripts/jewellery/stringing.rs2:70 "
+                 "stat_advance(crafting, 40)")
+
+
+# ---------------------------------------------------------------------------
+# Recipe accumulator
+# ---------------------------------------------------------------------------
+
+class Recipes:
+    def __init__(self, content):
+        self.c = content
+        self.out = {}
+        self.counts = {}
+
+    def add(self, key, *, skill, label, level, xp, inp, out, src,
+            tools=(), chance=None, note=None, extra=None):
+        if key in self.out:
+            raise BuildError(f"duplicate recipe key {key!r}")
+        if xp is None:
+            raise BuildError(f"{key}: no xp found")
+        rec = {
+            "skill": skill,
+            "label": label,
+            "level": int(level or 1),
+            "xp": xp,
+            "in": [{"id": self.c.oid(s), "n": n} for s, n in inp],
+            "out": [{"id": self.c.oid(s), "n": n} for s, n in out],
+            "src": src,
+        }
+        if tools:
+            rec["tools"] = [self.c.oid(t) for t in tools]
+        if chance is not None:
+            rec["chance"] = chance
+        if note:
+            rec["note"] = note
+        if extra:
+            rec.update(extra)
+        self.out[key] = rec
+        self.counts[skill] = self.counts.get(skill, 0) + 1
+
+
+# ---------------------------------------------------------------------------
+# Handlers — one per consuming script, each citing what it read
+# ---------------------------------------------------------------------------
+
+def h_fletching_logs(c, r):
+    """
+    fletch_bow_table, read by skill_fletching/scripts/cut_logs.rs2.
+
+    One log in (`inv_del(inv, $log, 1)`), one of three products out. The shafts
+    branch is the odd one: its xp is computed as `multiply($shaft_count, 5)`
+    rather than read from a column, and its product count is a real yield.
+    """
+    for name, rel, kv in c.rows("fletch_bow_table"):
+        log = one(kv, "log")
+        shafts = one(kv, "shafts")
+        if shafts and int(shafts) > 0:
+            n = int(shafts)
+            r.add(
+                f"fletch_shafts_from_{log}", skill="fletching", level=1,
+                xp=round(n * 5 / 10, 1),
+                label=f"Cut {c.obj_name(log).lower()} into arrow shafts",
+                inp=[(log, 1)], out=[("arrow_shaft", n)], tools=["knife"],
+                src=f"{rel}#{name}",
+                note="xp is multiply($shaft_count, 5) in cut_logs.rs2:88, "
+                     "not a table column",
+            )
+        for col in ("shortbow", "longbow"):
+            got = vals(kv, col)
+            if not got:
+                continue
+            product, level, exp = got[0][0], got[0][1], got[0][2]
+            r.add(
+                f"fletch_cut_{product}", skill="fletching", level=int(level),
+                xp=tenths(exp),
+                label=f"Cut {c.obj_name(log).lower()} into {col}s",
+                inp=[(log, 1)], out=[(product, 1)], tools=["knife"],
+                src=f"{rel}#{name}",
+            )
+
+
+def h_fletching_table(c, r):
+    """
+    fletching_table is read by four different scripts. Which one a row belongs
+    to is decided by the folder it lives in — Content groups them that way —
+    except in bolts.dbrow, where the gem rows go to a different handler and
+    the product count flips meaning.
+    """
+    for name, rel, kv in c.rows("fletching_table"):
+        item = one(kv, "item")
+        product_row = vals(kv, "product")[0]
+        product = product_row[0]
+        batch = int(product_row[1]) if len(product_row) > 1 else 1
+        level = int(one(kv, "level", default=1))
+        xp = tenths(one(kv, "experience"))
+        cap_note = f"the product column's {batch} is a per-click batch cap, not a yield"
+
+        if "/stringing/" in rel:
+            # bows.rs2:38-39 — one unstrung bow and one bow string per action.
+            r.add(
+                f"fletch_string_{product}", skill="fletching", level=level, xp=xp,
+                label=f"String {c.obj_name(product).lower()}",
+                inp=[(item, 1), ("bow_string", 1)], out=[(product, 1)],
+                src=f"{rel}#{name}", note=CO_INPUT_SRC["bow_string"],
+            )
+        elif "/arrows/" in rel:
+            r.add(
+                f"fletch_{product}", skill="fletching", level=level, xp=xp,
+                label=f"Attach {c.obj_name(item).lower()} to headless arrows",
+                inp=[(item, 1), ("headless_arrow", 1)], out=[(product, 1)],
+                src=f"{rel}#{name}",
+                note=f"{cap_note}; {CO_INPUT_SRC['headless_arrow']}",
+            )
+        elif "/darts/" in rel:
+            r.add(
+                f"fletch_{product}", skill="fletching", level=level, xp=xp,
+                label=f"Fletch {c.obj_name(product).lower()}s",
+                inp=[(item, 1), ("feather", 1)], out=[(product, 1)],
+                src=f"{rel}#{name}",
+                note=f"{cap_note}; {CO_INPUT_SRC['feather']}",
+            )
+        elif "/bolts/" in rel:
+            if item in BOLT_TIP_INPUTS:
+                # uncut_gem.rs2 -> make_bolt_tips, where "// includes count"
+                # (bolts.rs2:34) means the count IS the yield: one gem in,
+                # `batch` tips out, flat xp.
+                r.add(
+                    f"fletch_{product}_from_{item}", skill="fletching",
+                    level=level, xp=xp,
+                    label=f"Cut {c.obj_name(item).lower()} into bolt tips",
+                    inp=[(item, 1)], out=[(product, batch)], tools=["chisel"],
+                    src=f"{rel}#{name}", note=BOLT_TIP_SRC,
+                )
+            else:
+                r.add(
+                    f"fletch_{product}", skill="fletching", level=level, xp=xp,
+                    label=f"Tip bolts with {c.obj_name(item).lower()}",
+                    inp=[(item, 1), ("bolt", 1)], out=[(product, 1)],
+                    src=f"{rel}#{name}",
+                    note=f"{cap_note}; {CO_INPUT_SRC['bolt']}",
+                )
+        else:
+            raise BuildError(f"fletching_table row in an unrecognised folder: {rel}#{name}")
+
+
+def h_firemaking(c, r):
+    """
+    Logs carry their own firemaking xp: firemaking.rs2:121 reads
+    `oc_param($log, productexp)`, with the level gate from `levelrequire`.
+    """
+    for slug, (rel, kv) in sorted(c.objs.items()):
+        exp = param(kv, "productexp")
+        if exp is None:
+            continue
+        r.add(
+            f"burn_{slug}", skill="firemaking",
+            level=int(param(kv, "levelrequire", 1)), xp=tenths(exp),
+            label=f"Burn {c.obj_name(slug).lower()}",
+            inp=[(slug, 1)], out=[("ashes", 1)], tools=["tinderbox"],
+            src=f"{rel}#{slug} param=productexp",
+        )
+
+
+def h_prayer(c, r):
+    """
+    Bones carry `bone_exp`; bury_bone.rs2:15 deletes one and grants it. The
+    tutorial's copy of the bones config is skipped — same items, thinner rows.
+    """
+    for slug, (rel, kv) in sorted(c.objs.items()):
+        exp = param(kv, "bone_exp")
+        if exp is None or "/tutorial/" in rel:
+            continue
+        r.add(
+            f"bury_{slug}", skill="prayer", level=1, xp=tenths(exp),
+            label=f"Bury {c.obj_name(slug).lower()}",
+            inp=[(slug, 1)], out=[],
+            src=f"{rel}#{slug} param=bone_exp",
+        )
+
+
+def h_smelting(c, r):
+    """
+    smelting.struct carries a complete recipe — both ingredients with counts,
+    the product and the xp — so nothing here is inferred.
+
+    Iron is why the schema needs `chance`: smelting.rs2:200 rolls
+    `randominc(1)` and on a miss consumes the ore for no bar and no xp. A ring
+    of forging removes the roll, which is why the odds are recorded rather
+    than folded into the xp.
+    """
+    for name, rel, kv in c.structs_in("smelting"):
+        product = param(kv, "product")
+        exp = param(kv, "productexp")
+        if product is None or exp is None:
+            continue
+        inp = [(param(kv, "ingredient"), int(param(kv, "bar_count", 1)))]
+        second = param(kv, "ingredient_secondary")
+        if second:
+            inp.append((second, int(param(kv, "ingredient_secondary_count", 1))))
+        iron = product == "iron_bar"
+        r.add(
+            f"smelt_{product}", skill="smithing",
+            level=int(param(kv, "levelrequired", 1)), xp=tenths(exp),
+            label=f"Smelt {c.obj_name(product).lower()}",
+            inp=inp, out=[(product, 1)], src=f"{rel}#{name}",
+            chance={"kind": "flat", "p": 0.5} if iron else None,
+            note="50% failure unless a ring of forging is worn — "
+                 "smelting.rs2:200 randominc(1)" if iron else None,
+        )
+
+
+def h_smithing_anvil(c, r):
+    """
+    smithing.dbrow says how many bars a product takes; the xp per bar lives on
+    the bar's own `smithing_anvil_struct` (smithing.rs2:285). So every product
+    made from a given bar pays the same xp per bar — what you choose to hammer
+    changes the gp, never the xp.
+    """
+    bar_struct = c.struct_owners("smithing_anvil_struct")
+    bar_struct = {slug: name for name, slug in bar_struct.items()}
+
+    for name, rel, kv in c.rows("smithing"):
+        bar = one(kv, "bar")
+        bar_amount = int(one(kv, "bar_amount", default=1))
+        product = one(kv, "product")
+        product_amount = int(one(kv, "product_amount", default=1))
+        if bar not in bar_struct:
+            raise BuildError(f"{rel}#{name}: bar {bar!r} has no smithing_anvil_struct")
+        srel, skv = c.structs[bar_struct[bar]]
+        xp_per_bar = tenths(param(skv, "xpperbar"))
+        r.add(
+            f"smith_{name}", skill="smithing",
+            level=int(one(kv, "levelrequired", default=1)),
+            xp=round(xp_per_bar * bar_amount, 1),
+            label=f"Smith {c.obj_name(product).lower()}",
+            inp=[(bar, bar_amount)], out=[(product, product_amount)],
+            tools=["hammer"],
+            src=f"{rel}#{name} + {srel}#{bar_struct[bar]} param=xpperbar",
+        )
+
+
+def h_gem_cutting(c, r):
+    """
+    gem_cutting_table. Rows carrying `success_rate` can smash the gem for a
+    quarter of the xp (uncut_gem.rs2:54), so the roll is recorded rather than
+    the recipe being presented as certain; the four precious gems have no roll.
+    """
+    for name, rel, kv in c.rows("gem_cutting_table"):
+        uncut = one(kv, "uncut_gem")
+        cut = one(kv, "cut_gem")
+        rate = vals(kv, "success_rate")
+        r.add(
+            f"craft_cut_{cut}", skill="crafting",
+            level=int(one(kv, "level", default=1)),
+            xp=tenths(one(kv, "experience")),
+            label=f"Cut {c.obj_name(uncut).lower()}",
+            inp=[(uncut, 1)], out=[(cut, 1)], tools=["chisel"],
+            src=f"{rel}#{name}",
+            chance=None if not rate else
+                   {"kind": "level", "low": int(rate[0][0]),
+                    "high": int(rate[0][1]), "quarterOnMiss": True},
+            note=None if not rate else
+                 "a miss smashes the gem into crushed gemstone for a quarter "
+                 "of the xp (uncut_gem.rs2:54)",
+        )
+
+
+def h_leather(c, r):
+    """craft_leather_table. The `leather` column carries its own count."""
+    for name, rel, kv in c.rows("craft_leather_table"):
+        hide_row = vals(kv, "leather")[0]
+        hide, count = hide_row[0], int(hide_row[1])
+        product = one(kv, "product")
+        r.add(
+            f"craft_{name}", skill="crafting",
+            level=int(one(kv, "levelrequired", default=1)),
+            xp=tenths(one(kv, "productexp")),
+            label=f"Craft {c.obj_name(product).lower()}",
+            inp=[(hide, count)], out=[(product, 1)], tools=["needle", "thread"],
+            src=f"{rel}#{name}",
+            note="thread is consumed once per 5 items (leather.rs2:126)",
+        )
+
+
+def h_struct_pairs(c, r):
+    """
+    The plain one-in-one-out struct families: spinning, battlestaves, studded.
+    Each names its own `ingredient` and `product`; the only thing the scripts
+    add is a co-input (studs) or nothing at all.
+    """
+    families = [
+        ("spinning", "levelrequire", [], "Spin"),
+        ("battlestaves", "levelrequire", [], "Make"),
+        ("studded", "levelrequired", ["studs"], "Make"),
+    ]
+    for folder, level_key, co, verb in families:
+        for name, rel, kv in c.structs_in(folder):
+            ingredient = param(kv, "ingredient")
+            product = param(kv, "product")
+            exp = param(kv, "productexp")
+            if not (ingredient and product and exp):
+                continue
+            r.add(
+                f"craft_{name}", skill="crafting",
+                level=int(param(kv, level_key, 1)), xp=tenths(exp),
+                label=f"{verb} {c.obj_name(product).lower()}",
+                inp=[(ingredient, 1)] + [(x, 1) for x in co], out=[(product, 1)],
+                src=f"{rel}#{name}",
+                note=CO_INPUT_SRC[co[0]] if co else None,
+            )
+
+
+def h_glassblowing(c, r):
+    """glass.struct — one molten glass each (glass.rs2:99), plus the pipe."""
+    for name, rel, kv in c.structs_in("glass"):
+        product = param(kv, "product")
+        exp = param(kv, "productexp")
+        if not (product and exp):
+            continue
+        r.add(
+            f"craft_blow_{product}", skill="crafting",
+            level=int(param(kv, "levelrequire", 1)), xp=tenths(exp),
+            label=f"Blow {c.obj_name(product).lower()}",
+            inp=[("molten_glass", 1)], out=[(product, 1)],
+            tools=["glassblowingpipe"], src=f"{rel}#{name}",
+        )
+
+
+def h_pottery(c, r):
+    """
+    pottery.struct. Two steps: the wheel turns soft clay into an unfired item
+    (`processexp`, deterministic), the oven fires it (`productexp`) on a
+    `stat_random(crafting, 180, 800)` roll that cracks the item on a miss.
+
+    Which unfired item belongs to which struct is not in the struct — it is on
+    the item, as `param=crafting_pottery_struct`. Read it back from there
+    rather than pattern-matching the names.
+    """
+    owners = c.struct_owners("crafting_pottery_struct")
+    for name, rel, kv in c.structs_in("pottery"):
+        product = param(kv, "product")
+        if not product:
+            continue  # the soft_clay struct is just a message
+        if name not in owners:
+            raise BuildError(f"no obj carries crafting_pottery_struct,{name}")
+        unfired = owners[name]
+        process = param(kv, "processexp")
+        plural = param(kv, "pottery_name", "items")
+        if process:
+            r.add(
+                f"craft_shape_{name}", skill="crafting",
+                level=int(param(kv, "levelrequire", 1)), xp=tenths(process),
+                label=f"Shape soft clay into {plural}",
+                inp=[("softclay", 1)], out=[(unfired, 1)],
+                src=f"{rel}#{name} param=processexp + "
+                    f"{c.objs[unfired][0]}#{unfired} param=crafting_pottery_struct",
+            )
+        exp = param(kv, "productexp")
+        if exp:
+            r.add(
+                f"craft_fire_{name}", skill="crafting",
+                level=int(param(kv, "levelrequire", 1)), xp=tenths(exp),
+                label=f"Fire {plural} in an oven",
+                inp=[(unfired, 1)], out=[(product, 1)],
+                src=f"{rel}#{name} param=productexp",
+                chance={"kind": "level", "low": 180, "high": 800},
+                note="a miss cracks the item for no xp (pottery.rs2:151)",
+            )
+
+
+def h_jewellery(c, r):
+    """
+    jewellery.struct. A gold bar plus an optional gem, or a silver bar for the
+    three symbols; that split is not in the data, so SILVER_STRUCTS carries it
+    with a citation.
+    """
+    for name, rel, kv in c.structs_in("jewellery"):
+        product = param(kv, "product")
+        exp = param(kv, "productexp")
+        if not (product and exp):
+            continue
+        silver = name in SILVER_STRUCTS
+        inp = [("silver_bar" if silver else "gold_bar", 1)]
+        gem = param(kv, "gem")
+        if gem:
+            inp.append((gem, 1))
+        mould = param(kv, "mould")
+        r.add(
+            f"craft_{name}", skill="crafting",
+            level=int(param(kv, "levelrequired", 1)), xp=tenths(exp),
+            label=f"Make {c.obj_name(product).lower()}",
+            inp=inp, out=[(product, 1)], tools=[mould] if mould else [],
+            src=f"{rel}#{name}", note=SILVER_SRC if silver else None,
+        )
+
+    # Stringing: one flat 4 xp for every amulet (stringing.rs2:70), applied to
+    # whichever structs declare a `strung` counterpart.
+    for name, rel, kv in c.structs_in("jewellery"):
+        strung = param(kv, "strung")
+        unstrung = param(kv, "product")
+        if not (strung and unstrung):
+            continue
+        r.add(
+            f"craft_string_{unstrung}", skill="crafting", level=1,
+            xp=STRINGING_XP,
+            label=f"String {c.obj_name(strung).lower()}",
+            inp=[(unstrung, 1), ("ball_of_wool", 1)], out=[(strung, 1)],
+            src=f"{STRINGING_SRC} + {rel}#{name}",
+            note=CO_INPUT_SRC["ball_of_wool"],
+        )
+
+
+def h_herblore(c, r):
+    """
+    Identify: identify.rs2 maps each unid to its herb, and the *identified*
+    herb carries the xp. Brewing: every brew_potion.struct block is a complete
+    recipe (ingredient + solvent -> mixture). Unfinished potions carry no
+    `brew_potion_exp` and so pay nothing, which is correct — the xp all lands
+    on the second step.
+    """
+    ident_path = "scripts/skill_herblore/scripts/identifying/identify.rs2"
+    ident = c.tree.get(ident_path)
+    if ident is None:
+        raise BuildError(f"{ident_path} not found")
+    pairs = re.findall(
+        r"\[opheld1,(\w+)\]\s*\n\s*~attempt_identify_herb\((\w+),", ident)
+    if not pairs:
+        raise BuildError("identify.rs2 parsed to zero herb pairs")
+    for unid, herb in pairs:
+        if herb not in c.objs:
+            raise BuildError(f"identify.rs2 names an unknown herb: {herb!r}")
+        hrel, hkv = c.objs[herb]
+        exp = param(hkv, "identified_herb_exp")
+        if not exp:
+            continue
+        r.add(
+            f"herb_identify_{herb}", skill="herblore",
+            level=int(param(hkv, "identified_herb_level", 3)), xp=tenths(exp),
+            label=f"Identify {c.obj_name(herb).lower()}",
+            inp=[(unid, 1)], out=[(herb, 1)],
+            src=f"{ident_path} + {hrel}#{herb} param=identified_herb_exp",
+        )
+
+    for name, rel, kv in c.structs_in("brewing"):
+        mixture = param(kv, "brew_potion_mixture")
+        ingredient = param(kv, "brew_potion_ingredient")
+        solvent = param(kv, "brew_potion_solvent")
+        exp = param(kv, "brew_potion_exp")
+        if not (mixture and ingredient and solvent):
+            continue
+        if not exp or int(exp) == 0:
+            continue
+        r.add(
+            f"brew_{name}", skill="herblore",
+            level=int(param(kv, "brew_potion_level", 3)), xp=tenths(exp),
+            label=f"Brew {c.obj_name(mixture).lower()}",
+            inp=[(ingredient, 1), (solvent, 1)], out=[(mixture, 1)],
+            src=f"{rel}#{name}",
+        )
+
+
+def h_runecraft(c, r):
+    """
+    runecraft_table. One essence per cast and the xp is flat per essence — but
+    the rune *yield* scales with level as `level / multiplier + 1`
+    (runecraft.rs2:83), so the divisor is passed through for the report to
+    evaluate against the player's real level rather than baked in at 1.
+    """
+    for name, rel, kv in c.rows("runecraft_table"):
+        rune = one(kv, "rune")
+        talisman = one(kv, "talisman")
+        mult = one(kv, "multiplier")
+        r.add(
+            f"rc_{rune}", skill="runecraft",
+            level=int(one(kv, "level", default=1)),
+            xp=tenths(one(kv, "experience")),
+            label=f"Bind {c.obj_name(rune).lower()}s",
+            inp=[("blankrune", 1)], out=[(rune, 1)],
+            tools=[talisman] if talisman else [],
+            src=f"{rel}#{name}",
+            extra={"yieldPerLevel": int(mult)} if mult else None,
+            note=f"runes per essence is level/{mult} + 1 (runecraft.rs2:83); "
+                 f"the xp is per essence either way" if mult else None,
+        )
+
+
+def h_magic(c, r):
+    """
+    magic_spell_table. Enchanting names its exact input and output in
+    `convertobj`, so those are ordinary recipes. Alchemy names only its runes —
+    the target is any alchable item — so it is flagged `anyItem` and the report
+    picks that target out of the bank rather than this file inventing one.
+    """
+    # alchemy.rs2:25 / :63 — `max(scale(6, 10, oc_cost($item)), 1)` coins for
+    # high, four tenths for low. The rate travels with the recipe so the report
+    # can say what the casts pay for, rather than hardcoding 0.6 in the browser.
+    any_item = {
+        "magic_spell_low_alch": ("Low alchemy", 0.4),
+        "magic_spell_high_alch": ("High alchemy", 0.6),
+    }
+    for name, rel, kv in c.rows("magic_spell_table"):
+        exp = one(kv, "experience")
+        if not exp or int(exp) == 0:
+            continue
+        rune_in = []
+        runes = vals(kv, "runesrequired")
+        if runes:
+            fields = runes[0]
+            for i in range(0, len(fields) - 1, 2):
+                slug, n = fields[i], fields[i + 1]
+                if slug and slug != "null":
+                    rune_in.append((slug, int(n)))
+        level = int(one(kv, "levelrequired", default=1))
+
+        if name in any_item:
+            label, rate = any_item[name]
+            r.add(
+                f"magic_{name}", skill="magic", level=level, xp=tenths(exp),
+                label=label, inp=rune_in, out=[],
+                src=f"{rel}#{name}",
+                extra={"anyItem": True, "alchRate": rate},
+                note="also consumes one alchable item per cast, paying "
+                     f"{rate:g}x its cost in coins (alchemy.rs2:25); the "
+                     "report picks that target from the bank",
+            )
+            continue
+
+        for conv in vals(kv, "convertobj"):
+            if len(conv) < 2 or conv[0] == "null":
+                continue
+            target, product = conv[0], conv[1]
+            r.add(
+                f"magic_{name}_{target}", skill="magic", level=level,
+                xp=tenths(exp),
+                label=f"Enchant {c.obj_name(target).lower()}",
+                inp=[(target, 1)] + rune_in, out=[(product, 1)],
+                src=f"{rel}#{name} data=convertobj",
+            )
+
+
+def h_literals(c, r):
+    """Shape 4: xp literals read out of .rs2 bodies, each cited in LITERALS."""
+    for lit in LITERALS:
+        r.add(
+            lit["key"], skill=lit["skill"], level=lit["level"], xp=lit["xp"],
+            label=lit["label"], inp=lit["inp"], out=lit["out"],
+            tools=lit.get("tools", ()), src=lit["src"],
+        )
+
+
+HANDLERS = [
+    h_fletching_logs, h_fletching_table, h_firemaking, h_prayer,
+    h_smelting, h_smithing_anvil, h_gem_cutting, h_leather, h_struct_pairs,
+    h_glassblowing, h_pottery, h_jewellery, h_herblore, h_runecraft, h_magic,
+    h_literals,
+]
+
+# Individual recipes deliberately left out of covered skills. These are the
+# dangerous omissions: a whole missing skill is obvious, but a missing recipe
+# inside a skill that otherwise works just makes a number smaller and nobody
+# notices. Listed here, shipped in the data file, and shown in the UI.
+KNOWN_GAPS = [
+    "Superheat item (magic_spells.dbrow#magic_spell_superheat) smelts an ore "
+    "and pays Magic xp *and* Smithing xp off one cast — two skills from one "
+    "action, which this schema's one-skill-per-recipe shape cannot express.",
+
+    "Ogre arrows (skill_fletching/scripts/ogre_arrows.rs2) are quest-gated and "
+    "hardcode their xp in five places; left out rather than shipped without "
+    "the quest check.",
+
+    "Cooking recipes that are not dbrow-driven — wine, pizza, cakes, gnome "
+    "cooking — are out with the rest of cooking, but note they are separate "
+    "scripts, so covering cooking later means more than one table.",
+
+    "One-off crafting scripts with a hardcoded xp literal and no config: "
+    "cape dyeing (dye_cape.rs2:120, 2.5 xp) and snelm carving "
+    "(snelm.rs2:15, 32.5 xp).",
+]
+
+# Skills deliberately left out, with the reason. Written into the data file so
+# the report can say what it does not cover, instead of quietly reporting a
+# smaller number.
+NOT_COVERED = {
+    "cooking": "every recipe carries a burn roll (successchance in "
+               "cooking_generic.dbrow), so a total would be an expectation "
+               "dressed up as a count",
+    "woodcutting": "gathered from trees, not made from bank stock",
+    "mining": "gathered from rocks, not made from bank stock",
+    "fishing": "gathered from spots, not made from bank stock",
+    "agility": "no item input",
+    "thieving": "no item input",
+    "combat": "no item input",
+}
+
+
+def main():
+    DATA_DIR.mkdir(exist_ok=True)
+    obj_pack_text, tree = fetch_content_tree()
+    content = Content(obj_pack_text, tree)
+    print(f"  {len(content.slug_to_id)} item ids, {len(content.structs)} structs, "
+          f"{len(content.dbrows)} dbrows", flush=True)
+
+    recipes = Recipes(content)
+    for handler in HANDLERS:
+        before = len(recipes.out)
+        handler(content, recipes)
+        print(f"  {handler.__name__:20} +{len(recipes.out) - before}", flush=True)
+
+    # Items alchemy refuses, so the alch plan cannot quietly eat them:
+    # anything carrying param=no_alchemy, plus coins themselves
+    # ("Coins are already made of gold." — alchemy.rs2:91).
+    no_alch = {content.oid("coins")}
+    for slug, (_rel, kv) in content.objs.items():
+        if param(kv, "no_alchemy") and slug in content.slug_to_id:
+            no_alch.add(content.oid(slug))
+
+    payload = {
+        "meta": {
+            "contentBuild": CONTENT_BUILD,
+            "noAlch": sorted(no_alch),
+            "source": "https://github.com/LostCityRS/Content",
+            "count": len(recipes.out),
+            "bySkill": dict(sorted(recipes.counts.items())),
+            "notCovered": NOT_COVERED,
+            "knownGaps": KNOWN_GAPS,
+            "note": "xp is real xp; Content stores tenths and this build "
+                    "divides them out. `chance` marks a recipe whose outcome "
+                    "is a roll — {kind:flat} is a fixed probability, "
+                    "{kind:level,low,high} scales with the player's level.",
+        },
+        "recipes": recipes.out,
+    }
+
+    print(f"\nDone: {len(recipes.out)} recipes", flush=True)
+    for skill, n in sorted(recipes.counts.items(), key=lambda kv: -kv[1]):
+        print(f"    {skill:12} {n}", flush=True)
+
+    RECIPES_PATH.write_text(json.dumps(payload, indent=1, sort_keys=True), encoding="utf-8")
+    print(f"wrote {RECIPES_PATH}", flush=True)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        print(f"\nFATAL ERROR: {e}", flush=True)
+        traceback.print_exc()
+        sys.exit(1)

@@ -43,7 +43,19 @@
 
   <div class="status" id="status"></div>
 
-  <div class="report" id="report"></div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Report view">
+    <button type="button" role="tab" id="tab-value" data-tab="value"
+            aria-selected="true" aria-controls="report" tabindex="0">
+      Value <span class="tab-sub">in gp</span>
+    </button>
+    <button type="button" role="tab" id="tab-xp" data-tab="xp"
+            aria-selected="false" aria-controls="xp-report" tabindex="-1">
+      XP <span class="tab-sub">per skill</span>
+    </button>
+  </div>
+
+  <div class="report" id="report" role="tabpanel" aria-labelledby="tab-value" tabindex="0"></div>
+  <div class="report" id="xp-report" role="tabpanel" aria-labelledby="tab-xp" tabindex="0" hidden></div>
 
   <footer class="site-footer">
     Price data from <a href="https://markets.lostcity.rs" target="_blank" rel="noopener">Lost City Markets</a>.
@@ -55,6 +67,8 @@
 <script src="js/packet.js"></script>
 <script src="js/savParser.js"></script>
 <script src="js/report.js"></script>
+<script src="js/xp.js"></script>
+<script src="js/xpReport.js"></script>
 <script src="js/sample-data.js"></script>
 <script src="js/main.js"></script>
 </body>

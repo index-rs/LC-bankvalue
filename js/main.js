@@ -4,22 +4,26 @@
 (function () {
   let itemsDb = null;
   let pricesDb = null;
+  let recipesDb = null;
   let dataPromise = null;
+
+  function loadJson(path) {
+    return fetch(path).then((r) => {
+      if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
+      return r.json();
+    });
+  }
 
   function loadData() {
     if (!dataPromise) {
       dataPromise = Promise.all([
-        fetch('data/items.json').then((r) => {
-          if (!r.ok) throw new Error(`items.json: HTTP ${r.status}`);
-          return r.json();
-        }),
-        fetch('data/prices.json').then((r) => {
-          if (!r.ok) throw new Error(`prices.json: HTTP ${r.status}`);
-          return r.json();
-        }),
-      ]).then(([items, prices]) => {
+        loadJson('data/items.json'),
+        loadJson('data/prices.json'),
+        loadJson('data/recipes.json'),
+      ]).then(([items, prices, recipes]) => {
         itemsDb = items;
         pricesDb = prices;
+        recipesDb = recipes;
       });
     }
     return dataPromise;
@@ -55,12 +59,81 @@
     const fileInput = document.getElementById('sav-input');
     const sampleBtn = document.getElementById('sample-btn');
     const reportEl = document.getElementById('report');
+    const xpReportEl = document.getElementById('xp-report');
+    const tabsEl = document.getElementById('tabs');
     const statusEl = document.getElementById('status');
+
+    // The last parse, kept in memory so the XP tab can re-solve when the level
+    // filter is toggled without asking for the file again. It never leaves the
+    // page, same as everything else here.
+    let current = null;         // { containers, stats }
+    let capToLevel = false;
 
     function setStatus(msg, kind) {
       if (!statusEl) return;
       statusEl.textContent = msg || '';
       statusEl.className = 'status' + (kind ? ' ' + kind : '') + (msg ? ' visible' : '');
+    }
+
+    // Roving tabindex: only the selected tab is in the Tab order, and the
+    // arrow keys move between them — the behaviour a role="tablist" promises.
+    function showTab(name, focus) {
+      if (!tabsEl) return;
+      tabsEl.querySelectorAll('[data-tab]').forEach((btn) => {
+        const on = btn.dataset.tab === name;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        btn.tabIndex = on ? 0 : -1;
+        if (on && focus) btn.focus();
+      });
+      if (reportEl) reportEl.hidden = name !== 'value';
+      if (xpReportEl) xpReportEl.hidden = name !== 'xp';
+    }
+
+    if (tabsEl) {
+      const tabButtons = [...tabsEl.querySelectorAll('[data-tab]')];
+      tabButtons.forEach((btn, i) => {
+        btn.addEventListener('click', () => showTab(btn.dataset.tab));
+        btn.addEventListener('keydown', (e) => {
+          const step = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: tabButtons.length - 1 - i }[e.key];
+          if (step === undefined) return;
+          e.preventDefault();
+          const next = (i + step + tabButtons.length) % tabButtons.length;
+          showTab(tabButtons[next].dataset.tab, true);
+        });
+      });
+      showTab('value');
+    }
+
+    // Renders the XP tab from `current`, and re-binds the level filter — the
+    // checkbox lives inside the rendered markup, so it is fresh each time.
+    function renderXp() {
+      if (!xpReportEl || !current) return;
+      const solved = window.BankXP.solve(
+        current.containers, itemsDb, pricesDb, recipesDb, current.stats,
+        { capToLevel }
+      );
+      window.BankXPReport.renderXpReport(xpReportEl, solved, itemsDb, { capToLevel });
+      const box = xpReportEl.querySelector('#xp-cap-level');
+      if (box) {
+        box.addEventListener('change', () => {
+          capToLevel = box.checked;
+          renderXp();
+        });
+      }
+      return solved;
+    }
+
+    // One entry point for every source of a bank: a dropped save, the sample,
+    // or the audit harness. Both tabs are always built, so switching between
+    // them is instant and neither view can go stale against the other.
+    function render(containers, stats, meta) {
+      current = { containers, stats: stats || null };
+      const rows = window.BankReport.buildRows(containers, itemsDb, pricesDb);
+      const r = window.BankReport.renderReport(reportEl, rows, meta || {});
+      renderXp();
+      if (tabsEl) tabsEl.classList.add('visible');
+      return r;
     }
 
     if (dropzone && fileInput) {
@@ -94,8 +167,8 @@
         setStatus('Showing a sample bank.', 'info');
         loadData()
           .then(() => {
-            const rows = window.BankReport.buildRows(window.SAMPLE_BANK, itemsDb, pricesDb);
-            window.BankReport.renderReport(reportEl, rows, { priceAsOf: priceAsOf() });
+            render(window.SAMPLE_BANK, window.SAMPLE_STATS || null,
+                   { priceAsOf: priceAsOf() });
             reportEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
           })
           .catch((err) => setStatus(`Could not load price data: ${err.message}`, 'error'));
@@ -108,15 +181,29 @@
       loadData()
         .then(() => {
           const bank = auditBank(auditMode);
-          const rows = window.BankReport.buildRows({ bank }, itemsDb, pricesDb);
-          const r = window.BankReport.renderReport(reportEl, rows, {
+          const r = render({ bank }, null, {
             priceAsOf: priceAsOf(),
             scopeLabel: 'Audit — one of every item',
           });
+          // Drift check between the two builders. recipes.json is keyed by
+          // the same numeric ids as items.json, but they are generated by
+          // different scripts against different parts of Content — if a
+          // rebuild ever drops an item the recipes still name, the XP tab
+          // would quietly lose those recipes. Say so instead.
+          const orphans = new Set();
+          Object.values(recipesDb.recipes).forEach((rec) => {
+            [...rec.in, ...rec.out].forEach((slot) => {
+              if (!itemsDb[String(slot.id)]) orphans.add(slot.id);
+            });
+          });
           setStatus(
             `Audit bank: ${bank.length} catalog items, ${r.itemCount} rows ` +
-            `(×1 each, so every row total is its unit price).`,
-            'ok'
+            `(×1 each, so every row total is its unit price). ` +
+            `${Object.keys(recipesDb.recipes).length} recipes` +
+            (orphans.size
+              ? ` — ${orphans.size} reference items missing from the catalog.`
+              : `, every ingredient resolves.`),
+            orphans.size ? 'error' : 'ok'
           );
         })
         .catch((err) => setStatus(`Could not load price data: ${err.message}`, 'error'));
@@ -134,6 +221,7 @@
         } catch (err) {
           setStatus(err.message, 'error');
           reportEl.classList.remove('visible');
+          if (tabsEl) tabsEl.classList.remove('visible');
           return;
         }
 
@@ -144,6 +232,7 @@
         if (!heldCount) {
           setStatus('That save parsed fine, but the character holds nothing.', 'error');
           reportEl.classList.remove('visible');
+          if (tabsEl) tabsEl.classList.remove('visible');
           return;
         }
 
@@ -155,8 +244,7 @@
 
         loadData()
           .then(() => {
-            const rows = window.BankReport.buildRows(containers, itemsDb, pricesDb);
-            const r = window.BankReport.renderReport(reportEl, rows, {
+            const r = render(containers, parsed.stats, {
               priceAsOf: priceAsOf(),
               scopeLabel: 'Total value',
             });

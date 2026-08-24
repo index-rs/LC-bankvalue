@@ -6,3 +6,6 @@ savs/
 __pycache__/
 *.pyc
 .DS_Store
+
+# Local preview config (python -m http.server), not part of the site.
+.claude/

@@ -1,8 +1,9 @@
 # Lost City Bank Value Calculator
 
-Estimate what a [Lost City](https://lostcity.rs) (2004scape) bank is worth in gp.
+Estimate what a [Lost City](https://lostcity.rs) (2004scape) bank is worth — in gp, and in XP.
 
-Drop in your `.sav` file, get a categorised valuation. **The save file never leaves your
+Drop in your `.sav` file, get a categorised valuation and, on a second tab, what that same
+bank is worth in each skill you could spend it on. **The save file never leaves your
 browser** — parsing happens client-side, nothing is uploaded. That's not a policy promise,
 it's how it's built: the site is static files, there's no server to upload to.
 
@@ -11,22 +12,24 @@ Runs on GitHub Pages. No build step, no framework, no dependencies.
 ## How it works
 
 ```
-your .sav  ──▶  js/savParser.js  ──▶  bank contents  ──┐
-                (in your browser)                       │
-                                                        ▼
-                                          data/items.json + data/prices.json
-                                                        │
-                                                        ▼
-                                                  js/report.js
+your .sav  ──▶  js/savParser.js  ──▶  bank contents + stats
+                (in your browser)                │
+                     ┌───────────────────────────┴───────────────────────────┐
+                     ▼                                                       ▼
+          items.json + prices.json                            items.json + recipes.json
+                     ▼                                                       ▼
+               js/report.js                                             js/xp.js
+          "worth 24.1M gp"  Value tab                "1.8M Fletching xp, 94 → 96"  XP tab
 ```
 
-Two data files are committed to the repo and served as static JSON:
+Four data files are committed to the repo and served as static JSON:
 
 | File | Built by | How often | What it is |
 |---|---|---|---|
 | `data/items.json` | `scripts/build_catalog.py` | rarely (on content updates) | Every item in the game: id, name, alch cost, category, tradeable flag |
 | `data/prices.json` | `scripts/scrape_prices.py` | daily, via GitHub Actions | Current value per item, with a confidence tier |
 | `data/history.json` | `scrape_prices.py` + `backfill_history.py` | daily / occasionally | Completed sales, 60-day window for current pricing plus older ones as a fallback |
+| `data/recipes.json` | `scripts/build_recipes.py` | rarely (on content updates) | Every XP-paying thing you can make from bank stock: inputs, outputs, level, xp, and where in Content it was read from |
 
 ### The item catalog is authoritative, not guessed
 
@@ -287,12 +290,144 @@ Rares are never alch-estimated. A half full wine jug has `cost=1` but trades for
 so an alch guess would be wrong by six orders of magnitude. With no market data they stay
 unpriced and are reported as such.
 
+## Banked XP
+
+The Value tab answers *what is my bank worth in gp*. The XP tab answers *what is my bank
+worth in XP* — the other currency players actually hold banks in.
+
+```
+Fletching   94 → 96                                     1,775,551 xp
+  10.9M gp of stock in → 7.39M gp out   the xp costs you 3.6M gp · 2.03 gp per xp
+  Cut yew logs into longbows       ×22,328   75 xp    1,674,600
+  Cut oak logs into longbows        ×3,949   25 xp       98,725
+  Attach feathers to arrow shafts   ×2,226    1 xp        2,226
+  Also wanted elsewhere. Yew logs ×22,328 Firemaking · Oak logs ×3,949 Firemaking
+```
+
+That gp line is the part no standalone XP calculator can do, because no other calculator
+already knows what the stock is worth.
+
+### The recipes are read from the game, not typed from a wiki
+
+Same discipline as the item catalog. `build_recipes.py` walks the same
+[Content build 274](https://github.com/LostCityRS/Content) tarball, and **every recipe
+carries a `src`** naming the file and block it was read out of:
+
+```jsonc
+"fletch_string_yew_longbow": {
+  "skill": "fletching", "level": 70, "xp": 75,
+  "in":  [{ "id": 66, "n": 1 }, { "id": 1777, "n": 1 }],
+  "out": [{ "id": 855, "n": 1 }],
+  "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_yew_longbow",
+  "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)"
+}
+```
+
+XP lives in Content in four different shapes, and three of them are extracted mechanically:
+
+| Shape | Example | Skills |
+|---|---|---|
+| `.dbrow` rows against a `.dbtable` | `stringing/bows.dbrow` | fletching, gem cutting, leather, smithing, runecraft, magic |
+| `param=` on the item itself | `yew_logs` carries `param=productexp,2025` | firemaking, prayer, herb identification |
+| `.struct` named param bags | `smelting.struct` | smelting, jewellery, spinning, pottery, glass, studded, battlestaves, potion brewing |
+| a literal in an `.rs2` script body | `stat_advance(fletching, multiply($arrow_count, 10))` | scattered one-offs |
+
+The fourth can't be extracted, so it's a short hand-written table (`LITERALS`) with a
+`file:line` citation per entry — same spirit as `FIXED_PRICES` in `lc_items.py`. The
+hand-maintained parts **fail the build loudly** rather than silently dropping recipes: if a
+slug or block they name stops existing, `build_recipes.py` errors out.
+
+Two traps in that data, both of which produce a wrong answer rather than an error:
+
+**Everything is in tenths.** `stat_advance` takes tenths of an xp point, so
+`experience=750` is 75.0 xp. Divided out on extraction. *The save file is in tenths too* —
+a fletching field reading 130,344,716 is 13,034,471.6 xp, which is level 99.
+
+**`product,<obj>,<n>` means two different things.** `make_bolts` reads the 10 in
+`product,opal_bolt,10` as a per-click batch cap (1 tip → 1 bolt), while `make_bolt_tips`
+reads the 12 in `product,opal_bolttips,12` as a real yield (1 opal → 12 tips). Same table,
+same column; which applies is a property of the consuming `.rs2`. Get it backwards and the
+number is 15× wrong. Always read the script that consumes a table before trusting the
+table's shape.
+
+### One bank, spent many ways — never totalled
+
+Yew logs are Fletching XP *or* Firemaking XP, never both. Iron ore is Smithing. A single
+"your bank is worth 14M xp" number would be a lie by double-counting, and it would be the
+most quotable number on the page — which is exactly why it doesn't exist.
+
+Each skill is solved independently, as if you spent the whole bank on it, and the items two
+skills both want are named along with the rival skill, so the contention is visible rather
+than resolved behind your back. Same reasoning as reporting bank value excluding and
+including rares side by side: show both framings rather than picking one and hiding the
+choice.
+
+### Chains, and the one tie-break
+
+Raw logs are not one recipe deep. A bank holding yew logs and bow string can cut unstrung
+bows *and then* string them — two XP grants off one log — so the solve consumes stock, adds
+the products back, and goes round again until nothing more can fire.
+
+When two recipes want the same item, **the one paying more XP per unit of that item wins.**
+That's a deliberate choice, not an approximation nobody noticed. For fletching it's exactly
+right (longbow beats shortbow at every tier), and it gets smelting right for the same
+reason: per iron ore, steel pays 17.5 and iron pays 12.5, halved again by its failure roll.
+Where it isn't what you'd do, the step list shows which branch was taken.
+
+Ties are broken on what the product is worth — a whole tier of smithing recipes pays the
+same XP per bar, so the XP is identical either way and picking at random would make the gp
+line meaningless.
+
+### Levels come from the save, and are computed, not read
+
+`savParser.js` now captures the stats block, which is what gives the *94 → 96* line. Two
+things about it are not obvious, and both were verified rather than assumed:
+
+* **The 21 stat slots are the engine's RS2 order**, which is not the order in Content's
+  `stat.constant` (19 entries). The check that pins it: for every stat, the stored level
+  byte should equal the level the xp implies. Across four real saves — 84 stats — that held
+  everywhere except hitpoints in three and prayer in one, which is exactly the pair of stats
+  that get *drained*.
+* **The level byte is the current level, not the base level**, for that same reason. Base
+  level is computed from xp with the standard curve (ten lines, no data file).
+
+Recipes above your level are shown greyed with a `lvl N` badge by default — for a long
+grind that's the truthful default, since you *do* unlock the better recipe partway through.
+A toggle restricts the solve to what you can make right now.
+
+### What it doesn't cover, and says so
+
+A missing recipe just makes a number smaller and nobody notices — the same failure mode as
+a missing price. So the gaps are listed in the UI, from `notCovered` in `recipes.json`:
+
+* **Cooking** — every recipe carries a burn roll (`successchance` in
+  `cooking_generic.dbrow`), so a total would be an expectation dressed up as a count.
+* **Woodcutting, mining, fishing** — gathered from the world, not made from bank stock.
+* **Agility, thieving, combat** — no item input.
+
+Whole missing skills are the easy case. The dangerous omission is a recipe missing from a
+skill that otherwise works, since that still *looks* like an answer — so those are listed
+too, in `knownGaps`. Currently: superheat item (it pays Magic *and* Smithing xp off one
+cast, which the one-skill-per-recipe schema can't express), quest-gated ogre arrows, cape
+dyeing and snelm carving.
+
+Recipes that *can* fail but are otherwise ordinary are kept, flagged `estimate`, and their
+contribution is tallied separately so the skill header can say how much of itself is an
+expectation: iron smelting (a flat 50% unless you wear a ring of forging), opal/jade/topaz
+cutting, and pottery firing (level-scaled rolls).
+
+Alchemy is the odd one out: it consumes one *arbitrary* item per cast alongside its runes.
+The target is picked out of the bank rather than invented — cheapest first, skipping
+everything Content refuses to alch — and the report says which items it ate and what the
+casts paid back in coins.
+
 ## Running the scrapers locally
 
 Python 3.12+. No dependencies — standard library only.
 
 ```bash
 python scripts/build_catalog.py     # rebuild the item catalog (rarely needed)
+python scripts/build_recipes.py     # rebuild the XP recipe table (rarely needed)
 python scripts/backfill_history.py  # deep sale history for slow-moving items (slow, occasional)
 python scripts/scrape_prices.py     # refresh prices (fast, daily)
 ```
@@ -337,11 +472,13 @@ files, which browsers block on `file://`.
 index.html
 css/    base.css + two themes (terminal / editorial), toggled and persisted
 js/     packet.js  byte reader ported from the engine's Packet.ts
-        savParser.js  .sav decoder
-        report.js   categorisation, totals, rendering
-        main.js     file input wiring
-data/   items.json, prices.json, history.json
-scripts/  build_catalog.py, scrape_prices.py, lc_market.py, lc_items.py
+        savParser.js  .sav decoder (bank, inventory, worn, stats)
+        report.js   categorisation, totals, rendering        — Value tab
+        xp.js       recipe chain solve, per skill            — XP tab
+        xpReport.js rendering for the XP tab
+        main.js     file input wiring, tab switching
+data/   items.json, prices.json, history.json, recipes.json
+scripts/  build_catalog.py, build_recipes.py, scrape_prices.py, lc_market.py, lc_items.py
 ```
 
 `savs/` holds real save files used for local testing. It is **git-ignored** —
@@ -359,6 +496,18 @@ real report path, so a mispriced or miscategorised item is visible immediately i
 waiting for someone to happen to hold one. At one-of-each, a row's total *is* its unit price —
 so the top of each category is exactly where a bad price shows up first, and the tier badges
 show at a glance which items are resting on thin evidence.
+
+It also runs a **drift check between the two builders**. `items.json` and `recipes.json` are
+keyed by the same numeric game ids but generated by different scripts against different parts
+of Content, so a rebuild that drops an item the recipes still name would quietly cost the XP
+tab those recipes. The audit status line reports it either way: *"354 recipes, every
+ingredient resolves."*
+
+What `?audit` is **not** is a recipe *coverage* harness. The original plan was that a recipe
+which never fires against a bank holding one of everything would be one that can't be reached
+— but that isn't what happens. 242 of 354 never fire there, and nearly all of them lost to a
+rival recipe competing for the same input, which is the solver working correctly. Measuring
+genuine unreachability needs a separate non-greedy pass, and doesn't exist yet.
 
 ## Credits
 

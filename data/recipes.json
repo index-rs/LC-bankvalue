@@ -1,0 +1,7900 @@
+{
+ "meta": {
+  "bySkill": {
+   "crafting": 77,
+   "firemaking": 6,
+   "fletching": 44,
+   "herblore": 43,
+   "magic": 17,
+   "prayer": 17,
+   "runecraft": 11,
+   "smithing": 139
+  },
+  "contentBuild": "274",
+  "count": 354,
+  "knownGaps": [
+   "Superheat item (magic_spells.dbrow#magic_spell_superheat) smelts an ore and pays Magic xp *and* Smithing xp off one cast \u2014 two skills from one action, which this schema's one-skill-per-recipe shape cannot express.",
+   "Ogre arrows (skill_fletching/scripts/ogre_arrows.rs2) are quest-gated and hardcode their xp in five places; left out rather than shipped without the quest check.",
+   "Cooking recipes that are not dbrow-driven \u2014 wine, pizza, cakes, gnome cooking \u2014 are out with the rest of cooking, but note they are separate scripts, so covering cooking later means more than one table.",
+   "One-off crafting scripts with a hardcoded xp literal and no config: cape dyeing (dye_cape.rs2:120, 2.5 xp) and snelm carving (snelm.rs2:15, 32.5 xp)."
+  ],
+  "noAlch": [
+   76,
+   290,
+   291,
+   553,
+   763,
+   765,
+   995,
+   2403,
+   2404
+  ],
+  "notCovered": {
+   "agility": "no item input",
+   "combat": "no item input",
+   "cooking": "every recipe carries a burn roll (successchance in cooking_generic.dbrow), so a total would be an expectation dressed up as a count",
+   "fishing": "gathered from spots, not made from bank stock",
+   "mining": "gathered from rocks, not made from bank stock",
+   "thieving": "no item input",
+   "woodcutting": "gathered from trees, not made from bank stock"
+  },
+  "note": "xp is real xp; Content stores tenths and this build divides them out. `chance` marks a recipe whose outcome is a roll \u2014 {kind:flat} is a fixed probability, {kind:level,low,high} scales with the player's level.",
+  "source": "https://github.com/LostCityRS/Content"
+ },
+ "recipes": {
+  "brew_3dose1agility": {
+   "in": [
+    {
+     "id": 2152,
+     "n": 1
+    },
+    {
+     "id": 3002,
+     "n": 1
+    }
+   ],
+   "label": "Brew agility potion(3)",
+   "level": 34,
+   "out": [
+    {
+     "id": 3034,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose1agility",
+   "xp": 80.0
+  },
+  "brew_3dose1antidragon": {
+   "in": [
+    {
+     "id": 241,
+     "n": 1
+    },
+    {
+     "id": 2483,
+     "n": 1
+    }
+   ],
+   "label": "Brew antifire potion(3)",
+   "level": 69,
+   "out": [
+    {
+     "id": 2454,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose1antidragon",
+   "xp": 157.5
+  },
+  "brew_3dose1attack": {
+   "in": [
+    {
+     "id": 221,
+     "n": 1
+    },
+    {
+     "id": 91,
+     "n": 1
+    }
+   ],
+   "label": "Brew attack potion(3)",
+   "level": 3,
+   "out": [
+    {
+     "id": 121,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose1attack",
+   "xp": 25.0
+  },
+  "brew_3dose1defense": {
+   "in": [
+    {
+     "id": 239,
+     "n": 1
+    },
+    {
+     "id": 99,
+     "n": 1
+    }
+   ],
+   "label": "Brew defence potion(3)",
+   "level": 30,
+   "out": [
+    {
+     "id": 133,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose1defense",
+   "xp": 75.0
+  },
+  "brew_3dose1energy": {
+   "in": [
+    {
+     "id": 1975,
+     "n": 1
+    },
+    {
+     "id": 97,
+     "n": 1
+    }
+   ],
+   "label": "Brew energy potion(3)",
+   "level": 26,
+   "out": [
+    {
+     "id": 3010,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose1energy",
+   "xp": 67.5
+  },
+  "brew_3dose1magic": {
+   "in": [
+    {
+     "id": 3138,
+     "n": 1
+    },
+    {
+     "id": 2483,
+     "n": 1
+    }
+   ],
+   "label": "Brew magic potion(3)",
+   "level": 76,
+   "out": [
+    {
+     "id": 3042,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose1magic",
+   "xp": 172.5
+  },
+  "brew_3dose1restore": {
+   "in": [
+    {
+     "id": 223,
+     "n": 1
+    },
+    {
+     "id": 97,
+     "n": 1
+    }
+   ],
+   "label": "Brew restore potion(3)",
+   "level": 22,
+   "out": [
+    {
+     "id": 127,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose1restore",
+   "xp": 62.5
+  },
+  "brew_3dose1strength": {
+   "in": [
+    {
+     "id": 225,
+     "n": 1
+    },
+    {
+     "id": 95,
+     "n": 1
+    }
+   ],
+   "label": "Brew strength potion(3)",
+   "level": 12,
+   "out": [
+    {
+     "id": 115,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose1strength",
+   "xp": 50.0
+  },
+  "brew_3dose2antipoison": {
+   "in": [
+    {
+     "id": 235,
+     "n": 1
+    },
+    {
+     "id": 101,
+     "n": 1
+    }
+   ],
+   "label": "Brew superantipoison(3)",
+   "level": 48,
+   "out": [
+    {
+     "id": 181,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose2antipoison",
+   "xp": 106.3
+  },
+  "brew_3dose2attack": {
+   "in": [
+    {
+     "id": 221,
+     "n": 1
+    },
+    {
+     "id": 101,
+     "n": 1
+    }
+   ],
+   "label": "Brew super attack(3)",
+   "level": 45,
+   "out": [
+    {
+     "id": 145,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose2attack",
+   "xp": 100.0
+  },
+  "brew_3dose2defense": {
+   "in": [
+    {
+     "id": 239,
+     "n": 1
+    },
+    {
+     "id": 107,
+     "n": 1
+    }
+   ],
+   "label": "Brew super defence(3)",
+   "level": 66,
+   "out": [
+    {
+     "id": 163,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose2defense",
+   "xp": 150.0
+  },
+  "brew_3dose2energy": {
+   "in": [
+    {
+     "id": 2970,
+     "n": 1
+    },
+    {
+     "id": 103,
+     "n": 1
+    }
+   ],
+   "label": "Brew super energy(3)",
+   "level": 52,
+   "out": [
+    {
+     "id": 3018,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose2energy",
+   "xp": 117.5
+  },
+  "brew_3dose2restore": {
+   "in": [
+    {
+     "id": 223,
+     "n": 1
+    },
+    {
+     "id": 3004,
+     "n": 1
+    }
+   ],
+   "label": "Brew super restore(3)",
+   "level": 63,
+   "out": [
+    {
+     "id": 3026,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose2restore",
+   "xp": 142.5
+  },
+  "brew_3dose2strength": {
+   "in": [
+    {
+     "id": 225,
+     "n": 1
+    },
+    {
+     "id": 105,
+     "n": 1
+    }
+   ],
+   "label": "Brew super strength(3)",
+   "level": 55,
+   "out": [
+    {
+     "id": 157,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dose2strength",
+   "xp": 125.0
+  },
+  "brew_3doseantipoison": {
+   "in": [
+    {
+     "id": 235,
+     "n": 1
+    },
+    {
+     "id": 93,
+     "n": 1
+    }
+   ],
+   "label": "Brew antipoison(3)",
+   "level": 5,
+   "out": [
+    {
+     "id": 175,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3doseantipoison",
+   "xp": 37.5
+  },
+  "brew_3dosefisherspotion": {
+   "in": [
+    {
+     "id": 231,
+     "n": 1
+    },
+    {
+     "id": 103,
+     "n": 1
+    }
+   ],
+   "label": "Brew fishing potion(3)",
+   "level": 50,
+   "out": [
+    {
+     "id": 151,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dosefisherspotion",
+   "xp": 112.5
+  },
+  "brew_3dosepotionofzamorak": {
+   "in": [
+    {
+     "id": 247,
+     "n": 1
+    },
+    {
+     "id": 111,
+     "n": 1
+    }
+   ],
+   "label": "Brew zamorak potion(3)",
+   "level": 78,
+   "out": [
+    {
+     "id": 189,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3dosepotionofzamorak",
+   "xp": 175.0
+  },
+  "brew_3doseprayerrestore": {
+   "in": [
+    {
+     "id": 231,
+     "n": 1
+    },
+    {
+     "id": 99,
+     "n": 1
+    }
+   ],
+   "label": "Brew prayer potion(3)",
+   "level": 38,
+   "out": [
+    {
+     "id": 139,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3doseprayerrestore",
+   "xp": 87.5
+  },
+  "brew_3doserangerspotion": {
+   "in": [
+    {
+     "id": 245,
+     "n": 1
+    },
+    {
+     "id": 109,
+     "n": 1
+    }
+   ],
+   "label": "Brew ranging potion(3)",
+   "level": 72,
+   "out": [
+    {
+     "id": 169,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#3doserangerspotion",
+   "xp": 162.5
+  },
+  "brew_blamish_oil": {
+   "in": [
+    {
+     "id": 1581,
+     "n": 1
+    },
+    {
+     "id": 97,
+     "n": 1
+    }
+   ],
+   "label": "Brew blamish oil",
+   "level": 25,
+   "out": [
+    {
+     "id": 1582,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#blamish_oil",
+   "xp": 80.0
+  },
+  "brew_eadgar_ground_troll_thistle_potion": {
+   "in": [
+    {
+     "id": 3264,
+     "n": 1
+    },
+    {
+     "id": 99,
+     "n": 1
+    }
+   ],
+   "label": "Brew troll potion",
+   "level": 31,
+   "out": [
+    {
+     "id": 3265,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#eadgar_ground_troll_thistle_potion",
+   "xp": 77.5
+  },
+  "brew_mort_serum3_ashesvial": {
+   "in": [
+    {
+     "id": 253,
+     "n": 1
+    },
+    {
+     "id": 3406,
+     "n": 1
+    }
+   ],
+   "label": "Brew serum 207 (3)",
+   "level": 15,
+   "out": [
+    {
+     "id": 3410,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#mort_serum3_ashesvial",
+   "xp": 50.0
+  },
+  "brew_mort_serum3_tarrominvial": {
+   "in": [
+    {
+     "id": 592,
+     "n": 1
+    },
+    {
+     "id": 95,
+     "n": 1
+    }
+   ],
+   "label": "Brew serum 207 (3)",
+   "level": 15,
+   "out": [
+    {
+     "id": 3410,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#mort_serum3_tarrominvial",
+   "xp": 50.0
+  },
+  "brew_weapon_poison": {
+   "in": [
+    {
+     "id": 241,
+     "n": 1
+    },
+    {
+     "id": 105,
+     "n": 1
+    }
+   ],
+   "label": "Brew weapon poison",
+   "level": 60,
+   "out": [
+    {
+     "id": 187,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/configs/brewing/brew_potion.struct#weapon_poison",
+   "xp": 137.5
+  },
+  "burn_logs": {
+   "in": [
+    {
+     "id": 1511,
+     "n": 1
+    }
+   ],
+   "label": "Burn logs",
+   "level": 1,
+   "out": [
+    {
+     "id": 592,
+     "n": 1
+    }
+   ],
+   "skill": "firemaking",
+   "src": "scripts/skill_firemaking/configs/firemaking.obj#logs param=productexp",
+   "tools": [
+    590
+   ],
+   "xp": 40.0
+  },
+  "burn_magic_logs": {
+   "in": [
+    {
+     "id": 1513,
+     "n": 1
+    }
+   ],
+   "label": "Burn magic logs",
+   "level": 75,
+   "out": [
+    {
+     "id": 592,
+     "n": 1
+    }
+   ],
+   "skill": "firemaking",
+   "src": "scripts/skill_firemaking/configs/firemaking.obj#magic_logs param=productexp",
+   "tools": [
+    590
+   ],
+   "xp": 303.8
+  },
+  "burn_maple_logs": {
+   "in": [
+    {
+     "id": 1517,
+     "n": 1
+    }
+   ],
+   "label": "Burn maple logs",
+   "level": 45,
+   "out": [
+    {
+     "id": 592,
+     "n": 1
+    }
+   ],
+   "skill": "firemaking",
+   "src": "scripts/skill_firemaking/configs/firemaking.obj#maple_logs param=productexp",
+   "tools": [
+    590
+   ],
+   "xp": 135.0
+  },
+  "burn_oak_logs": {
+   "in": [
+    {
+     "id": 1521,
+     "n": 1
+    }
+   ],
+   "label": "Burn oak logs",
+   "level": 15,
+   "out": [
+    {
+     "id": 592,
+     "n": 1
+    }
+   ],
+   "skill": "firemaking",
+   "src": "scripts/skill_firemaking/configs/firemaking.obj#oak_logs param=productexp",
+   "tools": [
+    590
+   ],
+   "xp": 60.0
+  },
+  "burn_willow_logs": {
+   "in": [
+    {
+     "id": 1519,
+     "n": 1
+    }
+   ],
+   "label": "Burn willow logs",
+   "level": 30,
+   "out": [
+    {
+     "id": 592,
+     "n": 1
+    }
+   ],
+   "skill": "firemaking",
+   "src": "scripts/skill_firemaking/configs/firemaking.obj#willow_logs param=productexp",
+   "tools": [
+    590
+   ],
+   "xp": 90.0
+  },
+  "burn_yew_logs": {
+   "in": [
+    {
+     "id": 1515,
+     "n": 1
+    }
+   ],
+   "label": "Burn yew logs",
+   "level": 60,
+   "out": [
+    {
+     "id": 592,
+     "n": 1
+    }
+   ],
+   "skill": "firemaking",
+   "src": "scripts/skill_firemaking/configs/firemaking.obj#yew_logs param=productexp",
+   "tools": [
+    590
+   ],
+   "xp": 202.5
+  },
+  "bury_babydragon_bones": {
+   "in": [
+    {
+     "id": 534,
+     "n": 1
+    }
+   ],
+   "label": "Bury babydragon bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#babydragon_bones param=bone_exp",
+   "xp": 30.0
+  },
+  "bury_bat_bones": {
+   "in": [
+    {
+     "id": 530,
+     "n": 1
+    }
+   ],
+   "label": "Bury bat bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#bat_bones param=bone_exp",
+   "xp": 4.5
+  },
+  "bury_big_bones": {
+   "in": [
+    {
+     "id": 532,
+     "n": 1
+    }
+   ],
+   "label": "Bury big bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#big_bones param=bone_exp",
+   "xp": 15.0
+  },
+  "bury_bones": {
+   "in": [
+    {
+     "id": 526,
+     "n": 1
+    }
+   ],
+   "label": "Bury bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#bones param=bone_exp",
+   "xp": 4.5
+  },
+  "bury_bones_burnt": {
+   "in": [
+    {
+     "id": 528,
+     "n": 1
+    }
+   ],
+   "label": "Bury burnt bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#bones_burnt param=bone_exp",
+   "xp": 4.5
+  },
+  "bury_dragon_bones": {
+   "in": [
+    {
+     "id": 536,
+     "n": 1
+    }
+   ],
+   "label": "Bury dragon bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#dragon_bones param=bone_exp",
+   "xp": 72.0
+  },
+  "bury_mm_normal_monkey_bones": {
+   "in": [
+    {
+     "id": 3183,
+     "n": 1
+    }
+   ],
+   "label": "Bury monkey bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/_unpack/274/all.obj#mm_normal_monkey_bones param=bone_exp",
+   "xp": 5.0
+  },
+  "bury_tbwt_beast_bones": {
+   "in": [
+    {
+     "id": 3123,
+     "n": 1
+    }
+   ],
+   "label": "Bury shaikahan bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#tbwt_beast_bones param=bone_exp",
+   "xp": 25.0
+  },
+  "bury_tbwt_burnt_jogre_bones": {
+   "in": [
+    {
+     "id": 3127,
+     "n": 1
+    }
+   ],
+   "label": "Bury burnt jogre bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#tbwt_burnt_jogre_bones param=bone_exp",
+   "xp": 16.0
+  },
+  "bury_tbwt_burnt_jogre_bones_in_cooked_karambwanji_paste": {
+   "in": [
+    {
+     "id": 3129,
+     "n": 1
+    }
+   ],
+   "label": "Bury pasty jogre bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#tbwt_burnt_jogre_bones_in_cooked_karambwanji_paste param=bone_exp",
+   "xp": 16.0
+  },
+  "bury_tbwt_burnt_jogre_bones_in_raw_karambwanji_paste": {
+   "in": [
+    {
+     "id": 3128,
+     "n": 1
+    }
+   ],
+   "label": "Bury pasty jogre bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#tbwt_burnt_jogre_bones_in_raw_karambwanji_paste param=bone_exp",
+   "xp": 17.0
+  },
+  "bury_tbwt_burnt_jogre_bones_marinated_in_karambwanji": {
+   "in": [
+    {
+     "id": 3130,
+     "n": 1
+    }
+   ],
+   "label": "Bury marinated j' bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#tbwt_burnt_jogre_bones_marinated_in_karambwanji param=bone_exp",
+   "xp": 18.0
+  },
+  "bury_tbwt_jogre_bones": {
+   "in": [
+    {
+     "id": 3125,
+     "n": 1
+    }
+   ],
+   "label": "Bury jogre bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#tbwt_jogre_bones param=bone_exp",
+   "xp": 15.0
+  },
+  "bury_tbwt_jogre_bones_in_cooked_karambwanji_paste": {
+   "in": [
+    {
+     "id": 3132,
+     "n": 1
+    }
+   ],
+   "label": "Bury pasty jogre bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#tbwt_jogre_bones_in_cooked_karambwanji_paste param=bone_exp",
+   "xp": 16.0
+  },
+  "bury_tbwt_jogre_bones_in_raw_karambwanji_paste": {
+   "in": [
+    {
+     "id": 3131,
+     "n": 1
+    }
+   ],
+   "label": "Bury pasty jogre bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#tbwt_jogre_bones_in_raw_karambwanji_paste param=bone_exp",
+   "xp": 16.0
+  },
+  "bury_tbwt_jogre_bones_marinated_in_karambwanji": {
+   "in": [
+    {
+     "id": 3133,
+     "n": 1
+    }
+   ],
+   "label": "Bury marinated j' bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#tbwt_jogre_bones_marinated_in_karambwanji param=bone_exp",
+   "xp": 17.0
+  },
+  "bury_wolf_bones": {
+   "in": [
+    {
+     "id": 2859,
+     "n": 1
+    }
+   ],
+   "label": "Bury wolf bones",
+   "level": 1,
+   "out": [],
+   "skill": "prayer",
+   "src": "scripts/skill_prayer/configs/bones.obj#wolf_bones param=bone_exp",
+   "xp": 4.5
+  },
+  "craft_air_orb": {
+   "in": [
+    {
+     "id": 573,
+     "n": 1
+    }
+   ],
+   "label": "Make air battlestaff",
+   "level": 66,
+   "out": [
+    {
+     "id": 1397,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/battlestaves/battlestaves.struct#air_orb",
+   "xp": 137.5
+  },
+  "craft_blow_beer_glass": {
+   "in": [
+    {
+     "id": 1775,
+     "n": 1
+    }
+   ],
+   "label": "Blow beer glass",
+   "level": 1,
+   "out": [
+    {
+     "id": 1919,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/glass/glass.struct#beer_glass",
+   "tools": [
+    1785
+   ],
+   "xp": 17.5
+  },
+  "craft_blow_stafforb": {
+   "in": [
+    {
+     "id": 1775,
+     "n": 1
+    }
+   ],
+   "label": "Blow unpowered orb",
+   "level": 46,
+   "out": [
+    {
+     "id": 567,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/glass/glass.struct#stafforb",
+   "tools": [
+    1785
+   ],
+   "xp": 52.5
+  },
+  "craft_blow_vial_empty": {
+   "in": [
+    {
+     "id": 1775,
+     "n": 1
+    }
+   ],
+   "label": "Blow vial",
+   "level": 33,
+   "out": [
+    {
+     "id": 229,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/glass/glass.struct#vial_empty",
+   "tools": [
+    1785
+   ],
+   "xp": 35.0
+  },
+  "craft_craft_coif": {
+   "in": [
+    {
+     "id": 1741,
+     "n": 1
+    }
+   ],
+   "label": "Craft coif",
+   "level": 38,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1169,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_coif",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 37.0
+  },
+  "craft_craft_dragonhide_body": {
+   "in": [
+    {
+     "id": 1745,
+     "n": 3
+    }
+   ],
+   "label": "Craft green dragonhide body",
+   "level": 63,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1135,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_body",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 186.0
+  },
+  "craft_craft_dragonhide_body_black": {
+   "in": [
+    {
+     "id": 2509,
+     "n": 3
+    }
+   ],
+   "label": "Craft black dragonhide body",
+   "level": 84,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 2503,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_body_black",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 258.0
+  },
+  "craft_craft_dragonhide_body_blue": {
+   "in": [
+    {
+     "id": 2505,
+     "n": 3
+    }
+   ],
+   "label": "Craft blue dragonhide body",
+   "level": 71,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 2499,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_body_blue",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 210.0
+  },
+  "craft_craft_dragonhide_body_red": {
+   "in": [
+    {
+     "id": 2507,
+     "n": 3
+    }
+   ],
+   "label": "Craft red dragonhide body",
+   "level": 77,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 2501,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_body_red",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 234.0
+  },
+  "craft_craft_dragonhide_chaps": {
+   "in": [
+    {
+     "id": 1745,
+     "n": 2
+    }
+   ],
+   "label": "Craft green dragonhide chaps",
+   "level": 60,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1099,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_chaps",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 124.0
+  },
+  "craft_craft_dragonhide_chaps_black": {
+   "in": [
+    {
+     "id": 2509,
+     "n": 2
+    }
+   ],
+   "label": "Craft black dragonhide chaps",
+   "level": 82,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 2497,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_chaps_black",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 172.0
+  },
+  "craft_craft_dragonhide_chaps_blue": {
+   "in": [
+    {
+     "id": 2505,
+     "n": 2
+    }
+   ],
+   "label": "Craft blue dragonhide chaps",
+   "level": 68,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 2493,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_chaps_blue",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 140.0
+  },
+  "craft_craft_dragonhide_chaps_red": {
+   "in": [
+    {
+     "id": 2507,
+     "n": 2
+    }
+   ],
+   "label": "Craft red dragonhide chaps",
+   "level": 75,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 2495,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_chaps_red",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 156.0
+  },
+  "craft_craft_dragonhide_vamb": {
+   "in": [
+    {
+     "id": 1745,
+     "n": 1
+    }
+   ],
+   "label": "Craft green dragon vambraces",
+   "level": 57,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1065,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_vamb",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 62.0
+  },
+  "craft_craft_dragonhide_vamb_black": {
+   "in": [
+    {
+     "id": 2509,
+     "n": 1
+    }
+   ],
+   "label": "Craft black dragon vambraces",
+   "level": 79,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 2491,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_vamb_black",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 86.0
+  },
+  "craft_craft_dragonhide_vamb_blue": {
+   "in": [
+    {
+     "id": 2505,
+     "n": 1
+    }
+   ],
+   "label": "Craft blue dragon vambraces",
+   "level": 66,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 2487,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_vamb_blue",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 70.0
+  },
+  "craft_craft_dragonhide_vamb_red": {
+   "in": [
+    {
+     "id": 2507,
+     "n": 1
+    }
+   ],
+   "label": "Craft red dragon vambraces",
+   "level": 73,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 2489,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_dragonhide_vamb_red",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 78.0
+  },
+  "craft_craft_hardleather_body": {
+   "in": [
+    {
+     "id": 1743,
+     "n": 1
+    }
+   ],
+   "label": "Craft hardleather body",
+   "level": 28,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1131,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_hardleather_body",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 35.0
+  },
+  "craft_craft_leather_body": {
+   "in": [
+    {
+     "id": 1741,
+     "n": 1
+    }
+   ],
+   "label": "Craft leather body",
+   "level": 14,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1129,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_leather_body",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 25.0
+  },
+  "craft_craft_leather_boots": {
+   "in": [
+    {
+     "id": 1741,
+     "n": 1
+    }
+   ],
+   "label": "Craft leather boots",
+   "level": 7,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1061,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_leather_boots",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 16.3
+  },
+  "craft_craft_leather_chaps": {
+   "in": [
+    {
+     "id": 1741,
+     "n": 1
+    }
+   ],
+   "label": "Craft leather chaps",
+   "level": 18,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1095,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_leather_chaps",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 27.0
+  },
+  "craft_craft_leather_cowl": {
+   "in": [
+    {
+     "id": 1741,
+     "n": 1
+    }
+   ],
+   "label": "Craft leather cowl",
+   "level": 9,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1167,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_leather_cowl",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 18.5
+  },
+  "craft_craft_leather_gloves": {
+   "in": [
+    {
+     "id": 1741,
+     "n": 1
+    }
+   ],
+   "label": "Craft leather gloves",
+   "level": 1,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1059,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_leather_gloves",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 13.8
+  },
+  "craft_craft_leather_vambraces": {
+   "in": [
+    {
+     "id": 1741,
+     "n": 1
+    }
+   ],
+   "label": "Craft leather vambraces",
+   "level": 11,
+   "note": "thread is consumed once per 5 items (leather.rs2:126)",
+   "out": [
+    {
+     "id": 1063,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/leather/leather.dbrow#craft_leather_vambraces",
+   "tools": [
+    1733,
+    1734
+   ],
+   "xp": 22.0
+  },
+  "craft_cut_diamond": {
+   "in": [
+    {
+     "id": 1617,
+     "n": 1
+    }
+   ],
+   "label": "Cut uncut diamond",
+   "level": 43,
+   "out": [
+    {
+     "id": 1601,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/gem/gem.dbrow#diamond_cutting",
+   "tools": [
+    1755
+   ],
+   "xp": 107.5
+  },
+  "craft_cut_dragonstone": {
+   "in": [
+    {
+     "id": 1631,
+     "n": 1
+    }
+   ],
+   "label": "Cut uncut dragonstone",
+   "level": 55,
+   "out": [
+    {
+     "id": 1615,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/gem/gem.dbrow#dragonstone_cutting",
+   "tools": [
+    1755
+   ],
+   "xp": 137.5
+  },
+  "craft_cut_emerald": {
+   "in": [
+    {
+     "id": 1621,
+     "n": 1
+    }
+   ],
+   "label": "Cut uncut emerald",
+   "level": 27,
+   "out": [
+    {
+     "id": 1605,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/gem/gem.dbrow#emerald_cutting",
+   "tools": [
+    1755
+   ],
+   "xp": 67.5
+  },
+  "craft_cut_jade": {
+   "chance": {
+    "high": 240,
+    "kind": "level",
+    "low": 90,
+    "quarterOnMiss": true
+   },
+   "in": [
+    {
+     "id": 1627,
+     "n": 1
+    }
+   ],
+   "label": "Cut uncut jade",
+   "level": 13,
+   "note": "a miss smashes the gem into crushed gemstone for a quarter of the xp (uncut_gem.rs2:54)",
+   "out": [
+    {
+     "id": 1611,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/gem/gem.dbrow#jade_cutting",
+   "tools": [
+    1755
+   ],
+   "xp": 20.0
+  },
+  "craft_cut_opal": {
+   "chance": {
+    "high": 250,
+    "kind": "level",
+    "low": 128,
+    "quarterOnMiss": true
+   },
+   "in": [
+    {
+     "id": 1625,
+     "n": 1
+    }
+   ],
+   "label": "Cut uncut opal",
+   "level": 1,
+   "note": "a miss smashes the gem into crushed gemstone for a quarter of the xp (uncut_gem.rs2:54)",
+   "out": [
+    {
+     "id": 1609,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/gem/gem.dbrow#opal_cutting",
+   "tools": [
+    1755
+   ],
+   "xp": 15.0
+  },
+  "craft_cut_red_topaz": {
+   "chance": {
+    "high": 245,
+    "kind": "level",
+    "low": 100,
+    "quarterOnMiss": true
+   },
+   "in": [
+    {
+     "id": 1629,
+     "n": 1
+    }
+   ],
+   "label": "Cut uncut red topaz",
+   "level": 16,
+   "note": "a miss smashes the gem into crushed gemstone for a quarter of the xp (uncut_gem.rs2:54)",
+   "out": [
+    {
+     "id": 1613,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/gem/gem.dbrow#red_topaz_cutting",
+   "tools": [
+    1755
+   ],
+   "xp": 25.0
+  },
+  "craft_cut_ruby": {
+   "in": [
+    {
+     "id": 1619,
+     "n": 1
+    }
+   ],
+   "label": "Cut uncut ruby",
+   "level": 34,
+   "out": [
+    {
+     "id": 1603,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/gem/gem.dbrow#ruby_cutting",
+   "tools": [
+    1755
+   ],
+   "xp": 85.0
+  },
+  "craft_cut_sapphire": {
+   "in": [
+    {
+     "id": 1623,
+     "n": 1
+    }
+   ],
+   "label": "Cut uncut sapphire",
+   "level": 20,
+   "out": [
+    {
+     "id": 1607,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/gem/gem.dbrow#sapphire_cutting",
+   "tools": [
+    1755
+   ],
+   "xp": 50.0
+  },
+  "craft_diamond_necklace": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1601,
+     "n": 1
+    }
+   ],
+   "label": "Make diamond necklace",
+   "level": 56,
+   "out": [
+    {
+     "id": 1662,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#diamond_necklace",
+   "xp": 90.0
+  },
+  "craft_diamond_ring": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1601,
+     "n": 1
+    }
+   ],
+   "label": "Make diamond ring",
+   "level": 43,
+   "out": [
+    {
+     "id": 1643,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#diamond_ring",
+   "xp": 85.0
+  },
+  "craft_dragonstone_necklace": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1615,
+     "n": 1
+    }
+   ],
+   "label": "Make dragon necklace",
+   "level": 72,
+   "out": [
+    {
+     "id": 1664,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#dragonstone_necklace",
+   "xp": 105.0
+  },
+  "craft_dragonstone_ring": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1615,
+     "n": 1
+    }
+   ],
+   "label": "Make dragonstone ring",
+   "level": 55,
+   "out": [
+    {
+     "id": 1645,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#dragonstone_ring",
+   "xp": 100.0
+  },
+  "craft_earth_orb": {
+   "in": [
+    {
+     "id": 575,
+     "n": 1
+    }
+   ],
+   "label": "Make earth battlestaff",
+   "level": 58,
+   "out": [
+    {
+     "id": 1399,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/battlestaves/battlestaves.struct#earth_orb",
+   "xp": 112.5
+  },
+  "craft_emerald_necklace": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1605,
+     "n": 1
+    }
+   ],
+   "label": "Make emerald necklace",
+   "level": 29,
+   "out": [
+    {
+     "id": 1658,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#emerald_necklace",
+   "xp": 60.0
+  },
+  "craft_emerald_ring": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1605,
+     "n": 1
+    }
+   ],
+   "label": "Make emerald ring",
+   "level": 27,
+   "out": [
+    {
+     "id": 1639,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#emerald_ring",
+   "xp": 55.0
+  },
+  "craft_fire_orb": {
+   "in": [
+    {
+     "id": 569,
+     "n": 1
+    }
+   ],
+   "label": "Make fire battlestaff",
+   "level": 62,
+   "out": [
+    {
+     "id": 1393,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/battlestaves/battlestaves.struct#fire_orb",
+   "xp": 125.0
+  },
+  "craft_fire_unfired_bowl": {
+   "chance": {
+    "high": 800,
+    "kind": "level",
+    "low": 180
+   },
+   "in": [
+    {
+     "id": 1791,
+     "n": 1
+    }
+   ],
+   "label": "Fire bowls in an oven",
+   "level": 8,
+   "note": "a miss cracks the item for no xp (pottery.rs2:151)",
+   "out": [
+    {
+     "id": 1923,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/pottery/pottery.struct#unfired_bowl param=productexp",
+   "xp": 15.0
+  },
+  "craft_fire_unfired_piedish": {
+   "chance": {
+    "high": 800,
+    "kind": "level",
+    "low": 180
+   },
+   "in": [
+    {
+     "id": 1789,
+     "n": 1
+    }
+   ],
+   "label": "Fire pie dishes in an oven",
+   "level": 7,
+   "note": "a miss cracks the item for no xp (pottery.rs2:151)",
+   "out": [
+    {
+     "id": 2313,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/pottery/pottery.struct#unfired_piedish param=productexp",
+   "xp": 10.0
+  },
+  "craft_fire_unfired_pot": {
+   "chance": {
+    "high": 800,
+    "kind": "level",
+    "low": 180
+   },
+   "in": [
+    {
+     "id": 1787,
+     "n": 1
+    }
+   ],
+   "label": "Fire pots in an oven",
+   "level": 1,
+   "note": "a miss cracks the item for no xp (pottery.rs2:151)",
+   "out": [
+    {
+     "id": 1931,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/pottery/pottery.struct#unfired_pot param=productexp",
+   "xp": 6.3
+  },
+  "craft_flax": {
+   "in": [
+    {
+     "id": 1779,
+     "n": 1
+    }
+   ],
+   "label": "Spin bow string",
+   "level": 10,
+   "out": [
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/spinning/spinning.struct#flax",
+   "xp": 15.0
+  },
+  "craft_gold_necklace": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    }
+   ],
+   "label": "Make gold necklace",
+   "level": 6,
+   "out": [
+    {
+     "id": 1654,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#gold_necklace",
+   "xp": 20.0
+  },
+  "craft_gold_ring": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    }
+   ],
+   "label": "Make gold ring",
+   "level": 5,
+   "out": [
+    {
+     "id": 1635,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#gold_ring",
+   "xp": 15.0
+  },
+  "craft_molten_glass": {
+   "in": [
+    {
+     "id": 1783,
+     "n": 1
+    },
+    {
+     "id": 1781,
+     "n": 1
+    }
+   ],
+   "label": "Melt sand and soda ash into glass",
+   "level": 1,
+   "out": [
+    {
+     "id": 1775,
+     "n": 1
+    },
+    {
+     "id": 1925,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/glass/glass.rs2:53 stat_advance(crafting, 200)",
+   "xp": 20.0
+  },
+  "craft_perfect_necklace": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1603,
+     "n": 1
+    }
+   ],
+   "label": "Make 'perfect' necklace",
+   "level": 40,
+   "out": [
+    {
+     "id": 774,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#perfect_necklace",
+   "xp": 75.0
+  },
+  "craft_perfect_ring": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1603,
+     "n": 1
+    }
+   ],
+   "label": "Make 'perfect' ring",
+   "level": 34,
+   "out": [
+    {
+     "id": 773,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#perfect_ring",
+   "xp": 70.0
+  },
+  "craft_ruby_necklace": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1603,
+     "n": 1
+    }
+   ],
+   "label": "Make ruby necklace",
+   "level": 40,
+   "out": [
+    {
+     "id": 1660,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#ruby_necklace",
+   "xp": 75.0
+  },
+  "craft_ruby_ring": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1603,
+     "n": 1
+    }
+   ],
+   "label": "Make ruby ring",
+   "level": 34,
+   "out": [
+    {
+     "id": 1641,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#ruby_ring",
+   "xp": 70.0
+  },
+  "craft_sapphire_necklace": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1607,
+     "n": 1
+    }
+   ],
+   "label": "Make sapphire necklace",
+   "level": 20,
+   "out": [
+    {
+     "id": 1656,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#sapphire_necklace",
+   "xp": 55.0
+  },
+  "craft_sapphire_ring": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1607,
+     "n": 1
+    }
+   ],
+   "label": "Make sapphire ring",
+   "level": 20,
+   "out": [
+    {
+     "id": 1637,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#sapphire_ring",
+   "xp": 40.0
+  },
+  "craft_shape_unfired_bowl": {
+   "in": [
+    {
+     "id": 1761,
+     "n": 1
+    }
+   ],
+   "label": "Shape soft clay into bowls",
+   "level": 8,
+   "out": [
+    {
+     "id": 1791,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/pottery/pottery.struct#unfired_bowl param=processexp + scripts/skill_crafting/configs/pottery/pottery.obj#bowl_unfired param=crafting_pottery_struct",
+   "xp": 18.0
+  },
+  "craft_shape_unfired_piedish": {
+   "in": [
+    {
+     "id": 1761,
+     "n": 1
+    }
+   ],
+   "label": "Shape soft clay into pie dishes",
+   "level": 7,
+   "out": [
+    {
+     "id": 1789,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/pottery/pottery.struct#unfired_piedish param=processexp + scripts/skill_crafting/configs/pottery/pottery.obj#piedish_unfired param=crafting_pottery_struct",
+   "xp": 15.0
+  },
+  "craft_shape_unfired_pot": {
+   "in": [
+    {
+     "id": 1761,
+     "n": 1
+    }
+   ],
+   "label": "Shape soft clay into pots",
+   "level": 1,
+   "out": [
+    {
+     "id": 1787,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/pottery/pottery.struct#unfired_pot param=processexp + scripts/skill_crafting/configs/pottery/pottery.obj#pot_unfired param=crafting_pottery_struct",
+   "xp": 6.3
+  },
+  "craft_silver_sickle": {
+   "in": [
+    {
+     "id": 2355,
+     "n": 1
+    }
+   ],
+   "label": "Make silver sickle",
+   "level": 18,
+   "note": "skill_crafting/configs/jewellery/silver.obj param=crafting_jewelry_struct + scripts/jewellery/jewellery.rs2:326 inv_del(inv, silver_bar, 1)",
+   "out": [
+    {
+     "id": 2961,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#silver_sickle",
+   "tools": [
+    2976
+   ],
+   "xp": 50.0
+  },
+  "craft_string_nostringsnake": {
+   "in": [
+    {
+     "id": 1720,
+     "n": 1
+    },
+    {
+     "id": 1759,
+     "n": 1
+    }
+   ],
+   "label": "String unpowered symbol",
+   "level": 1,
+   "note": "skill_crafting/scripts/jewellery/stringing.rs2:64 inv_del(inv, ball_of_wool, 1)",
+   "out": [
+    {
+     "id": 1722,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/jewellery/stringing.rs2:70 stat_advance(crafting, 40) + scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_emblem",
+   "xp": 4.0
+  },
+  "craft_string_nostringstar": {
+   "in": [
+    {
+     "id": 1714,
+     "n": 1
+    },
+    {
+     "id": 1759,
+     "n": 1
+    }
+   ],
+   "label": "String unblessed symbol",
+   "level": 1,
+   "note": "skill_crafting/scripts/jewellery/stringing.rs2:64 inv_del(inv, ball_of_wool, 1)",
+   "out": [
+    {
+     "id": 1716,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/jewellery/stringing.rs2:70 stat_advance(crafting, 40) + scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_symbol",
+   "xp": 4.0
+  },
+  "craft_string_unstrung_diamond_amulet": {
+   "in": [
+    {
+     "id": 1681,
+     "n": 1
+    },
+    {
+     "id": 1759,
+     "n": 1
+    }
+   ],
+   "label": "String diamond amulet",
+   "level": 1,
+   "note": "skill_crafting/scripts/jewellery/stringing.rs2:64 inv_del(inv, ball_of_wool, 1)",
+   "out": [
+    {
+     "id": 1700,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/jewellery/stringing.rs2:70 stat_advance(crafting, 40) + scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_diamond_amulet",
+   "xp": 4.0
+  },
+  "craft_string_unstrung_dragonstone_amulet": {
+   "in": [
+    {
+     "id": 1683,
+     "n": 1
+    },
+    {
+     "id": 1759,
+     "n": 1
+    }
+   ],
+   "label": "String dragonstoneamulet",
+   "level": 1,
+   "note": "skill_crafting/scripts/jewellery/stringing.rs2:64 inv_del(inv, ball_of_wool, 1)",
+   "out": [
+    {
+     "id": 1702,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/jewellery/stringing.rs2:70 stat_advance(crafting, 40) + scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_dragonstone_amulet",
+   "xp": 4.0
+  },
+  "craft_string_unstrung_emerald_amulet": {
+   "in": [
+    {
+     "id": 1677,
+     "n": 1
+    },
+    {
+     "id": 1759,
+     "n": 1
+    }
+   ],
+   "label": "String emerald amulet",
+   "level": 1,
+   "note": "skill_crafting/scripts/jewellery/stringing.rs2:64 inv_del(inv, ball_of_wool, 1)",
+   "out": [
+    {
+     "id": 1696,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/jewellery/stringing.rs2:70 stat_advance(crafting, 40) + scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_emerald_amulet",
+   "xp": 4.0
+  },
+  "craft_string_unstrung_gold_amulet": {
+   "in": [
+    {
+     "id": 1673,
+     "n": 1
+    },
+    {
+     "id": 1759,
+     "n": 1
+    }
+   ],
+   "label": "String gold amulet",
+   "level": 1,
+   "note": "skill_crafting/scripts/jewellery/stringing.rs2:64 inv_del(inv, ball_of_wool, 1)",
+   "out": [
+    {
+     "id": 1692,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/jewellery/stringing.rs2:70 stat_advance(crafting, 40) + scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_gold_amulet",
+   "xp": 4.0
+  },
+  "craft_string_unstrung_ruby_amulet": {
+   "in": [
+    {
+     "id": 1679,
+     "n": 1
+    },
+    {
+     "id": 1759,
+     "n": 1
+    }
+   ],
+   "label": "String ruby amulet",
+   "level": 1,
+   "note": "skill_crafting/scripts/jewellery/stringing.rs2:64 inv_del(inv, ball_of_wool, 1)",
+   "out": [
+    {
+     "id": 1698,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/jewellery/stringing.rs2:70 stat_advance(crafting, 40) + scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_ruby_amulet",
+   "xp": 4.0
+  },
+  "craft_string_unstrung_sapphire_amulet": {
+   "in": [
+    {
+     "id": 1675,
+     "n": 1
+    },
+    {
+     "id": 1759,
+     "n": 1
+    }
+   ],
+   "label": "String sapphire amulet",
+   "level": 1,
+   "note": "skill_crafting/scripts/jewellery/stringing.rs2:64 inv_del(inv, ball_of_wool, 1)",
+   "out": [
+    {
+     "id": 1694,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/jewellery/stringing.rs2:70 stat_advance(crafting, 40) + scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_sapphire_amulet",
+   "xp": 4.0
+  },
+  "craft_studded_body": {
+   "in": [
+    {
+     "id": 1129,
+     "n": 1
+    },
+    {
+     "id": 2370,
+     "n": 1
+    }
+   ],
+   "label": "Make studded body",
+   "level": 41,
+   "note": "skill_crafting/scripts/studded/studded.rs2:51 inv_del(inv, studs, 1)",
+   "out": [
+    {
+     "id": 1133,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/studded/studded.struct#studded_body",
+   "xp": 40.0
+  },
+  "craft_studded_chaps": {
+   "in": [
+    {
+     "id": 1095,
+     "n": 1
+    },
+    {
+     "id": 2370,
+     "n": 1
+    }
+   ],
+   "label": "Make studded chaps",
+   "level": 44,
+   "note": "skill_crafting/scripts/studded/studded.rs2:51 inv_del(inv, studs, 1)",
+   "out": [
+    {
+     "id": 1097,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/studded/studded.struct#studded_chaps",
+   "xp": 42.0
+  },
+  "craft_unstrung_diamond_amulet": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1601,
+     "n": 1
+    }
+   ],
+   "label": "Make unstrung diamond amulet",
+   "level": 70,
+   "out": [
+    {
+     "id": 1681,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_diamond_amulet",
+   "xp": 100.0
+  },
+  "craft_unstrung_dragonstone_amulet": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1615,
+     "n": 1
+    }
+   ],
+   "label": "Make unstrung dragonstoneamulet",
+   "level": 80,
+   "out": [
+    {
+     "id": 1683,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_dragonstone_amulet",
+   "xp": 150.0
+  },
+  "craft_unstrung_emblem": {
+   "in": [
+    {
+     "id": 2355,
+     "n": 1
+    }
+   ],
+   "label": "Make unstrung emblem",
+   "level": 17,
+   "note": "skill_crafting/configs/jewellery/silver.obj param=crafting_jewelry_struct + scripts/jewellery/jewellery.rs2:326 inv_del(inv, silver_bar, 1)",
+   "out": [
+    {
+     "id": 1720,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_emblem",
+   "tools": [
+    1594
+   ],
+   "xp": 50.0
+  },
+  "craft_unstrung_emerald_amulet": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1605,
+     "n": 1
+    }
+   ],
+   "label": "Make unstrung emerald amulet",
+   "level": 31,
+   "out": [
+    {
+     "id": 1677,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_emerald_amulet",
+   "xp": 70.0
+  },
+  "craft_unstrung_gold_amulet": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    }
+   ],
+   "label": "Make unstrung gold amulet",
+   "level": 8,
+   "out": [
+    {
+     "id": 1673,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_gold_amulet",
+   "xp": 30.0
+  },
+  "craft_unstrung_ruby_amulet": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1603,
+     "n": 1
+    }
+   ],
+   "label": "Make unstrung ruby amulet",
+   "level": 50,
+   "out": [
+    {
+     "id": 1679,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_ruby_amulet",
+   "xp": 85.0
+  },
+  "craft_unstrung_sapphire_amulet": {
+   "in": [
+    {
+     "id": 2357,
+     "n": 1
+    },
+    {
+     "id": 1607,
+     "n": 1
+    }
+   ],
+   "label": "Make unstrung sapphire amulet",
+   "level": 24,
+   "out": [
+    {
+     "id": 1675,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_sapphire_amulet",
+   "xp": 65.0
+  },
+  "craft_unstrung_symbol": {
+   "in": [
+    {
+     "id": 2355,
+     "n": 1
+    }
+   ],
+   "label": "Make unstrung symbol",
+   "level": 16,
+   "note": "skill_crafting/configs/jewellery/silver.obj param=crafting_jewelry_struct + scripts/jewellery/jewellery.rs2:326 inv_del(inv, silver_bar, 1)",
+   "out": [
+    {
+     "id": 1714,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#unstrung_symbol",
+   "tools": [
+    1599
+   ],
+   "xp": 50.0
+  },
+  "craft_water_orb": {
+   "in": [
+    {
+     "id": 571,
+     "n": 1
+    }
+   ],
+   "label": "Make water battlestaff",
+   "level": 54,
+   "out": [
+    {
+     "id": 1395,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/battlestaves/battlestaves.struct#water_orb",
+   "xp": 100.0
+  },
+  "craft_wool": {
+   "in": [
+    {
+     "id": 1737,
+     "n": 1
+    }
+   ],
+   "label": "Spin ball of wool",
+   "level": 1,
+   "out": [
+    {
+     "id": 1759,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/configs/spinning/spinning.struct#wool",
+   "xp": 2.5
+  },
+  "fletch_adamant_arrow": {
+   "in": [
+    {
+     "id": 43,
+     "n": 1
+    },
+    {
+     "id": 53,
+     "n": 1
+    }
+   ],
+   "label": "Attach adamant arrowtips to headless arrows",
+   "level": 60,
+   "note": "the product column's 15 is a per-click batch cap, not a yield; skill_fletching/scripts/arrows.rs2:79 inv_del(inv, headless_arrow, $arrows_count)",
+   "out": [
+    {
+     "id": 890,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/arrows/arrows.dbrow#fletching_adamant_arrow",
+   "xp": 10.0
+  },
+  "fletch_adamant_dart": {
+   "in": [
+    {
+     "id": 823,
+     "n": 1
+    },
+    {
+     "id": 314,
+     "n": 1
+    }
+   ],
+   "label": "Fletch adamant darts",
+   "level": 67,
+   "note": "the product column's 10 is a per-click batch cap, not a yield; skill_fletching/scripts/darts.rs2:53 inv_del(inv, feather, $darts_count)",
+   "out": [
+    {
+     "id": 810,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/darts/darts.dbrow#fletching_adamant_dart",
+   "xp": 15.0
+  },
+  "fletch_barbed_bolt": {
+   "in": [
+    {
+     "id": 47,
+     "n": 1
+    },
+    {
+     "id": 877,
+     "n": 1
+    }
+   ],
+   "label": "Tip bolts with barb bolttips",
+   "level": 51,
+   "note": "the product column's 10 is a per-click batch cap, not a yield; skill_fletching/scripts/bolts.rs2:82 inv_del(inv, bolt, $bolts_count)",
+   "out": [
+    {
+     "id": 881,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/bolts/bolts.dbrow#fletching_barb_bolts",
+   "xp": 9.5
+  },
+  "fletch_bronze_arrow": {
+   "in": [
+    {
+     "id": 39,
+     "n": 1
+    },
+    {
+     "id": 53,
+     "n": 1
+    }
+   ],
+   "label": "Attach bronze arrowtips to headless arrows",
+   "level": 1,
+   "note": "the product column's 15 is a per-click batch cap, not a yield; skill_fletching/scripts/arrows.rs2:79 inv_del(inv, headless_arrow, $arrows_count)",
+   "out": [
+    {
+     "id": 882,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/arrows/arrows.dbrow#fletching_bronze_arrow",
+   "xp": 1.3
+  },
+  "fletch_bronze_dart": {
+   "in": [
+    {
+     "id": 819,
+     "n": 1
+    },
+    {
+     "id": 314,
+     "n": 1
+    }
+   ],
+   "label": "Fletch bronze darts",
+   "level": 1,
+   "note": "the product column's 10 is a per-click batch cap, not a yield; skill_fletching/scripts/darts.rs2:53 inv_del(inv, feather, $darts_count)",
+   "out": [
+    {
+     "id": 806,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/darts/darts.dbrow#fletching_bronze_dart",
+   "xp": 1.8
+  },
+  "fletch_cut_unstrung_longbow": {
+   "in": [
+    {
+     "id": 1511,
+     "n": 1
+    }
+   ],
+   "label": "Cut logs into longbows",
+   "level": 10,
+   "out": [
+    {
+     "id": 48,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_normal",
+   "tools": [
+    946
+   ],
+   "xp": 10.0
+  },
+  "fletch_cut_unstrung_magic_longbow": {
+   "in": [
+    {
+     "id": 1513,
+     "n": 1
+    }
+   ],
+   "label": "Cut magic logs into longbows",
+   "level": 85,
+   "out": [
+    {
+     "id": 70,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_magic",
+   "tools": [
+    946
+   ],
+   "xp": 91.5
+  },
+  "fletch_cut_unstrung_magic_shortbow": {
+   "in": [
+    {
+     "id": 1513,
+     "n": 1
+    }
+   ],
+   "label": "Cut magic logs into shortbows",
+   "level": 80,
+   "out": [
+    {
+     "id": 72,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_magic",
+   "tools": [
+    946
+   ],
+   "xp": 83.3
+  },
+  "fletch_cut_unstrung_maple_longbow": {
+   "in": [
+    {
+     "id": 1517,
+     "n": 1
+    }
+   ],
+   "label": "Cut maple logs into longbows",
+   "level": 55,
+   "out": [
+    {
+     "id": 62,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_maple",
+   "tools": [
+    946
+   ],
+   "xp": 58.3
+  },
+  "fletch_cut_unstrung_maple_shortbow": {
+   "in": [
+    {
+     "id": 1517,
+     "n": 1
+    }
+   ],
+   "label": "Cut maple logs into shortbows",
+   "level": 50,
+   "out": [
+    {
+     "id": 64,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_maple",
+   "tools": [
+    946
+   ],
+   "xp": 50.0
+  },
+  "fletch_cut_unstrung_oak_longbow": {
+   "in": [
+    {
+     "id": 1521,
+     "n": 1
+    }
+   ],
+   "label": "Cut oak logs into longbows",
+   "level": 25,
+   "out": [
+    {
+     "id": 56,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_oak",
+   "tools": [
+    946
+   ],
+   "xp": 25.0
+  },
+  "fletch_cut_unstrung_oak_shortbow": {
+   "in": [
+    {
+     "id": 1521,
+     "n": 1
+    }
+   ],
+   "label": "Cut oak logs into shortbows",
+   "level": 20,
+   "out": [
+    {
+     "id": 54,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_oak",
+   "tools": [
+    946
+   ],
+   "xp": 16.5
+  },
+  "fletch_cut_unstrung_shortbow": {
+   "in": [
+    {
+     "id": 1511,
+     "n": 1
+    }
+   ],
+   "label": "Cut logs into shortbows",
+   "level": 5,
+   "out": [
+    {
+     "id": 50,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_normal",
+   "tools": [
+    946
+   ],
+   "xp": 5.0
+  },
+  "fletch_cut_unstrung_willow_longbow": {
+   "in": [
+    {
+     "id": 1519,
+     "n": 1
+    }
+   ],
+   "label": "Cut willow logs into longbows",
+   "level": 40,
+   "out": [
+    {
+     "id": 58,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_willow",
+   "tools": [
+    946
+   ],
+   "xp": 41.5
+  },
+  "fletch_cut_unstrung_willow_shortbow": {
+   "in": [
+    {
+     "id": 1519,
+     "n": 1
+    }
+   ],
+   "label": "Cut willow logs into shortbows",
+   "level": 35,
+   "out": [
+    {
+     "id": 60,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_willow",
+   "tools": [
+    946
+   ],
+   "xp": 33.3
+  },
+  "fletch_cut_unstrung_yew_longbow": {
+   "in": [
+    {
+     "id": 1515,
+     "n": 1
+    }
+   ],
+   "label": "Cut yew logs into longbows",
+   "level": 70,
+   "out": [
+    {
+     "id": 66,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_yew",
+   "tools": [
+    946
+   ],
+   "xp": 75.0
+  },
+  "fletch_cut_unstrung_yew_shortbow": {
+   "in": [
+    {
+     "id": 1515,
+     "n": 1
+    }
+   ],
+   "label": "Cut yew logs into shortbows",
+   "level": 65,
+   "out": [
+    {
+     "id": 68,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_yew",
+   "tools": [
+    946
+   ],
+   "xp": 67.5
+  },
+  "fletch_headless_arrow": {
+   "in": [
+    {
+     "id": 52,
+     "n": 1
+    },
+    {
+     "id": 314,
+     "n": 1
+    }
+   ],
+   "label": "Attach feathers to arrow shafts",
+   "level": 1,
+   "out": [
+    {
+     "id": 53,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/scripts/arrows.rs2:46 stat_advance(fletching, multiply($arrow_count, 10))",
+   "xp": 1.0
+  },
+  "fletch_iron_arrow": {
+   "in": [
+    {
+     "id": 40,
+     "n": 1
+    },
+    {
+     "id": 53,
+     "n": 1
+    }
+   ],
+   "label": "Attach iron arrowtips to headless arrows",
+   "level": 15,
+   "note": "the product column's 15 is a per-click batch cap, not a yield; skill_fletching/scripts/arrows.rs2:79 inv_del(inv, headless_arrow, $arrows_count)",
+   "out": [
+    {
+     "id": 884,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/arrows/arrows.dbrow#fletching_iron_arrow",
+   "xp": 2.5
+  },
+  "fletch_iron_dart": {
+   "in": [
+    {
+     "id": 820,
+     "n": 1
+    },
+    {
+     "id": 314,
+     "n": 1
+    }
+   ],
+   "label": "Fletch iron darts",
+   "level": 22,
+   "note": "the product column's 10 is a per-click batch cap, not a yield; skill_fletching/scripts/darts.rs2:53 inv_del(inv, feather, $darts_count)",
+   "out": [
+    {
+     "id": 807,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/darts/darts.dbrow#fletching_iron_dart",
+   "xp": 3.8
+  },
+  "fletch_mithril_arrow": {
+   "in": [
+    {
+     "id": 42,
+     "n": 1
+    },
+    {
+     "id": 53,
+     "n": 1
+    }
+   ],
+   "label": "Attach mithril arrowtips to headless arrows",
+   "level": 45,
+   "note": "the product column's 15 is a per-click batch cap, not a yield; skill_fletching/scripts/arrows.rs2:79 inv_del(inv, headless_arrow, $arrows_count)",
+   "out": [
+    {
+     "id": 888,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/arrows/arrows.dbrow#fletching_mithril_arrow",
+   "xp": 7.5
+  },
+  "fletch_mithril_dart": {
+   "in": [
+    {
+     "id": 822,
+     "n": 1
+    },
+    {
+     "id": 314,
+     "n": 1
+    }
+   ],
+   "label": "Fletch mithril darts",
+   "level": 52,
+   "note": "the product column's 10 is a per-click batch cap, not a yield; skill_fletching/scripts/darts.rs2:53 inv_del(inv, feather, $darts_count)",
+   "out": [
+    {
+     "id": 809,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/darts/darts.dbrow#fletching_mithril_dart",
+   "xp": 11.2
+  },
+  "fletch_opal_bolt": {
+   "in": [
+    {
+     "id": 45,
+     "n": 1
+    },
+    {
+     "id": 877,
+     "n": 1
+    }
+   ],
+   "label": "Tip bolts with opal bolttips",
+   "level": 11,
+   "note": "the product column's 10 is a per-click batch cap, not a yield; skill_fletching/scripts/bolts.rs2:82 inv_del(inv, bolt, $bolts_count)",
+   "out": [
+    {
+     "id": 879,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/bolts/bolts.dbrow#fletching_opal_bolts",
+   "xp": 1.6
+  },
+  "fletch_opal_bolttips_from_opal": {
+   "in": [
+    {
+     "id": 1609,
+     "n": 1
+    }
+   ],
+   "label": "Cut opal into bolt tips",
+   "level": 11,
+   "note": "skill_crafting/scripts/gem/uncut_gem.rs2:6 case opal, smalloysterpearls, bigoysterpearls : @make_bolt_tips",
+   "out": [
+    {
+     "id": 45,
+     "n": 12
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/bolts/bolts.dbrow#fletching_opal_tips",
+   "tools": [
+    1755
+   ],
+   "xp": 1.5
+  },
+  "fletch_pearl_bolt": {
+   "in": [
+    {
+     "id": 46,
+     "n": 1
+    },
+    {
+     "id": 877,
+     "n": 1
+    }
+   ],
+   "label": "Tip bolts with pearl bolttips",
+   "level": 41,
+   "note": "the product column's 10 is a per-click batch cap, not a yield; skill_fletching/scripts/bolts.rs2:82 inv_del(inv, bolt, $bolts_count)",
+   "out": [
+    {
+     "id": 880,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/bolts/bolts.dbrow#fletching_pearl_bolts",
+   "xp": 3.2
+  },
+  "fletch_pearl_bolttips_from_bigoysterpearls": {
+   "in": [
+    {
+     "id": 413,
+     "n": 1
+    }
+   ],
+   "label": "Cut oyster pearls into bolt tips",
+   "level": 41,
+   "note": "skill_crafting/scripts/gem/uncut_gem.rs2:6 case opal, smalloysterpearls, bigoysterpearls : @make_bolt_tips",
+   "out": [
+    {
+     "id": 46,
+     "n": 24
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/bolts/bolts.dbrow#fletching_oyster_pearls_tips",
+   "tools": [
+    1755
+   ],
+   "xp": 3.2
+  },
+  "fletch_pearl_bolttips_from_smalloysterpearls": {
+   "in": [
+    {
+     "id": 411,
+     "n": 1
+    }
+   ],
+   "label": "Cut oyster pearl into bolt tips",
+   "level": 41,
+   "note": "skill_crafting/scripts/gem/uncut_gem.rs2:6 case opal, smalloysterpearls, bigoysterpearls : @make_bolt_tips",
+   "out": [
+    {
+     "id": 46,
+     "n": 6
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/bolts/bolts.dbrow#fletching_oyster_pearl_tips",
+   "tools": [
+    1755
+   ],
+   "xp": 3.2
+  },
+  "fletch_rune_arrow": {
+   "in": [
+    {
+     "id": 44,
+     "n": 1
+    },
+    {
+     "id": 53,
+     "n": 1
+    }
+   ],
+   "label": "Attach rune arrowtips to headless arrows",
+   "level": 75,
+   "note": "the product column's 15 is a per-click batch cap, not a yield; skill_fletching/scripts/arrows.rs2:79 inv_del(inv, headless_arrow, $arrows_count)",
+   "out": [
+    {
+     "id": 892,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/arrows/arrows.dbrow#fletching_rune_arrow",
+   "xp": 12.5
+  },
+  "fletch_rune_dart": {
+   "in": [
+    {
+     "id": 824,
+     "n": 1
+    },
+    {
+     "id": 314,
+     "n": 1
+    }
+   ],
+   "label": "Fletch rune darts",
+   "level": 81,
+   "note": "the product column's 10 is a per-click batch cap, not a yield; skill_fletching/scripts/darts.rs2:53 inv_del(inv, feather, $darts_count)",
+   "out": [
+    {
+     "id": 811,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/darts/darts.dbrow#fletching_rune_dart",
+   "xp": 18.8
+  },
+  "fletch_shafts_from_logs": {
+   "in": [
+    {
+     "id": 1511,
+     "n": 1
+    }
+   ],
+   "label": "Cut logs into arrow shafts",
+   "level": 1,
+   "note": "xp is multiply($shaft_count, 5) in cut_logs.rs2:88, not a table column",
+   "out": [
+    {
+     "id": 52,
+     "n": 15
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/cut_logs/cut_logs.dbrow#fletching_normal",
+   "tools": [
+    946
+   ],
+   "xp": 7.5
+  },
+  "fletch_steel_arrow": {
+   "in": [
+    {
+     "id": 41,
+     "n": 1
+    },
+    {
+     "id": 53,
+     "n": 1
+    }
+   ],
+   "label": "Attach steel arrowtips to headless arrows",
+   "level": 30,
+   "note": "the product column's 15 is a per-click batch cap, not a yield; skill_fletching/scripts/arrows.rs2:79 inv_del(inv, headless_arrow, $arrows_count)",
+   "out": [
+    {
+     "id": 886,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/arrows/arrows.dbrow#fletching_steel_arrow",
+   "xp": 5.0
+  },
+  "fletch_steel_dart": {
+   "in": [
+    {
+     "id": 821,
+     "n": 1
+    },
+    {
+     "id": 314,
+     "n": 1
+    }
+   ],
+   "label": "Fletch steel darts",
+   "level": 37,
+   "note": "the product column's 10 is a per-click batch cap, not a yield; skill_fletching/scripts/darts.rs2:53 inv_del(inv, feather, $darts_count)",
+   "out": [
+    {
+     "id": 808,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/darts/darts.dbrow#fletching_steel_dart",
+   "xp": 7.5
+  },
+  "fletch_string_longbow": {
+   "in": [
+    {
+     "id": 48,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String longbow",
+   "level": 10,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 839,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_normal_longbow",
+   "xp": 10.0
+  },
+  "fletch_string_magic_longbow": {
+   "in": [
+    {
+     "id": 70,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String magic longbow",
+   "level": 85,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 859,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_magic_longbow",
+   "xp": 91.5
+  },
+  "fletch_string_magic_shortbow": {
+   "in": [
+    {
+     "id": 72,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String magic shortbow",
+   "level": 80,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 861,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_magic_shortbow",
+   "xp": 83.2
+  },
+  "fletch_string_maple_longbow": {
+   "in": [
+    {
+     "id": 62,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String maple longbow",
+   "level": 55,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 851,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_maple_longbow",
+   "xp": 58.2
+  },
+  "fletch_string_maple_shortbow": {
+   "in": [
+    {
+     "id": 64,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String maple shortbow",
+   "level": 50,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 853,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_maple_shortbow",
+   "xp": 50.0
+  },
+  "fletch_string_oak_longbow": {
+   "in": [
+    {
+     "id": 56,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String oak longbow",
+   "level": 25,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 845,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_oak_longbow",
+   "xp": 25.0
+  },
+  "fletch_string_oak_shortbow": {
+   "in": [
+    {
+     "id": 54,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String oak shortbow",
+   "level": 20,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 843,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_oak_shortbow",
+   "xp": 16.5
+  },
+  "fletch_string_shortbow": {
+   "in": [
+    {
+     "id": 50,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String shortbow",
+   "level": 5,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 841,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_normal_shortbow",
+   "xp": 5.0
+  },
+  "fletch_string_willow_longbow": {
+   "in": [
+    {
+     "id": 58,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String willow longbow",
+   "level": 40,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 847,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_willow_longbow",
+   "xp": 41.5
+  },
+  "fletch_string_willow_shortbow": {
+   "in": [
+    {
+     "id": 60,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String willow shortbow",
+   "level": 35,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 849,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_willow_shortbow",
+   "xp": 33.2
+  },
+  "fletch_string_yew_longbow": {
+   "in": [
+    {
+     "id": 66,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String yew longbow",
+   "level": 70,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 855,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_yew_longbow",
+   "xp": 75.0
+  },
+  "fletch_string_yew_shortbow": {
+   "in": [
+    {
+     "id": 68,
+     "n": 1
+    },
+    {
+     "id": 1777,
+     "n": 1
+    }
+   ],
+   "label": "String yew shortbow",
+   "level": 65,
+   "note": "skill_fletching/scripts/bows.rs2:39 inv_del(inv, bow_string, 1)",
+   "out": [
+    {
+     "id": 857,
+     "n": 1
+    }
+   ],
+   "skill": "fletching",
+   "src": "scripts/skill_fletching/configs/stringing/bows.dbrow#stringing_yew_shortbow",
+   "xp": 67.5
+  },
+  "herb_identify_ardrigal": {
+   "in": [
+    {
+     "id": 1527,
+     "n": 1
+    }
+   ],
+   "label": "Identify ardrigal",
+   "level": 3,
+   "out": [
+    {
+     "id": 1528,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#ardrigal param=identified_herb_exp",
+   "xp": 2.5
+  },
+  "herb_identify_avantoe": {
+   "in": [
+    {
+     "id": 211,
+     "n": 1
+    }
+   ],
+   "label": "Identify avantoe",
+   "level": 48,
+   "out": [
+    {
+     "id": 261,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#avantoe param=identified_herb_exp",
+   "xp": 10.0
+  },
+  "herb_identify_cadantine": {
+   "in": [
+    {
+     "id": 215,
+     "n": 1
+    }
+   ],
+   "label": "Identify cadantine",
+   "level": 65,
+   "out": [
+    {
+     "id": 265,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#cadantine param=identified_herb_exp",
+   "xp": 12.5
+  },
+  "herb_identify_dwarf_weed": {
+   "in": [
+    {
+     "id": 217,
+     "n": 1
+    }
+   ],
+   "label": "Identify dwarf weed",
+   "level": 70,
+   "out": [
+    {
+     "id": 267,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#dwarf_weed param=identified_herb_exp",
+   "xp": 13.8
+  },
+  "herb_identify_guam_leaf": {
+   "in": [
+    {
+     "id": 199,
+     "n": 1
+    }
+   ],
+   "label": "Identify guam leaf",
+   "level": 3,
+   "out": [
+    {
+     "id": 249,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#guam_leaf param=identified_herb_exp",
+   "xp": 2.5
+  },
+  "herb_identify_harralander": {
+   "in": [
+    {
+     "id": 205,
+     "n": 1
+    }
+   ],
+   "label": "Identify harralander",
+   "level": 20,
+   "out": [
+    {
+     "id": 255,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#harralander param=identified_herb_exp",
+   "xp": 6.3
+  },
+  "herb_identify_irit_leaf": {
+   "in": [
+    {
+     "id": 209,
+     "n": 1
+    }
+   ],
+   "label": "Identify irit leaf",
+   "level": 40,
+   "out": [
+    {
+     "id": 259,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#irit_leaf param=identified_herb_exp",
+   "xp": 8.8
+  },
+  "herb_identify_kwuarm": {
+   "in": [
+    {
+     "id": 213,
+     "n": 1
+    }
+   ],
+   "label": "Identify kwuarm",
+   "level": 54,
+   "out": [
+    {
+     "id": 263,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#kwuarm param=identified_herb_exp",
+   "xp": 11.3
+  },
+  "herb_identify_lantadyme": {
+   "in": [
+    {
+     "id": 2485,
+     "n": 1
+    }
+   ],
+   "label": "Identify lantadyme",
+   "level": 67,
+   "out": [
+    {
+     "id": 2481,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#lantadyme param=identified_herb_exp",
+   "xp": 13.1
+  },
+  "herb_identify_marentill": {
+   "in": [
+    {
+     "id": 201,
+     "n": 1
+    }
+   ],
+   "label": "Identify marrentill",
+   "level": 5,
+   "out": [
+    {
+     "id": 251,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#marentill param=identified_herb_exp",
+   "xp": 3.8
+  },
+  "herb_identify_ranarr_weed": {
+   "in": [
+    {
+     "id": 207,
+     "n": 1
+    }
+   ],
+   "label": "Identify ranarr weed",
+   "level": 25,
+   "out": [
+    {
+     "id": 257,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#ranarr_weed param=identified_herb_exp",
+   "xp": 7.5
+  },
+  "herb_identify_rogues_purse": {
+   "in": [
+    {
+     "id": 1533,
+     "n": 1
+    }
+   ],
+   "label": "Identify rogues purse",
+   "level": 3,
+   "out": [
+    {
+     "id": 1534,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#rogues_purse param=identified_herb_exp",
+   "xp": 2.5
+  },
+  "herb_identify_sito_foil": {
+   "in": [
+    {
+     "id": 1529,
+     "n": 1
+    }
+   ],
+   "label": "Identify sito foil",
+   "level": 3,
+   "out": [
+    {
+     "id": 1530,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#sito_foil param=identified_herb_exp",
+   "xp": 2.5
+  },
+  "herb_identify_snake_weed": {
+   "in": [
+    {
+     "id": 1525,
+     "n": 1
+    }
+   ],
+   "label": "Identify snake weed",
+   "level": 3,
+   "out": [
+    {
+     "id": 1526,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#snake_weed param=identified_herb_exp",
+   "xp": 2.5
+  },
+  "herb_identify_snapdragon": {
+   "in": [
+    {
+     "id": 3051,
+     "n": 1
+    }
+   ],
+   "label": "Identify snapdragon",
+   "level": 59,
+   "out": [
+    {
+     "id": 3000,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#snapdragon param=identified_herb_exp",
+   "xp": 11.8
+  },
+  "herb_identify_tarromin": {
+   "in": [
+    {
+     "id": 203,
+     "n": 1
+    }
+   ],
+   "label": "Identify tarromin",
+   "level": 11,
+   "out": [
+    {
+     "id": 253,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#tarromin param=identified_herb_exp",
+   "xp": 5.0
+  },
+  "herb_identify_toadflax": {
+   "in": [
+    {
+     "id": 3049,
+     "n": 1
+    }
+   ],
+   "label": "Identify toadflax",
+   "level": 30,
+   "out": [
+    {
+     "id": 2998,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#toadflax param=identified_herb_exp",
+   "xp": 8.0
+  },
+  "herb_identify_torstol": {
+   "in": [
+    {
+     "id": 219,
+     "n": 1
+    }
+   ],
+   "label": "Identify torstol",
+   "level": 75,
+   "out": [
+    {
+     "id": 269,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#torstol param=identified_herb_exp",
+   "xp": 15.0
+  },
+  "herb_identify_volencia_moss": {
+   "in": [
+    {
+     "id": 1531,
+     "n": 1
+    }
+   ],
+   "label": "Identify volencia moss",
+   "level": 3,
+   "out": [
+    {
+     "id": 1532,
+     "n": 1
+    }
+   ],
+   "skill": "herblore",
+   "src": "scripts/skill_herblore/scripts/identifying/identify.rs2 + scripts/skill_herblore/configs/herbs.obj#volencia_moss param=identified_herb_exp",
+   "xp": 2.5
+  },
+  "magic_magic_spell_charge_air_orb_stafforb": {
+   "in": [
+    {
+     "id": 567,
+     "n": 1
+    },
+    {
+     "id": 556,
+     "n": 30
+    },
+    {
+     "id": 564,
+     "n": 3
+    }
+   ],
+   "label": "Enchant unpowered orb",
+   "level": 66,
+   "out": [
+    {
+     "id": 573,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_charge_air_orb data=convertobj",
+   "xp": 76.0
+  },
+  "magic_magic_spell_charge_earth_orb_stafforb": {
+   "in": [
+    {
+     "id": 567,
+     "n": 1
+    },
+    {
+     "id": 557,
+     "n": 30
+    },
+    {
+     "id": 564,
+     "n": 3
+    }
+   ],
+   "label": "Enchant unpowered orb",
+   "level": 60,
+   "out": [
+    {
+     "id": 575,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_charge_earth_orb data=convertobj",
+   "xp": 70.0
+  },
+  "magic_magic_spell_charge_fire_orb_stafforb": {
+   "in": [
+    {
+     "id": 567,
+     "n": 1
+    },
+    {
+     "id": 554,
+     "n": 30
+    },
+    {
+     "id": 564,
+     "n": 3
+    }
+   ],
+   "label": "Enchant unpowered orb",
+   "level": 63,
+   "out": [
+    {
+     "id": 569,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_charge_fire_orb data=convertobj",
+   "xp": 73.0
+  },
+  "magic_magic_spell_charge_water_orb_stafforb": {
+   "in": [
+    {
+     "id": 567,
+     "n": 1
+    },
+    {
+     "id": 555,
+     "n": 30
+    },
+    {
+     "id": 564,
+     "n": 3
+    }
+   ],
+   "label": "Enchant unpowered orb",
+   "level": 56,
+   "out": [
+    {
+     "id": 571,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_charge_water_orb data=convertobj",
+   "xp": 66.0
+  },
+  "magic_magic_spell_enchant_level1_sapphire_necklace": {
+   "in": [
+    {
+     "id": 1656,
+     "n": 1
+    },
+    {
+     "id": 555,
+     "n": 1
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant sapphire necklace",
+   "level": 7,
+   "out": [
+    {
+     "id": 3853,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level1 data=convertobj",
+   "xp": 17.5
+  },
+  "magic_magic_spell_enchant_level1_sapphire_ring": {
+   "in": [
+    {
+     "id": 1637,
+     "n": 1
+    },
+    {
+     "id": 555,
+     "n": 1
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant sapphire ring",
+   "level": 7,
+   "out": [
+    {
+     "id": 2550,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level1 data=convertobj",
+   "xp": 17.5
+  },
+  "magic_magic_spell_enchant_level1_strung_sapphire_amulet": {
+   "in": [
+    {
+     "id": 1694,
+     "n": 1
+    },
+    {
+     "id": 555,
+     "n": 1
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant sapphire amulet",
+   "level": 7,
+   "out": [
+    {
+     "id": 1727,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level1 data=convertobj",
+   "xp": 17.5
+  },
+  "magic_magic_spell_enchant_level2_emerald_ring": {
+   "in": [
+    {
+     "id": 1639,
+     "n": 1
+    },
+    {
+     "id": 556,
+     "n": 3
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant emerald ring",
+   "level": 27,
+   "out": [
+    {
+     "id": 2552,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level2 data=convertobj",
+   "xp": 37.0
+  },
+  "magic_magic_spell_enchant_level2_strung_emerald_amulet": {
+   "in": [
+    {
+     "id": 1696,
+     "n": 1
+    },
+    {
+     "id": 556,
+     "n": 3
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant emerald amulet",
+   "level": 27,
+   "out": [
+    {
+     "id": 1729,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level2 data=convertobj",
+   "xp": 37.0
+  },
+  "magic_magic_spell_enchant_level3_ruby_ring": {
+   "in": [
+    {
+     "id": 1641,
+     "n": 1
+    },
+    {
+     "id": 554,
+     "n": 5
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant ruby ring",
+   "level": 49,
+   "out": [
+    {
+     "id": 2568,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level3 data=convertobj",
+   "xp": 59.0
+  },
+  "magic_magic_spell_enchant_level3_strung_ruby_amulet": {
+   "in": [
+    {
+     "id": 1698,
+     "n": 1
+    },
+    {
+     "id": 554,
+     "n": 5
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant ruby amulet",
+   "level": 49,
+   "out": [
+    {
+     "id": 1725,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level3 data=convertobj",
+   "xp": 59.0
+  },
+  "magic_magic_spell_enchant_level4_diamond_ring": {
+   "in": [
+    {
+     "id": 1643,
+     "n": 1
+    },
+    {
+     "id": 557,
+     "n": 10
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant diamond ring",
+   "level": 57,
+   "out": [
+    {
+     "id": 2570,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level4 data=convertobj",
+   "xp": 67.0
+  },
+  "magic_magic_spell_enchant_level4_strung_diamond_amulet": {
+   "in": [
+    {
+     "id": 1700,
+     "n": 1
+    },
+    {
+     "id": 557,
+     "n": 10
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant diamond amulet",
+   "level": 57,
+   "out": [
+    {
+     "id": 1731,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level4 data=convertobj",
+   "xp": 67.0
+  },
+  "magic_magic_spell_enchant_level5_dragonstone_ring": {
+   "in": [
+    {
+     "id": 1645,
+     "n": 1
+    },
+    {
+     "id": 557,
+     "n": 15
+    },
+    {
+     "id": 555,
+     "n": 15
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant dragonstone ring",
+   "level": 68,
+   "out": [
+    {
+     "id": 2572,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level5 data=convertobj",
+   "xp": 78.0
+  },
+  "magic_magic_spell_enchant_level5_strung_dragonstone_amulet": {
+   "in": [
+    {
+     "id": 1702,
+     "n": 1
+    },
+    {
+     "id": 557,
+     "n": 15
+    },
+    {
+     "id": 555,
+     "n": 15
+    },
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "label": "Enchant dragonstoneamulet",
+   "level": 68,
+   "out": [
+    {
+     "id": 1704,
+     "n": 1
+    }
+   ],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_enchant_level5 data=convertobj",
+   "xp": 78.0
+  },
+  "magic_magic_spell_high_alch": {
+   "alchRate": 0.6,
+   "anyItem": true,
+   "in": [
+    {
+     "id": 561,
+     "n": 1
+    },
+    {
+     "id": 554,
+     "n": 5
+    }
+   ],
+   "label": "High alchemy",
+   "level": 55,
+   "note": "also consumes one alchable item per cast, paying 0.6x its cost in coins (alchemy.rs2:25); the report picks that target from the bank",
+   "out": [],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_high_alch",
+   "xp": 65.0
+  },
+  "magic_magic_spell_low_alch": {
+   "alchRate": 0.4,
+   "anyItem": true,
+   "in": [
+    {
+     "id": 561,
+     "n": 1
+    },
+    {
+     "id": 554,
+     "n": 3
+    }
+   ],
+   "label": "Low alchemy",
+   "level": 21,
+   "note": "also consumes one alchable item per cast, paying 0.4x its cost in coins (alchemy.rs2:25); the report picks that target from the bank",
+   "out": [],
+   "skill": "magic",
+   "src": "scripts/skill_magic/configs/magic_spells.dbrow#magic_spell_low_alch",
+   "xp": 31.0
+  },
+  "rc_airrune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind air runes",
+   "level": 1,
+   "note": "runes per essence is level/11 + 1 (runecraft.rs2:83); the xp is per essence either way",
+   "out": [
+    {
+     "id": 556,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_air",
+   "tools": [
+    1438
+   ],
+   "xp": 5.0,
+   "yieldPerLevel": 11
+  },
+  "rc_bodyrune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind body runes",
+   "level": 20,
+   "note": "runes per essence is level/46 + 1 (runecraft.rs2:83); the xp is per essence either way",
+   "out": [
+    {
+     "id": 559,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_body",
+   "tools": [
+    1446
+   ],
+   "xp": 7.5,
+   "yieldPerLevel": 46
+  },
+  "rc_chaosrune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind chaos runes",
+   "level": 35,
+   "note": "runes per essence is level/74 + 1 (runecraft.rs2:83); the xp is per essence either way",
+   "out": [
+    {
+     "id": 562,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_chaos",
+   "tools": [
+    1452
+   ],
+   "xp": 8.5,
+   "yieldPerLevel": 74
+  },
+  "rc_cosmicrune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind cosmic runes",
+   "level": 27,
+   "note": "runes per essence is level/59 + 1 (runecraft.rs2:83); the xp is per essence either way",
+   "out": [
+    {
+     "id": 564,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_cosmic",
+   "tools": [
+    1454
+   ],
+   "xp": 8.0,
+   "yieldPerLevel": 59
+  },
+  "rc_deathrune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind death runes",
+   "level": 65,
+   "out": [
+    {
+     "id": 560,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_death",
+   "tools": [
+    1456
+   ],
+   "xp": 10.0
+  },
+  "rc_earthrune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind earth runes",
+   "level": 9,
+   "note": "runes per essence is level/26 + 1 (runecraft.rs2:83); the xp is per essence either way",
+   "out": [
+    {
+     "id": 557,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_earth",
+   "tools": [
+    1440
+   ],
+   "xp": 6.5,
+   "yieldPerLevel": 26
+  },
+  "rc_firerune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind fire runes",
+   "level": 14,
+   "note": "runes per essence is level/35 + 1 (runecraft.rs2:83); the xp is per essence either way",
+   "out": [
+    {
+     "id": 554,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_fire",
+   "tools": [
+    1442
+   ],
+   "xp": 7.0,
+   "yieldPerLevel": 35
+  },
+  "rc_lawrune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind law runes",
+   "level": 54,
+   "out": [
+    {
+     "id": 563,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_law",
+   "tools": [
+    1458
+   ],
+   "xp": 9.5
+  },
+  "rc_mindrune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind mind runes",
+   "level": 2,
+   "note": "runes per essence is level/14 + 1 (runecraft.rs2:83); the xp is per essence either way",
+   "out": [
+    {
+     "id": 558,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_mind",
+   "tools": [
+    1448
+   ],
+   "xp": 5.5,
+   "yieldPerLevel": 14
+  },
+  "rc_naturerune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind nature runes",
+   "level": 44,
+   "note": "runes per essence is level/91 + 1 (runecraft.rs2:83); the xp is per essence either way",
+   "out": [
+    {
+     "id": 561,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_nature",
+   "tools": [
+    1462
+   ],
+   "xp": 9.0,
+   "yieldPerLevel": 91
+  },
+  "rc_waterrune": {
+   "in": [
+    {
+     "id": 1436,
+     "n": 1
+    }
+   ],
+   "label": "Bind water runes",
+   "level": 5,
+   "note": "runes per essence is level/19 + 1 (runecraft.rs2:83); the xp is per essence either way",
+   "out": [
+    {
+     "id": 555,
+     "n": 1
+    }
+   ],
+   "skill": "runecraft",
+   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_water",
+   "tools": [
+    1444
+   ],
+   "xp": 6.0,
+   "yieldPerLevel": 19
+  },
+  "smelt_adamantite_bar": {
+   "in": [
+    {
+     "id": 449,
+     "n": 1
+    },
+    {
+     "id": 453,
+     "n": 6
+    }
+   ],
+   "label": "Smelt adamantite bar",
+   "level": 70,
+   "out": [
+    {
+     "id": 2361,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smelting/smelting.struct#smelting_adamantite_bar",
+   "xp": 37.5
+  },
+  "smelt_bronze_bar": {
+   "in": [
+    {
+     "id": 436,
+     "n": 1
+    },
+    {
+     "id": 438,
+     "n": 1
+    }
+   ],
+   "label": "Smelt bronze bar",
+   "level": 1,
+   "out": [
+    {
+     "id": 2349,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smelting/smelting.struct#smelting_bronze_bar",
+   "xp": 6.2
+  },
+  "smelt_gold_bar": {
+   "in": [
+    {
+     "id": 444,
+     "n": 1
+    }
+   ],
+   "label": "Smelt gold bar",
+   "level": 40,
+   "out": [
+    {
+     "id": 2357,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smelting/smelting.struct#smelting_gold_bar",
+   "xp": 22.5
+  },
+  "smelt_iron_bar": {
+   "chance": {
+    "kind": "flat",
+    "p": 0.5
+   },
+   "in": [
+    {
+     "id": 440,
+     "n": 1
+    }
+   ],
+   "label": "Smelt iron bar",
+   "level": 15,
+   "note": "50% failure unless a ring of forging is worn \u2014 smelting.rs2:200 randominc(1)",
+   "out": [
+    {
+     "id": 2351,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smelting/smelting.struct#smelting_iron_bar",
+   "xp": 12.5
+  },
+  "smelt_mithril_bar": {
+   "in": [
+    {
+     "id": 447,
+     "n": 1
+    },
+    {
+     "id": 453,
+     "n": 4
+    }
+   ],
+   "label": "Smelt mithril bar",
+   "level": 50,
+   "out": [
+    {
+     "id": 2359,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smelting/smelting.struct#smelting_mithril_bar",
+   "xp": 30.0
+  },
+  "smelt_perfect_gold_bar": {
+   "in": [
+    {
+     "id": 446,
+     "n": 1
+    }
+   ],
+   "label": "Smelt 'perfect' gold bar",
+   "level": 40,
+   "out": [
+    {
+     "id": 2365,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smelting/smelting.struct#smelting_perfect_gold_bar",
+   "xp": 22.5
+  },
+  "smelt_runite_bar": {
+   "in": [
+    {
+     "id": 451,
+     "n": 1
+    },
+    {
+     "id": 453,
+     "n": 8
+    }
+   ],
+   "label": "Smelt runite bar",
+   "level": 85,
+   "out": [
+    {
+     "id": 2363,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smelting/smelting.struct#smelting_runite_bar",
+   "xp": 50.0
+  },
+  "smelt_silver_bar": {
+   "in": [
+    {
+     "id": 442,
+     "n": 1
+    }
+   ],
+   "label": "Smelt silver bar",
+   "level": 20,
+   "out": [
+    {
+     "id": 2355,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smelting/smelting.struct#smelting_silver_bar",
+   "xp": 13.7
+  },
+  "smelt_steel_bar": {
+   "in": [
+    {
+     "id": 440,
+     "n": 1
+    },
+    {
+     "id": 453,
+     "n": 2
+    }
+   ],
+   "label": "Smelt steel bar",
+   "level": 30,
+   "out": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smelting/smelting.struct#smelting_steel_bar",
+   "xp": 17.5
+  },
+  "smith_adamant_2h_sword": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 3
+    }
+   ],
+   "label": "Smith adamant 2h sword",
+   "level": 84,
+   "out": [
+    {
+     "id": 1317,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_2h_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 187.5
+  },
+  "smith_adamant_arrowheads": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 1
+    }
+   ],
+   "label": "Smith adamant arrowtips",
+   "level": 75,
+   "out": [
+    {
+     "id": 43,
+     "n": 15
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_arrowheads + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 62.5
+  },
+  "smith_adamant_axe": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 1
+    }
+   ],
+   "label": "Smith adamant axe",
+   "level": 71,
+   "out": [
+    {
+     "id": 1357,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_axe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 62.5
+  },
+  "smith_adamant_battleaxe": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 3
+    }
+   ],
+   "label": "Smith adamant battleaxe",
+   "level": 80,
+   "out": [
+    {
+     "id": 1371,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_battleaxe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 187.5
+  },
+  "smith_adamant_chainbody": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 3
+    }
+   ],
+   "label": "Smith adamant chainbody",
+   "level": 81,
+   "out": [
+    {
+     "id": 1111,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_chainbody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 187.5
+  },
+  "smith_adamant_claws": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 2
+    }
+   ],
+   "label": "Smith adamant claws",
+   "level": 83,
+   "out": [
+    {
+     "id": 3100,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_claws + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 125.0
+  },
+  "smith_adamant_dagger": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 1
+    }
+   ],
+   "label": "Smith adamant dagger",
+   "level": 70,
+   "out": [
+    {
+     "id": 1211,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_dagger + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 62.5
+  },
+  "smith_adamant_dart_tip": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 1
+    }
+   ],
+   "label": "Smith adamant dart tip",
+   "level": 74,
+   "out": [
+    {
+     "id": 823,
+     "n": 10
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_dart_tip + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 62.5
+  },
+  "smith_adamant_full_helm": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 2
+    }
+   ],
+   "label": "Smith adamant full helm",
+   "level": 77,
+   "out": [
+    {
+     "id": 1161,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_full_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 125.0
+  },
+  "smith_adamant_kiteshield": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 3
+    }
+   ],
+   "label": "Smith adamant kiteshield",
+   "level": 82,
+   "out": [
+    {
+     "id": 1199,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_kiteshield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 187.5
+  },
+  "smith_adamant_knife": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 1
+    }
+   ],
+   "label": "Smith adamant knife",
+   "level": 77,
+   "out": [
+    {
+     "id": 867,
+     "n": 5
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_knife + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 62.5
+  },
+  "smith_adamant_longsword": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 2
+    }
+   ],
+   "label": "Smith adamant longsword",
+   "level": 76,
+   "out": [
+    {
+     "id": 1301,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_longsword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 125.0
+  },
+  "smith_adamant_mace": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 1
+    }
+   ],
+   "label": "Smith adamant mace",
+   "level": 72,
+   "out": [
+    {
+     "id": 1430,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_mace + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 62.5
+  },
+  "smith_adamant_med_helm": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 1
+    }
+   ],
+   "label": "Smith adamant med helm",
+   "level": 73,
+   "out": [
+    {
+     "id": 1145,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_med_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 62.5
+  },
+  "smith_adamant_platebody": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 5
+    }
+   ],
+   "label": "Smith adamant platebody",
+   "level": 88,
+   "out": [
+    {
+     "id": 1123,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_platebody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 312.5
+  },
+  "smith_adamant_platelegs": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 3
+    }
+   ],
+   "label": "Smith adamant platelegs",
+   "level": 86,
+   "out": [
+    {
+     "id": 1073,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_platelegs + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 187.5
+  },
+  "smith_adamant_plateskirt": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 3
+    }
+   ],
+   "label": "Smith adamant plateskirt",
+   "level": 86,
+   "out": [
+    {
+     "id": 1091,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_plateskirt + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 187.5
+  },
+  "smith_adamant_scimitar": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 2
+    }
+   ],
+   "label": "Smith adamant scimitar",
+   "level": 75,
+   "out": [
+    {
+     "id": 1331,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_scimitar + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 125.0
+  },
+  "smith_adamant_sq_shield": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 2
+    }
+   ],
+   "label": "Smith adamant sq shield",
+   "level": 78,
+   "out": [
+    {
+     "id": 1183,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_sq_shield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 125.0
+  },
+  "smith_adamant_sword": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 1
+    }
+   ],
+   "label": "Smith adamant sword",
+   "level": 74,
+   "out": [
+    {
+     "id": 1287,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 62.5
+  },
+  "smith_adamant_warhammer": {
+   "in": [
+    {
+     "id": 2361,
+     "n": 3
+    }
+   ],
+   "label": "Smith adamnt warhammer",
+   "level": 79,
+   "out": [
+    {
+     "id": 1345,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#adamant_warhammer + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_adamantite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 187.5
+  },
+  "smith_bronze_2h_sword": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 3
+    }
+   ],
+   "label": "Smith bronze 2h sword",
+   "level": 14,
+   "out": [
+    {
+     "id": 1307,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_2h_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_bronze_arrowheads": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 1
+    }
+   ],
+   "label": "Smith bronze arrowtips",
+   "level": 5,
+   "out": [
+    {
+     "id": 39,
+     "n": 15
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_arrowheads + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 12.5
+  },
+  "smith_bronze_axe": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 1
+    }
+   ],
+   "label": "Smith bronze axe",
+   "level": 1,
+   "out": [
+    {
+     "id": 1351,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_axe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 12.5
+  },
+  "smith_bronze_battleaxe": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 3
+    }
+   ],
+   "label": "Smith bronze battleaxe",
+   "level": 10,
+   "out": [
+    {
+     "id": 1375,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_battleaxe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_bronze_chainbody": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 3
+    }
+   ],
+   "label": "Smith bronze chainbody",
+   "level": 11,
+   "out": [
+    {
+     "id": 1103,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_chainbody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_bronze_claws": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 2
+    }
+   ],
+   "label": "Smith bronze claws",
+   "level": 13,
+   "out": [
+    {
+     "id": 3095,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_claws + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_bronze_dagger": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 1
+    }
+   ],
+   "label": "Smith bronze dagger",
+   "level": 1,
+   "out": [
+    {
+     "id": 1205,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_dagger + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 12.5
+  },
+  "smith_bronze_dart_tip": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 1
+    }
+   ],
+   "label": "Smith bronze dart tip",
+   "level": 4,
+   "out": [
+    {
+     "id": 819,
+     "n": 10
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_dart_tip + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 12.5
+  },
+  "smith_bronze_full_helm": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 2
+    }
+   ],
+   "label": "Smith bronze full helm",
+   "level": 7,
+   "out": [
+    {
+     "id": 1155,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_full_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_bronze_kiteshield": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 3
+    }
+   ],
+   "label": "Smith bronze kiteshield",
+   "level": 12,
+   "out": [
+    {
+     "id": 1189,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_kiteshield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_bronze_knife": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 1
+    }
+   ],
+   "label": "Smith bronze knife",
+   "level": 7,
+   "out": [
+    {
+     "id": 864,
+     "n": 5
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_knife + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 12.5
+  },
+  "smith_bronze_longsword": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 2
+    }
+   ],
+   "label": "Smith bronze longsword",
+   "level": 6,
+   "out": [
+    {
+     "id": 1291,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_longsword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_bronze_mace": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 1
+    }
+   ],
+   "label": "Smith bronze mace",
+   "level": 2,
+   "out": [
+    {
+     "id": 1422,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_mace + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 12.5
+  },
+  "smith_bronze_med_helm": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 1
+    }
+   ],
+   "label": "Smith bronze med helm",
+   "level": 3,
+   "out": [
+    {
+     "id": 1139,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_med_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 12.5
+  },
+  "smith_bronze_platebody": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 5
+    }
+   ],
+   "label": "Smith bronze platebody",
+   "level": 18,
+   "out": [
+    {
+     "id": 1117,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_platebody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 62.5
+  },
+  "smith_bronze_platelegs": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 3
+    }
+   ],
+   "label": "Smith bronze platelegs",
+   "level": 16,
+   "out": [
+    {
+     "id": 1075,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_platelegs + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_bronze_plateskirt": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 3
+    }
+   ],
+   "label": "Smith bronze plateskirt",
+   "level": 16,
+   "out": [
+    {
+     "id": 1087,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_plateskirt + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_bronze_scimitar": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 2
+    }
+   ],
+   "label": "Smith bronze scimitar",
+   "level": 5,
+   "out": [
+    {
+     "id": 1321,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_scimitar + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_bronze_sq_shield": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 2
+    }
+   ],
+   "label": "Smith bronze sq shield",
+   "level": 8,
+   "out": [
+    {
+     "id": 1173,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_sq_shield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_bronze_sword": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 1
+    }
+   ],
+   "label": "Smith bronze sword",
+   "level": 4,
+   "out": [
+    {
+     "id": 1277,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 12.5
+  },
+  "smith_bronze_warhammer": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 3
+    }
+   ],
+   "label": "Smith bronze warhammer",
+   "level": 9,
+   "out": [
+    {
+     "id": 1337,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_warhammer + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_bronze_wire": {
+   "in": [
+    {
+     "id": 2349,
+     "n": 1
+    }
+   ],
+   "label": "Smith bronze wire",
+   "level": 4,
+   "out": [
+    {
+     "id": 1794,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#bronze_wire + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_bronze_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 12.5
+  },
+  "smith_cannonballs": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Cast steel into cannonballs",
+   "level": 35,
+   "out": [
+    {
+     "id": 2,
+     "n": 4
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/scripts/smelting/cannonballs.rs2:42 stat_advance(smithing, 375)",
+   "tools": [
+    4
+   ],
+   "xp": 37.5
+  },
+  "smith_iron_2h_sword": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 3
+    }
+   ],
+   "label": "Smith iron 2h sword",
+   "level": 29,
+   "out": [
+    {
+     "id": 1309,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_2h_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_iron_arrowheads": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 1
+    }
+   ],
+   "label": "Smith iron arrowtips",
+   "level": 20,
+   "out": [
+    {
+     "id": 40,
+     "n": 15
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_arrowheads + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_iron_axe": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 1
+    }
+   ],
+   "label": "Smith iron axe",
+   "level": 16,
+   "out": [
+    {
+     "id": 1349,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_axe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_iron_battleaxe": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 3
+    }
+   ],
+   "label": "Smith iron battleaxe",
+   "level": 25,
+   "out": [
+    {
+     "id": 1363,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_battleaxe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_iron_chainbody": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 3
+    }
+   ],
+   "label": "Smith iron chainbody",
+   "level": 26,
+   "out": [
+    {
+     "id": 1101,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_chainbody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_iron_claws": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 2
+    }
+   ],
+   "label": "Smith iron claws",
+   "level": 28,
+   "out": [
+    {
+     "id": 3096,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_claws + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_iron_dagger": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 1
+    }
+   ],
+   "label": "Smith iron dagger",
+   "level": 15,
+   "out": [
+    {
+     "id": 1203,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_dagger + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_iron_dart_tip": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 1
+    }
+   ],
+   "label": "Smith iron dart tip",
+   "level": 19,
+   "out": [
+    {
+     "id": 820,
+     "n": 10
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_dart_tip + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_iron_full_helm": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 2
+    }
+   ],
+   "label": "Smith iron full helm",
+   "level": 22,
+   "out": [
+    {
+     "id": 1153,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_full_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_iron_kiteshield": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 3
+    }
+   ],
+   "label": "Smith iron kiteshield",
+   "level": 27,
+   "out": [
+    {
+     "id": 1191,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_kiteshield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_iron_knife": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 1
+    }
+   ],
+   "label": "Smith iron knife",
+   "level": 22,
+   "out": [
+    {
+     "id": 863,
+     "n": 5
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_knife + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_iron_longsword": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 2
+    }
+   ],
+   "label": "Smith iron longsword",
+   "level": 21,
+   "out": [
+    {
+     "id": 1293,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_longsword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_iron_mace": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 1
+    }
+   ],
+   "label": "Smith iron mace",
+   "level": 17,
+   "out": [
+    {
+     "id": 1420,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_mace + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_iron_med_helm": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 1
+    }
+   ],
+   "label": "Smith iron med helm",
+   "level": 18,
+   "out": [
+    {
+     "id": 1137,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_med_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_iron_platebody": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 5
+    }
+   ],
+   "label": "Smith iron platebody",
+   "level": 33,
+   "out": [
+    {
+     "id": 1115,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_platebody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 125.0
+  },
+  "smith_iron_platelegs": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 3
+    }
+   ],
+   "label": "Smith iron platelegs",
+   "level": 31,
+   "out": [
+    {
+     "id": 1067,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_platelegs + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_iron_plateskirt": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 3
+    }
+   ],
+   "label": "Smith iron plateskirt",
+   "level": 31,
+   "out": [
+    {
+     "id": 1081,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_plateskirt + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_iron_scimitar": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 2
+    }
+   ],
+   "label": "Smith iron scimitar",
+   "level": 20,
+   "out": [
+    {
+     "id": 1323,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_scimitar + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_iron_sq_shield": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 2
+    }
+   ],
+   "label": "Smith iron sq shield",
+   "level": 23,
+   "out": [
+    {
+     "id": 1175,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_sq_shield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_iron_sword": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 1
+    }
+   ],
+   "label": "Smith iron sword",
+   "level": 19,
+   "out": [
+    {
+     "id": 1279,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 25.0
+  },
+  "smith_iron_warhammer": {
+   "in": [
+    {
+     "id": 2351,
+     "n": 3
+    }
+   ],
+   "label": "Smith iron warhammer",
+   "level": 24,
+   "out": [
+    {
+     "id": 1335,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#iron_warhammer + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_iron_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_mithril_2h_sword": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 3
+    }
+   ],
+   "label": "Smith mithril 2h sword",
+   "level": 64,
+   "out": [
+    {
+     "id": 1315,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_2h_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_mithril_arrowheads": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 1
+    }
+   ],
+   "label": "Smith mithril arrowtips",
+   "level": 55,
+   "out": [
+    {
+     "id": 42,
+     "n": 15
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_arrowheads + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_mithril_axe": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 1
+    }
+   ],
+   "label": "Smith mithril axe",
+   "level": 51,
+   "out": [
+    {
+     "id": 1355,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_axe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_mithril_battleaxe": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 3
+    }
+   ],
+   "label": "Smith mithril battleaxe",
+   "level": 60,
+   "out": [
+    {
+     "id": 1369,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_battleaxe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_mithril_chainbody": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 3
+    }
+   ],
+   "label": "Smith mithril chainbody",
+   "level": 61,
+   "out": [
+    {
+     "id": 1109,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_chainbody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_mithril_claws": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 2
+    }
+   ],
+   "label": "Smith mithril claws",
+   "level": 63,
+   "out": [
+    {
+     "id": 3099,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_claws + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 100.0
+  },
+  "smith_mithril_dagger": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 1
+    }
+   ],
+   "label": "Smith mithril dagger",
+   "level": 50,
+   "out": [
+    {
+     "id": 1209,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_dagger + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_mithril_dart_tip": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 1
+    }
+   ],
+   "label": "Smith mithril dart tip",
+   "level": 54,
+   "out": [
+    {
+     "id": 822,
+     "n": 10
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_dart_tip + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_mithril_full_helm": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 2
+    }
+   ],
+   "label": "Smith mithril full helm",
+   "level": 57,
+   "out": [
+    {
+     "id": 1159,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_full_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 100.0
+  },
+  "smith_mithril_kiteshield": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 3
+    }
+   ],
+   "label": "Smith mithril kiteshield",
+   "level": 62,
+   "out": [
+    {
+     "id": 1197,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_kiteshield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_mithril_knife": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 1
+    }
+   ],
+   "label": "Smith mithril knife",
+   "level": 57,
+   "out": [
+    {
+     "id": 866,
+     "n": 5
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_knife + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_mithril_longsword": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 2
+    }
+   ],
+   "label": "Smith mithril longsword",
+   "level": 56,
+   "out": [
+    {
+     "id": 1299,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_longsword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 100.0
+  },
+  "smith_mithril_mace": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 1
+    }
+   ],
+   "label": "Smith mithril mace",
+   "level": 52,
+   "out": [
+    {
+     "id": 1428,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_mace + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_mithril_med_helm": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 1
+    }
+   ],
+   "label": "Smith mithril med helm",
+   "level": 53,
+   "out": [
+    {
+     "id": 1143,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_med_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_mithril_platebody": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 5
+    }
+   ],
+   "label": "Smith mithril platebody",
+   "level": 68,
+   "out": [
+    {
+     "id": 1121,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_platebody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 250.0
+  },
+  "smith_mithril_platelegs": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 3
+    }
+   ],
+   "label": "Smith mithril platelegs",
+   "level": 66,
+   "out": [
+    {
+     "id": 1071,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_platelegs + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_mithril_plateskirt": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 3
+    }
+   ],
+   "label": "Smith mithril plateskirt",
+   "level": 66,
+   "out": [
+    {
+     "id": 1085,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_plateskirt + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_mithril_scimitar": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 2
+    }
+   ],
+   "label": "Smith mithril scimitar",
+   "level": 55,
+   "out": [
+    {
+     "id": 1329,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_scimitar + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 100.0
+  },
+  "smith_mithril_sq_shield": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 2
+    }
+   ],
+   "label": "Smith mithril sq shield",
+   "level": 58,
+   "out": [
+    {
+     "id": 1181,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_sq_shield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 100.0
+  },
+  "smith_mithril_sword": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 1
+    }
+   ],
+   "label": "Smith mithril sword",
+   "level": 54,
+   "out": [
+    {
+     "id": 1285,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 50.0
+  },
+  "smith_mithril_warhammer": {
+   "in": [
+    {
+     "id": 2359,
+     "n": 3
+    }
+   ],
+   "label": "Smith mithril warhammer",
+   "level": 59,
+   "out": [
+    {
+     "id": 1343,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#mithril_warhammer + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_mithril_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_nails": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Smith nails",
+   "level": 34,
+   "out": [
+    {
+     "id": 1539,
+     "n": 2
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#nails + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_rune_2h_sword": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 3
+    }
+   ],
+   "label": "Smith rune 2h sword",
+   "level": 99,
+   "out": [
+    {
+     "id": 1319,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_2h_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 225.0
+  },
+  "smith_rune_arrowheads": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 1
+    }
+   ],
+   "label": "Smith rune arrowtips",
+   "level": 90,
+   "out": [
+    {
+     "id": 44,
+     "n": 15
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_arrowheads + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_rune_axe": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 1
+    }
+   ],
+   "label": "Smith rune axe",
+   "level": 86,
+   "out": [
+    {
+     "id": 1359,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_axe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_rune_battleaxe": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 3
+    }
+   ],
+   "label": "Smith rune battleaxe",
+   "level": 95,
+   "out": [
+    {
+     "id": 1373,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_battleaxe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 225.0
+  },
+  "smith_rune_chainbody": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 3
+    }
+   ],
+   "label": "Smith rune chainbody",
+   "level": 96,
+   "out": [
+    {
+     "id": 1113,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_chainbody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 225.0
+  },
+  "smith_rune_claws": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 2
+    }
+   ],
+   "label": "Smith rune claws",
+   "level": 98,
+   "out": [
+    {
+     "id": 3101,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_claws + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_rune_dagger": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 1
+    }
+   ],
+   "label": "Smith rune dagger",
+   "level": 85,
+   "out": [
+    {
+     "id": 1213,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_dagger + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_rune_dart_tip": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 1
+    }
+   ],
+   "label": "Smith rune dart tip",
+   "level": 89,
+   "out": [
+    {
+     "id": 824,
+     "n": 10
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_dart_tip + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_rune_full_helm": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 2
+    }
+   ],
+   "label": "Smith rune full helm",
+   "level": 92,
+   "out": [
+    {
+     "id": 1163,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_full_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_rune_kiteshield": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 3
+    }
+   ],
+   "label": "Smith rune kiteshield",
+   "level": 97,
+   "out": [
+    {
+     "id": 1201,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_kiteshield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 225.0
+  },
+  "smith_rune_knife": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 1
+    }
+   ],
+   "label": "Smith rune knife",
+   "level": 92,
+   "out": [
+    {
+     "id": 868,
+     "n": 5
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_knife + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_rune_longsword": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 2
+    }
+   ],
+   "label": "Smith rune longsword",
+   "level": 91,
+   "out": [
+    {
+     "id": 1303,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_longsword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_rune_mace": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 1
+    }
+   ],
+   "label": "Smith rune mace",
+   "level": 87,
+   "out": [
+    {
+     "id": 1432,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_mace + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_rune_med_helm": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 1
+    }
+   ],
+   "label": "Smith rune med helm",
+   "level": 88,
+   "out": [
+    {
+     "id": 1147,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_med_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_rune_platebody": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 5
+    }
+   ],
+   "label": "Smith rune platebody",
+   "level": 99,
+   "out": [
+    {
+     "id": 1127,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_platebody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 375.0
+  },
+  "smith_rune_platelegs": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 3
+    }
+   ],
+   "label": "Smith rune platelegs",
+   "level": 99,
+   "out": [
+    {
+     "id": 1079,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_platelegs + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 225.0
+  },
+  "smith_rune_plateskirt": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 3
+    }
+   ],
+   "label": "Smith rune plateskirt",
+   "level": 99,
+   "out": [
+    {
+     "id": 1093,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_plateskirt + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 225.0
+  },
+  "smith_rune_scimitar": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 2
+    }
+   ],
+   "label": "Smith rune scimitar",
+   "level": 90,
+   "out": [
+    {
+     "id": 1333,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_scimitar + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_rune_sq_shield": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 2
+    }
+   ],
+   "label": "Smith rune sq shield",
+   "level": 93,
+   "out": [
+    {
+     "id": 1185,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_sq_shield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 150.0
+  },
+  "smith_rune_sword": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 1
+    }
+   ],
+   "label": "Smith rune sword",
+   "level": 89,
+   "out": [
+    {
+     "id": 1289,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_rune_warhammer": {
+   "in": [
+    {
+     "id": 2363,
+     "n": 3
+    }
+   ],
+   "label": "Smith rune warhammer",
+   "level": 94,
+   "out": [
+    {
+     "id": 1347,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#rune_warhammer + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_runite_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 225.0
+  },
+  "smith_steel_2h_sword": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 3
+    }
+   ],
+   "label": "Smith steel 2h sword",
+   "level": 44,
+   "out": [
+    {
+     "id": 1311,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_2h_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 112.5
+  },
+  "smith_steel_arrowheads": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Smith steel arrowtips",
+   "level": 35,
+   "out": [
+    {
+     "id": 41,
+     "n": 15
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_arrowheads + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_steel_axe": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Smith steel axe",
+   "level": 31,
+   "out": [
+    {
+     "id": 1353,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_axe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_steel_battleaxe": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 3
+    }
+   ],
+   "label": "Smith steel battleaxe",
+   "level": 40,
+   "out": [
+    {
+     "id": 1365,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_battleaxe + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 112.5
+  },
+  "smith_steel_chainbody": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 3
+    }
+   ],
+   "label": "Smith steel chainbody",
+   "level": 41,
+   "out": [
+    {
+     "id": 1105,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_chainbody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 112.5
+  },
+  "smith_steel_claws": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 2
+    }
+   ],
+   "label": "Smith steel claws",
+   "level": 43,
+   "out": [
+    {
+     "id": 3097,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_claws + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_steel_dagger": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Smith steel dagger",
+   "level": 30,
+   "out": [
+    {
+     "id": 1207,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_dagger + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_steel_dart_tip": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Smith steel dart tip",
+   "level": 34,
+   "out": [
+    {
+     "id": 821,
+     "n": 10
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_dart_tip + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_steel_full_helm": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 2
+    }
+   ],
+   "label": "Smith steel full helm",
+   "level": 37,
+   "out": [
+    {
+     "id": 1157,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_full_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_steel_kiteshield": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 3
+    }
+   ],
+   "label": "Smith steel kiteshield",
+   "level": 42,
+   "out": [
+    {
+     "id": 1193,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_kiteshield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 112.5
+  },
+  "smith_steel_knife": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Smith steel knife",
+   "level": 37,
+   "out": [
+    {
+     "id": 865,
+     "n": 5
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_knife + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_steel_longsword": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 2
+    }
+   ],
+   "label": "Smith steel longsword",
+   "level": 36,
+   "out": [
+    {
+     "id": 1295,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_longsword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_steel_mace": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Smith steel mace",
+   "level": 32,
+   "out": [
+    {
+     "id": 1424,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_mace + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_steel_med_helm": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Smith steel med helm",
+   "level": 33,
+   "out": [
+    {
+     "id": 1141,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_med_helm + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_steel_platebody": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 5
+    }
+   ],
+   "label": "Smith steel platebody",
+   "level": 48,
+   "out": [
+    {
+     "id": 1119,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_platebody + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 187.5
+  },
+  "smith_steel_platelegs": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 3
+    }
+   ],
+   "label": "Smith steel platelegs",
+   "level": 46,
+   "out": [
+    {
+     "id": 1069,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_platelegs + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 112.5
+  },
+  "smith_steel_plateskirt": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 3
+    }
+   ],
+   "label": "Smith steel plateskirt",
+   "level": 46,
+   "out": [
+    {
+     "id": 1083,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_plateskirt + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 112.5
+  },
+  "smith_steel_scimitar": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 2
+    }
+   ],
+   "label": "Smith steel scimitar",
+   "level": 35,
+   "out": [
+    {
+     "id": 1325,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_scimitar + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_steel_sq_shield": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 2
+    }
+   ],
+   "label": "Smith steel sq shield",
+   "level": 38,
+   "out": [
+    {
+     "id": 1177,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_sq_shield + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
+  },
+  "smith_steel_studs": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Smith steel studs",
+   "level": 36,
+   "out": [
+    {
+     "id": 2370,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_studs + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_steel_sword": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 1
+    }
+   ],
+   "label": "Smith steel sword",
+   "level": 34,
+   "out": [
+    {
+     "id": 1281,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_sword + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 37.5
+  },
+  "smith_steel_warhammer": {
+   "in": [
+    {
+     "id": 2353,
+     "n": 3
+    }
+   ],
+   "label": "Smith steel warhammer",
+   "level": 39,
+   "out": [
+    {
+     "id": 1339,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/configs/smithing/smithing.dbrow#steel_warhammer + scripts/skill_smithing/configs/smithing/smithing.struct#smithing_steel_bar param=xpperbar",
+   "tools": [
+    2347
+   ],
+   "xp": 112.5
+  }
+ }
+}

@@ -1,7 +1,7 @@
-// sample-data.js — a plausible bank, in the same shape savParser.js produces
-// ([{ id, count }]), so visitors without a save file can see a real report.
-// Ids are real Lost City item ids, so this renders through the same catalog
-// and price lookup as a genuine save.
+// sample-data.js — a plausible bank and a plausible character, in the same
+// shapes savParser.js produces, so visitors without a save file can see a real
+// report. Ids are real Lost City item ids, so this renders through the same
+// catalog and price lookup as a genuine save.
 (function () {
   window.SAMPLE_BANK = [
     { id: 995, count: 1750000 },   // Coins
@@ -34,4 +34,39 @@
     { id: 1042, count: 1 },        // Blue partyhat  (rare — volatile)
     { id: 1050, count: 1 },        // Santa hat      (rare — volatile)
   ];
+
+  // Stats in savParser.js's shape ({ xp, current }), so the XP tab can show the
+  // "60 → 68" line it exists for rather than falling back to level 1.
+  //
+  // These belong to the bank above: someone mid-fletching-grind with 1,200 yew
+  // logs and 2,000 bow string, who has not reached the level 85 magic longbows
+  // also sitting in there. That makes the sample show the two things that are
+  // easy to miss — a recipe badged above your level, and yew logs contested
+  // between Fletching and Firemaking.
+  //
+  // `current` is the drained/boosted level a save stores; nothing reads it, and
+  // it is here only so the sample has the same shape as a parsed save.
+  window.SAMPLE_STATS = {
+    attack: { xp: 759693, current: 70 },
+    defence: { xp: 616157, current: 68 },
+    strength: { xp: 1044234, current: 73 },
+    hitpoints: { xp: 911089, current: 72 },
+    ranged: { xp: 424954, current: 64 },
+    prayer: { xp: 52006, current: 43 },
+    magic: { xp: 305979, current: 61 },
+    cooking: { xp: 347887, current: 62 },
+    woodcutting: { xp: 823265, current: 71 },
+    fletching: { xp: 283948, current: 60 },
+    fishing: { xp: 227386, current: 58 },
+    firemaking: { xp: 169038, current: 55 },
+    crafting: { xp: 232702, current: 58 },
+    smithing: { xp: 527748, current: 66 },
+    mining: { xp: 374716, current: 63 },
+    herblore: { xp: 62954, current: 45 },
+    agility: { xp: 78925, current: 47 },
+    thieving: { xp: 44162, current: 41 },
+    slayer: { xp: 0, current: 1 },
+    farming: { xp: 0, current: 1 },
+    runecraft: { xp: 19135, current: 33 },
+  };
 })();

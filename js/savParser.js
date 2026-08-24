@@ -14,6 +14,23 @@
   const INV_MAIN = 93;
   const INV_WORN = 94;
 
+  // The save writes 21 stat slots but Content's stat.constant names only 19,
+  // and the two lists disagree on order — so the mapping below is the engine's
+  // RS2 stat order, verified rather than assumed.
+  //
+  // The check: for every stat, the stored level byte should equal the level the
+  // xp implies. Across four real saves (84 stats) that held everywhere except
+  // hitpoints in three of them and prayer in one — which is exactly the pair of
+  // stats that get *drained*, and pins the ordering. Slots 18 and 19 (slayer,
+  // farming) are always zero here; Lost City has not implemented them, but the
+  // engine still reserves their place in the RS2 order.
+  const STAT_ORDER = [
+    'attack', 'defence', 'strength', 'hitpoints', 'ranged', 'prayer', 'magic',
+    'cooking', 'woodcutting', 'fletching', 'fishing', 'firemaking', 'crafting',
+    'smithing', 'mining', 'herblore', 'agility', 'thieving', 'slayer',
+    'farming', 'runecraft',
+  ];
+
   class SavParseError extends Error {}
 
   function parseSave(arrayBuffer) {
@@ -41,9 +58,19 @@
     else p.g2(); // playtime
 
     // stats: 21 skills, each (exp:int32, level:byte)
+    //
+    // Two things the layout does not advertise:
+    //   * xp is stored in tenths, the same as `stat_advance` takes in Content.
+    //     A fletching field reading 130,344,716 is 13,034,471.6 xp.
+    //   * the level byte is the player's *current* level, which is drained by
+    //     damage and by praying, so it is not the base level. Base level is
+    //     computed from xp instead; the stored byte is kept as `current` so a
+    //     reader can see the difference.
+    const stats = {};
     for (let i = 0; i < 21; i++) {
-      p.g4s(); // exp
-      p.g1(); // level
+      const xp = p.g4s() / 10;
+      const current = p.g1();
+      stats[STAT_ORDER[i]] = { xp, current };
     }
 
     // varps
@@ -91,6 +118,7 @@
     return {
       magic,
       version,
+      stats,
       inventories,
       bank,
       inventory: inventories.find((inv) => inv.type === INV_MAIN) || null,
@@ -98,5 +126,7 @@
     };
   }
 
-  window.SavParser = { parseSave, SavParseError, INV_BANK, INV_MAIN, INV_WORN };
+  window.SavParser = {
+    parseSave, SavParseError, STAT_ORDER, INV_BANK, INV_MAIN, INV_WORN,
+  };
 })();
