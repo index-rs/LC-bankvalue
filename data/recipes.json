@@ -1,7 +1,7 @@
 {
  "meta": {
   "bySkill": {
-   "crafting": 77,
+   "crafting": 83,
    "firemaking": 6,
    "fletching": 48,
    "herblore": 43,
@@ -11,7 +11,7 @@
    "smithing": 139
   },
   "contentBuild": "274",
-  "count": 357,
+  "count": 363,
   "knownGaps": [
    "Superheat item (magic_spells.dbrow#magic_spell_superheat) smelts an ore and pays Magic xp *and* Smithing xp off one cast \u2014 two skills from one action, which this schema's one-skill-per-recipe shape cannot express.",
    "Chiselling wolf bones into arrow tips pays Fletching *and* Crafting off one action (ogre_arrows.rs2:66-67). Only the Fletching half is counted, for the same reason superheat is missing entirely.",
@@ -7983,6 +7983,132 @@
     2347
    ],
    "xp": 112.5
+  },
+  "tan_cow_hide_to_hard_leather": {
+   "fee": 3,
+   "in": [
+    {
+     "id": 1739,
+     "n": 1
+    }
+   ],
+   "label": "Tan cow hide into hard leather",
+   "level": 1,
+   "note": "no xp \u2014 the tanner charges 3 gp a hide, and every leather recipe needs it done first",
+   "out": [
+    {
+     "id": 1743,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/areas/area_alkharid/scripts/tanner.rs2 @tan_soft_leather / @tan_hard_leather / @tan_dragonhide + configs/tanner.constant",
+   "xp": 0.0
+  },
+  "tan_cow_hide_to_leather": {
+   "fee": 1,
+   "in": [
+    {
+     "id": 1739,
+     "n": 1
+    }
+   ],
+   "label": "Tan cow hide into leather",
+   "level": 1,
+   "note": "no xp \u2014 the tanner charges 1 gp a hide, and every leather recipe needs it done first",
+   "out": [
+    {
+     "id": 1741,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/areas/area_alkharid/scripts/tanner.rs2 @tan_soft_leather / @tan_hard_leather / @tan_dragonhide + configs/tanner.constant",
+   "xp": 0.0
+  },
+  "tan_dragonhide_black_to_dragon_leather_black": {
+   "fee": 20,
+   "in": [
+    {
+     "id": 1747,
+     "n": 1
+    }
+   ],
+   "label": "Tan black dragonhide into black dragon leather",
+   "level": 1,
+   "note": "no xp \u2014 the tanner charges 20 gp a hide, and every leather recipe needs it done first",
+   "out": [
+    {
+     "id": 2509,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/areas/area_alkharid/scripts/tanner.rs2 @tan_soft_leather / @tan_hard_leather / @tan_dragonhide + configs/tanner.constant",
+   "xp": 0.0
+  },
+  "tan_dragonhide_blue_to_dragon_leather_blue": {
+   "fee": 20,
+   "in": [
+    {
+     "id": 1751,
+     "n": 1
+    }
+   ],
+   "label": "Tan blue dragonhide into blue dragon leather",
+   "level": 1,
+   "note": "no xp \u2014 the tanner charges 20 gp a hide, and every leather recipe needs it done first",
+   "out": [
+    {
+     "id": 2505,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/areas/area_alkharid/scripts/tanner.rs2 @tan_soft_leather / @tan_hard_leather / @tan_dragonhide + configs/tanner.constant",
+   "xp": 0.0
+  },
+  "tan_dragonhide_green_to_dragon_leather": {
+   "fee": 20,
+   "in": [
+    {
+     "id": 1753,
+     "n": 1
+    }
+   ],
+   "label": "Tan green dragonhide into green dragon leather",
+   "level": 1,
+   "note": "no xp \u2014 the tanner charges 20 gp a hide, and every leather recipe needs it done first",
+   "out": [
+    {
+     "id": 1745,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/areas/area_alkharid/scripts/tanner.rs2 @tan_soft_leather / @tan_hard_leather / @tan_dragonhide + configs/tanner.constant",
+   "xp": 0.0
+  },
+  "tan_dragonhide_red_to_dragon_leather_red": {
+   "fee": 20,
+   "in": [
+    {
+     "id": 1749,
+     "n": 1
+    }
+   ],
+   "label": "Tan red dragonhide into red dragon leather",
+   "level": 1,
+   "note": "no xp \u2014 the tanner charges 20 gp a hide, and every leather recipe needs it done first",
+   "out": [
+    {
+     "id": 2507,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/areas/area_alkharid/scripts/tanner.rs2 @tan_soft_leather / @tan_hard_leather / @tan_dragonhide + configs/tanner.constant",
+   "xp": 0.0
   }
  }
 }

@@ -333,6 +333,25 @@ UNRELEASED = {
 # Filled in as handlers skip them, so a stale entry cannot go unnoticed.
 SKIPPED_UNRELEASED = set()
 
+# Tanning: no xp, but without it a bank of raw hide is inert, because every
+# craft_leather_table row wants tanned leather. Costs are the constants in
+# area_alkharid/configs/tanner.constant; the werewolf tanner in Canifis
+# charges more (2/5/45) and is not modelled, since nobody walks past
+# Al Kharid to pay double.
+#
+#   hide -> leather, gp per hide, source
+TANNING = [
+    ("cow_hide", "leather", 1),
+    ("cow_hide", "hard_leather", 3),
+    ("dragonhide_green", "dragon_leather", 20),
+    ("dragonhide_blue", "dragon_leather_blue", 20),
+    ("dragonhide_red", "dragon_leather_red", 20),
+    ("dragonhide_black", "dragon_leather_black", 20),
+]
+TANNING_SRC = ("scripts/areas/area_alkharid/scripts/tanner.rs2 "
+               "@tan_soft_leather / @tan_hard_leather / @tan_dragonhide "
+               "+ configs/tanner.constant")
+
 # quest.enum:22 — the varp these recipes gate on is %chompybird.
 OGRE_QUEST = "Big Chompy Bird Hunting"
 
@@ -681,6 +700,27 @@ def h_gem_cutting(c, r):
         )
 
 
+def h_tanning(c, r):
+    """
+    Raw hide -> tanned leather. Pays nothing and costs coins, so it is not a
+    recipe in the xp sense — but it is the only way a bank of dragonhide
+    reaches the crafting table, and leaving it out made 700 green dragonhide
+    read as worth zero Crafting xp.
+
+    Filed under crafting so the chain walk can use it: the solve is per skill,
+    and a conversion step is only reachable by the skill it feeds.
+    """
+    for hide, leather, fee in TANNING:
+        r.add(
+            f"tan_{hide}_to_{leather}", skill="crafting", level=1, xp=0.0,
+            label=f"Tan {c.obj_name(hide).lower()} into {c.obj_name(leather).lower()}",
+            inp=[(hide, 1)], out=[(leather, 1)],
+            src=TANNING_SRC, extra={"fee": fee},
+            note=f"no xp — the tanner charges {fee} gp a hide, and every "
+                 f"leather recipe needs it done first",
+        )
+
+
 def h_leather(c, r):
     """craft_leather_table. The `leather` column carries its own count."""
     for name, rel, kv in c.rows("craft_leather_table"):
@@ -971,7 +1011,8 @@ def h_literals(c, r):
 
 HANDLERS = [
     h_fletching_logs, h_fletching_table, h_firemaking, h_prayer,
-    h_smelting, h_smithing_anvil, h_gem_cutting, h_leather, h_struct_pairs,
+    h_smelting, h_smithing_anvil, h_gem_cutting, h_tanning, h_leather,
+    h_struct_pairs,
     h_glassblowing, h_pottery, h_jewellery, h_herblore, h_runecraft, h_magic,
     h_literals,
 ]

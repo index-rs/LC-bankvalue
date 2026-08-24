@@ -64,6 +64,10 @@
     if (step.chance) {
       badges.push(`<span class="xp-badge chance" title="${esc(step.note || '')}">estimate</span>`);
     }
+    if (step.fee) {
+      badges.push(`<span class="xp-badge prep" title="Costs ${fmt(step.fee)} gp each ` +
+                  `and pays no xp, but the recipes downstream need it done">prep</span>`);
+    }
     if (step.quest) {
       badges.push(`<span class="xp-badge quest" title="Needs ${esc(step.quest)}` +
                   `">quest</span>`);
@@ -100,8 +104,15 @@
       <div class="xp-step${step.aboveLevel ? ' is-above' : ''}">
         <span class="xp-step-label" title="${esc(step.src)}">${esc(step.label)}${badges.join('')}</span>
         <span class="xp-step-times">&times;${fmt(step.times)}</span>
-        <span class="xp-step-each">${fmtXpEach(step.xpEach)} xp</span>
-        <span class="xp-step-total">${fmt(step.xp)}</span>
+        <span class="xp-step-each">${
+          step.fee && !step.xp ? `${fmt(step.fee)} gp` : `${fmtXpEach(step.xpEach)} xp`
+        }</span>
+        <span class="xp-step-total">${
+          step.fee && !step.xp ? `&mdash;${
+            step.fee * step.times
+              ? ` <span class="xp-fee">-${fmtCompact(step.fee * step.times)} gp</span>`
+              : ''}` : fmt(step.xp)
+        }</span>
         ${eaten}${alts}
       </div>`;
   }

@@ -195,6 +195,7 @@
     let totalXp = 0;
     let estimatedXp = 0; // the slice of totalXp that came from a roll
     let alchCoins = 0;   // coins alchemy hands back, which are a real product
+    let fees = 0;        // coins paid to NPCs on the way, e.g. the tanner
     let truncated = false; // did the walk hit MAX_PASSES with work left to do?
 
     // recipeList is [key, recipe] pairs — destructure, or every recipe reads
@@ -266,7 +267,31 @@
       for (const input of recipe.in) {
         worst = Math.min(worst, expectedXp(recipe, level) / input.n);
       }
-      return worst;
+      return worst > 0 ? worst : lookahead(recipe);
+    }
+
+    // A step that pays nothing is a prerequisite, not a choice. Tanning hides
+    // costs coins and gives no xp, so on its own score it would sort below
+    // literally everything and only fire once the walk had nothing better to
+    // do — which works, but says nothing about *which* conversion to pick.
+    //
+    // So a zero-xp step is scored by the best rate its product unlocks. That
+    // also settles cowhide, where the answer moves with level: hard leather is
+    // 35 xp a hide, soft leather tops out at 27 until coifs open at 38 and
+    // make it 37.
+    function lookahead(recipe) {
+      const inputUnits = recipe.in.reduce((sum, i) => sum + i.n, 0) || 1;
+      let best = 0;
+      for (const out of recipe.out) {
+        for (const [, other] of usable) {
+          if (other === recipe || other.anyItem) continue;
+          const slot = other.in.find((i) => i.id === out.id);
+          if (!slot) continue;
+          const rate = (expectedXp(other, level) / slot.n) * (out.n / inputUnits);
+          if (rate > best) best = rate;
+        }
+      }
+      return best;
     }
 
     // Every product made from a given bar pays the same xp per bar, so a whole
@@ -299,6 +324,7 @@
         produced.set(out.id, (produced.get(out.id) || 0) + made);
       });
 
+      if (recipe.fee) fees += recipe.fee * times;
       const each = expectedXp(recipe, level);
       const gained = each * times;
       totalXp += gained;
@@ -321,6 +347,7 @@
           aboveLevel: recipe.level > level,
           chance: recipe.chance || null,
           quest: recipe.quest || null,
+          fee: recipe.fee || 0,
           note: recipe.note || null,
           src: recipe.src,
           in: recipe.in,
@@ -461,7 +488,7 @@
 
     // gp: what went in, and what came out and survived. A product that a later
     // recipe ate is not counted twice — only stock still standing at the end.
-    let valueIn = 0;
+    let valueIn = fees;
     consumed.forEach((qty, id) => {
       const fromBank = Math.min(qty, baseStock.get(id) || 0);
       valueIn += fromBank * unitPrice(id, itemsDb, pricesDb);
@@ -479,6 +506,7 @@
       label: SKILL_LABELS[skill] || skill,
       steps,
       truncated,
+      fees,
       totalXp,
       estimatedXp,
       valueIn,

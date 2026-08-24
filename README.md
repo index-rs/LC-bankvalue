@@ -405,6 +405,21 @@ Ties are broken on what the product is worth — a whole tier of smithing recipe
 same XP per bar, so the XP is identical either way and picking at random would make the gp
 line meaningless.
 
+**Steps that pay nothing are scored by what they unlock.** Tanning gives no XP and costs
+coins, but every `craft_leather_table` row wants tanned leather, so without it a bank of
+700 dragonhide reads as worth zero Crafting — which it did, until it didn't. On its own
+score a zero-XP step sorts below everything; instead it takes the best rate its product
+unlocks. That also settles cowhide, where the right answer moves with level:
+
+| Crafting level | tans into | because |
+|---|---|---|
+| 30 | hard leather, 3 gp | hardleather body, 35 XP a hide |
+| 70 | soft leather, 1 gp | coif opens at 38 and pays 37 |
+
+Those steps are badged `prep`, show the fee per unit rather than an XP rate, and their
+total cost lands in the skill's gp line — 14K gp to tan 700 hides is a real cost of the
+43,400 XP it leads to.
+
 **And the roads not taken are shown.** One answer per skill is not the same as the only
 sane answer: law runes pay more XP per essence than nature, which does not make nature the
 wrong call. So every step lists what the same limiting stock would have paid through the
@@ -456,6 +471,11 @@ skill that otherwise works, since that still *looks* like an answer — so those
 too, in `knownGaps`. Currently: superheat item and the Crafting half of wolf-bone arrow
 tips (both pay two skills off one action, which the one-skill-per-recipe schema can't
 express), cape dyeing and snelm carving.
+
+**Raw materials count.** Hides are tanned at the Al Kharid tanner — 1 gp for soft leather,
+3 for hard, 20 a dragonhide (`tanner.constant`) — and the report assumes you'll do it,
+rather than treating raw hide as inert. The Canifis werewolf tanner charges 2/5/45 and
+isn't modelled; nobody walks past Al Kharid to pay double.
 
 **Quest content ships.** The ogre arrow chain needs Big Chompy Bird Hunting, and it is
 included rather than dropped — a player knows whether they've done the quest, and leaving
