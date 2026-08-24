@@ -78,13 +78,27 @@
         (step.coins ? ` &mdash; pays ${fmtCompact(step.coins)} gp in coins` : '') +
         `</div>`
       : '';
+    const alts = step.alternatives && step.alternatives.length
+      ? `<div class="xp-step-note xp-alts">Same ${fmt(step.limitQty)} ` +
+        `${esc((step.limitName || 'stock').toLowerCase())} instead &mdash; ` +
+        step.alternatives.map((a) =>
+          `<span class="xp-alt${a.aboveLevel ? ' is-above' : ''}"` +
+          `${a.aboveLevel ? ` title="needs level ${a.level}"` : ''}` +
+          `${a.capped ? ' title="limited by its other ingredients in this bank"' : ''}>` +
+          `${esc(a.label)}${a.capped ? ` &times;${fmt(a.times)}` : ''} ` +
+          `<b>${fmtCompact(a.xp)}</b>` +
+          `${a.aboveLevel ? ` <i>lvl ${a.level}</i>` : ''}</span>`
+        ).join('') +
+        (step.altMore ? `<span class="xp-alt-more">+${step.altMore} more</span>` : '') +
+        `</div>`
+      : '';
     return `
       <div class="xp-step${step.aboveLevel ? ' is-above' : ''}">
         <span class="xp-step-label" title="${esc(step.src)}">${esc(step.label)}${badges.join('')}</span>
         <span class="xp-step-times">&times;${fmt(step.times)}</span>
         <span class="xp-step-each">${fmtXpEach(step.xpEach)} xp</span>
         <span class="xp-step-total">${fmt(step.xp)}</span>
-        ${eaten}
+        ${eaten}${alts}
       </div>`;
   }
 
@@ -215,6 +229,16 @@
         <ul>${names.map((n) =>
           `<li><b>${esc(n[0].toUpperCase() + n.slice(1))}</b> &mdash; ${esc(notCovered[n])}</li>`
         ).join('')}</ul>
+        ${Object.keys(meta.unreleased || {}).length ? `
+        <h3>and ${Object.keys(meta.unreleased).length} recipe${
+          Object.keys(meta.unreleased).length === 1 ? '' : 's'} Content describes but the
+          2004 game doesn't have</h3>
+        <p>A row in a config file is not the same claim as a thing you can do. These are
+           dropped on purpose — left in, they'd be the best rate in their skill and would
+           quietly dominate the answer.</p>
+        <ul>${Object.entries(meta.unreleased).map(([row, why]) =>
+          `<li><b>${esc(row)}</b> &mdash; ${esc(why)}</li>`
+        ).join('')}</ul>` : ''}
         ${(meta.knownGaps || []).length ? `
         <h3>and ${meta.knownGaps.length} gaps inside the skills it does cover</h3>
         <p>Riskier than a missing skill, because a skill that half works still looks

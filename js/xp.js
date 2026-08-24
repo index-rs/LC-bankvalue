@@ -203,6 +203,15 @@
         (sum, o) => sum + o.n * unitPrice(o.id, itemsDb, pricesDb), 0);
     }
 
+    // Which input ran out first. That is the one the recipe was really
+    // competing for, and so the one an alternative has to be measured against.
+    function limitingInput(recipe, times) {
+      for (const input of recipe.in) {
+        if (Math.floor((stock.get(input.id) || 0) / input.n) === times) return input;
+      }
+      return recipe.in[0];
+    }
+
     function fire(recipe, key, times) {
       recipe.in.forEach((input) => {
         const take = input.n * times;
@@ -227,6 +236,8 @@
       } else {
         const step = {
           key,
+          recipe,
+          limit: limitingInput(recipe, times),
           label: recipe.label,
           level: recipe.level,
           xpEach: each,
@@ -310,6 +321,67 @@
         alchCoins += step.coins;
       }
     }
+
+    // What else that same stock could have become.
+    //
+    // The walk reports one answer per skill, but "highest xp per unit" is a
+    // stated choice, not the only sane one — a runecrafter with 400k essence
+    // wants to see the whole ladder, not just the top rung, because law runes
+    // being worth more xp than nature does not make nature the wrong call.
+    // So every step carries what the *same* limiting stock would have paid
+    // through the recipes that lost.
+    //
+    // Only recipes that lost on xp are listed. A whole tier of smithing ties
+    // exactly (same xp per bar whatever you hammer), and listing eight
+    // identical numbers would say nothing.
+    steps.forEach((step) => {
+      const limit = step.limit;
+      const alternatives = [];
+      if (limit) {
+        for (const [, other] of usable) {
+          if (other === step.recipe || other.anyItem) continue;
+          const slot = other.in.find((i) => i.id === limit.id);
+          if (!slot || slot.n !== limit.n) continue;
+          const each = expectedXp(other, level);
+          if (Math.abs(each - step.xpEach) < 1e-9) continue;
+          // An alternative is only worth as much as its *other* ingredients
+          // allow. 14,583 iron ore is 255k xp of steel bars on paper and 1.5k
+          // in practice if the bank holds 168 coal — offering the paper figure
+          // would be the same double-counting the per-skill split exists to
+          // avoid, one level down. Measured against the original bank, since
+          // that is what "if you had spent it this way instead" means.
+          let times = step.times;
+          let capped = false;
+          for (const input of other.in) {
+            if (input.id === limit.id) continue;
+            const possible = Math.floor((baseStock.get(input.id) || 0) / input.n);
+            if (possible < times) {
+              times = possible;
+              capped = true;
+            }
+          }
+          if (times <= 0) continue;
+          alternatives.push({
+            label: other.label,
+            level: other.level,
+            xpEach: each,
+            times,
+            capped,
+            xp: each * times,
+            aboveLevel: other.level > level,
+          });
+        }
+        alternatives.sort((a, b) => b.xp - a.xp);
+      }
+      step.alternatives = alternatives.slice(0, 5);
+      step.altMore = Math.max(0, alternatives.length - 5);
+      if (limit) {
+        step.limitName = itemName(limit.id, itemsDb);
+        step.limitQty = step.times * limit.n;
+      }
+      delete step.recipe;
+      delete step.limit;
+    });
 
     // gp: what went in, and what came out and survived. A product that a later
     // recipe ate is not counted twice — only stock still standing at the end.

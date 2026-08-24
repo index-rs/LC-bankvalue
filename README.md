@@ -337,6 +337,34 @@ The fourth can't be extracted, so it's a short hand-written table (`LITERALS`) w
 hand-maintained parts **fail the build loudly** rather than silently dropping recipes: if a
 slug or block they name stops existing, `build_recipes.py` errors out.
 
+### A config row is not a shipped recipe
+
+The extractor's first version treated "this row exists in Content" as "you can do this in
+the game". Those are different claims, and the gap between them is invisible in the output.
+
+Lost City is pinned to a 2004 snapshot, but some tables carry rows for content that arrived
+later. `runecraft.dbrow` has a death rune row — level 65, 10 XP an essence, the best rate in
+the table — so the solver happily told everyone to bind death runes. **Death runecrafting
+was added in mid-to-late 2005.** The row is there; the way in is not.
+
+The test that catches it: every tool a recipe requires should appear somewhere that could
+put it in a player's hands — a drop table, a shop, a spawn, a quest reward. Grep the whole
+`scripts/` tree for the slug, excluding `.obj`/`.param`/`.dbtable` (which say what an item
+*is*, not where it comes from) and `/_test/` (cheat commands).
+
+Run across all 22 tool items, exactly one came back empty: `death_talisman` appears only in
+`obj.pack`, its own `runecraft.obj` definition, and `_test/scripts/cheats/cheat_bank.rs2`.
+Every other talisman has at least one real source — `law_talisman` comes from `quest_death`
+and `quest_troll`. The row has a second tell too: it is the only one in the table whose
+`enter_coord` and `exit_coord` are both just the `altar_coord`, where every released altar
+has distinct ones.
+
+So it lives in `UNRELEASED` with that reasoning attached, the build errors out if the row it
+names ever disappears, and `build_recipes.py` re-runs the tool-source grep on every build
+and warns about anything new. That check is a warning rather than an error because it is a
+grep heuristic, and a false positive shouldn't block a rebuild — but a new name in it means
+a row wants looking at.
+
 Two traps in that data, both of which produce a wrong answer rather than an error:
 
 **Everything is in tenths.** `stat_advance` takes tenths of an xp point, so
@@ -369,14 +397,32 @@ bows *and then* string them — two XP grants off one log — so the solve consu
 the products back, and goes round again until nothing more can fire.
 
 When two recipes want the same item, **the one paying more XP per unit of that item wins.**
-That's a deliberate choice, not an approximation nobody noticed. For fletching it's exactly
-right (longbow beats shortbow at every tier), and it gets smelting right for the same
-reason: per iron ore, steel pays 17.5 and iron pays 12.5, halved again by its failure roll.
-Where it isn't what you'd do, the step list shows which branch was taken.
+That's a deliberate choice, not an approximation nobody noticed. A recipe is scored on the
+worst rate it pays across its inputs, so steel — one iron ore *and two coal* — is ranked on
+the coal rather than on the ore.
 
 Ties are broken on what the product is worth — a whole tier of smithing recipes pays the
 same XP per bar, so the XP is identical either way and picking at random would make the gp
 line meaningless.
+
+**And the roads not taken are shown.** One answer per skill is not the same as the only
+sane answer: law runes pay more XP per essence than nature, which does not make nature the
+wrong call. So every step lists what the same limiting stock would have paid through the
+recipes that lost:
+
+```
+Bind law runes                    ×467,727   9.5 xp   4,443,407
+  Same 467,727 rune essence instead —
+  Bind nature runes 4.21M · Bind chaos runes 3.98M · Bind cosmic runes 3.74M
+  · Bind body runes 3.51M · Bind fire runes 3.27M  +4 more
+```
+
+Alternatives are capped by their *own* ingredients, which matters more than it sounds.
+14,583 iron ore is 255K XP of steel bars on paper and 1.5K in a bank holding 168 coal; the
+paper figure would be the same double-counting the per-skill split exists to prevent, one
+level down. Where an alternative is short it shows the count it could actually reach
+(`Smelt steel bar ×84`). Recipes that tie exactly on XP aren't listed — eight identical
+numbers say nothing.
 
 ### Levels come from the save, and are computed, not read
 

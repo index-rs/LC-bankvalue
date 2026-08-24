@@ -700,3 +700,22 @@ footer.site-footer {
   .xp-skill-head { flex-wrap: wrap; }
   .xp-skill-head .category-bar { order: 5; flex-basis: 100%; }
 }
+
+/* Roads not taken: what the same limiting stock would pay through the recipes
+   that lost the tie-break. Wraps, since a runecrafter has nine of them. */
+.xp-alts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding-top: 2px;
+}
+.xp-alt {
+  white-space: nowrap;
+  border-left: 2px solid var(--border-2);
+  padding-left: 6px;
+}
+.xp-alt b { color: var(--text-2); font-weight: 500; }
+.xp-alt.is-above { opacity: 0.6; }
+.xp-alt.is-above i { font-style: normal; color: var(--gold); }
+.xp-alt-more { color: var(--text-3); }

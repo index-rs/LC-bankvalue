@@ -271,6 +271,23 @@ crafting, smithing, herblore (including struct-driven brewing, which landed earl
 and magic. Still open: cooking, and a proper success model for the rolls that are currently
 reported as expectations.
 
+## What the first build got wrong
+
+Two things worth keeping, because neither was visible in the output.
+
+**A config row is not a shipped recipe.** The extractor read `runecraft.dbrow` and emitted
+a death rune recipe — the best XP per essence in the table, so it dominated every
+runecrafting answer. Death runecrafting arrived in 2005; build 274 has the row but no
+`death_talisman` anywhere a player could reach. Caught by a user, not by the build. There is
+now a tool-source check that greps for every required tool outside `.obj`/`_test`, and it
+flags exactly one item across all 354 recipes.
+
+**One answer per skill is not the only sane answer.** The greedy walk reports the single
+highest-XP-per-unit recipe, which for runecraft is always the top rune you can reach. Real
+players craft nature, law and fire. The fix is not to change the tie-break — it is right,
+and stated — but to show the ladder underneath it, capped by each alternative's own
+ingredients.
+
 ## Risks
 
 * **Content drift.** Build 274 is pinned today. The co-input table and any hardcoded

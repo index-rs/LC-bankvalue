@@ -68,7 +68,8 @@ RECIPES_PATH = DATA_DIR / "recipes.json"
 
 # Suffixes worth carrying in memory. .rs2 is included only so the herb-identify
 # handler can read its opheld1 dispatch table; nothing else parses script text.
-WANT = (".obj", ".dbrow", ".dbtable", ".struct", ".param", ".rs2")
+WANT = (".obj", ".dbrow", ".dbtable", ".struct", ".param", ".rs2",
+        ".loc", ".npc", ".inv")
 
 
 class BuildError(Exception):
@@ -304,6 +305,33 @@ BOLT_TIP_SRC = ("skill_crafting/scripts/gem/uncut_gem.rs2:6 "
 SILVER_STRUCTS = {"unstrung_symbol", "unstrung_emblem", "silver_sickle"}
 SILVER_SRC = ("skill_crafting/configs/jewellery/silver.obj param=crafting_jewelry_struct "
               "+ scripts/jewellery/jewellery.rs2:326 inv_del(inv, silver_bar, 1)")
+
+# Rows that exist in Content but cannot be reached by a player in this build.
+#
+# A config row is not a promise the content shipped. Lost City is pinned to a
+# 2004 snapshot, and some tables carry rows for things that arrived later; the
+# row is there, the way in is not. Extracting one anyway invents a recipe, and
+# it is the kind of error that looks completely normal in the output.
+#
+# The test that caught this: every tool item a recipe requires should appear
+# somewhere that could put it in a player's hands — a drop table, a shop, a
+# spawn, a quest reward. Grep the whole scripts/ tree for the slug, excluding
+# .obj/.param/.dbtable (which say what an item *is*, not where it comes from)
+# and /_test/ (cheat commands). Re-run that when Content updates; the build
+# prints a warning for any tool that comes back empty.
+UNRELEASED = {
+    "runecraft_death":
+        "death_talisman has no source anywhere in build 274 — it appears only "
+        "in pack/obj.pack, its own runecraft.obj definition, and "
+        "_test/scripts/cheats/cheat_bank.rs2, while every other talisman has "
+        "at least one drop, shop or quest source. The row is also the only one "
+        "in runecraft.dbrow whose enter_coord and exit_coord are both just the "
+        "altar_coord, where every released altar has distinct ones. Death "
+        "runecrafting arrived in 2005.",
+}
+
+# Filled in as handlers skip them, so a stale entry cannot go unnoticed.
+SKIPPED_UNRELEASED = set()
 
 # Shape 4: literals in .rs2 bodies. Every entry cites file:line.
 LITERALS = [
@@ -804,6 +832,9 @@ def h_runecraft(c, r):
     evaluate against the player's real level rather than baked in at 1.
     """
     for name, rel, kv in c.rows("runecraft_table"):
+        if name in UNRELEASED:
+            SKIPPED_UNRELEASED.add(name)
+            continue
         rune = one(kv, "rune")
         talisman = one(kv, "talisman")
         mult = one(kv, "multiplier")
@@ -930,6 +961,51 @@ NOT_COVERED = {
 }
 
 
+def check_tool_sources(content, recipes):
+    """
+    Warn about any tool a recipe requires that nothing in the game can give you.
+
+    This is the check that caught death runecrafting: `death_talisman` is
+    required by a real config row, but the only places the slug appears are its
+    own item definition and a test cheat. A recipe gated behind an item with no
+    source is a recipe no player can do.
+
+    A warning rather than an error, because it is a grep heuristic and a false
+    positive should not block a rebuild — but a new one means a row wants
+    looking at, and probably an entry in UNRELEASED.
+    """
+    tools = sorted({t for r in recipes.values() for t in r.get("tools", ())})
+    by_id = {gid: slug for slug, gid in content.slug_to_id.items()}
+    orphans = []
+    for gid in tools:
+        slug = by_id.get(gid)
+        if not slug:
+            continue
+        pattern = re.compile(r"\b" + re.escape(slug) + r"\b")
+        found = False
+        for rel, text in content.tree.items():
+            # .obj/.param/.dbtable say what an item is, not where it comes
+            # from; /_test/ is cheat commands, not the game.
+            if "/_test/" in rel or rel.endswith((".obj", ".param", ".dbtable")):
+                continue
+            # The table that *requires* the tool is not a way to obtain it.
+            if rel.endswith(".dbrow") and pattern.search(text):
+                continue
+            if pattern.search(text):
+                found = True
+                break
+        if not found:
+            orphans.append(slug)
+    if orphans:
+        # Plain ASCII: this is the one line that must survive being printed to
+        # a console with a legacy codepage, which is where a warning gets read.
+        print("\n  WARNING: tools with no source in Content - the recipes "
+              "needing them may be unreleased:", flush=True)
+        for slug in orphans:
+            print(f"    {slug}", flush=True)
+    return orphans
+
+
 def main():
     DATA_DIR.mkdir(exist_ok=True)
     obj_pack_text, tree = fetch_content_tree()
@@ -942,6 +1018,17 @@ def main():
         before = len(recipes.out)
         handler(content, recipes)
         print(f"  {handler.__name__:20} +{len(recipes.out) - before}", flush=True)
+
+    # A stale exclusion is as bad as a missing one: if a row named in
+    # UNRELEASED is gone, the note about it is now describing nothing.
+    missed = set(UNRELEASED) - SKIPPED_UNRELEASED
+    if missed:
+        raise BuildError(
+            f"UNRELEASED names rows that no longer exist: {sorted(missed)}. "
+            "Either Content moved them or they finally shipped — check before "
+            "deleting the entry."
+        )
+    check_tool_sources(content, recipes.out)
 
     # Items alchemy refuses, so the alch plan cannot quietly eat them:
     # anything carrying param=no_alchemy, plus coins themselves
@@ -960,6 +1047,7 @@ def main():
             "bySkill": dict(sorted(recipes.counts.items())),
             "notCovered": NOT_COVERED,
             "knownGaps": KNOWN_GAPS,
+            "unreleased": UNRELEASED,
             "note": "xp is real xp; Content stores tenths and this build "
                     "divides them out. `chance` marks a recipe whose outcome "
                     "is a roll — {kind:flat} is a fixed probability, "

@@ -7,11 +7,11 @@
    "herblore": 43,
    "magic": 17,
    "prayer": 17,
-   "runecraft": 11,
+   "runecraft": 10,
    "smithing": 139
   },
   "contentBuild": "274",
-  "count": 354,
+  "count": 353,
   "knownGaps": [
    "Superheat item (magic_spells.dbrow#magic_spell_superheat) smelts an ore and pays Magic xp *and* Smithing xp off one cast \u2014 two skills from one action, which this schema's one-skill-per-recipe shape cannot express.",
    "Ogre arrows (skill_fletching/scripts/ogre_arrows.rs2) are quest-gated and hardcode their xp in five places; left out rather than shipped without the quest check.",
@@ -39,7 +39,10 @@
    "woodcutting": "gathered from trees, not made from bank stock"
   },
   "note": "xp is real xp; Content stores tenths and this build divides them out. `chance` marks a recipe whose outcome is a roll \u2014 {kind:flat} is a fixed probability, {kind:level,low,high} scales with the player's level.",
-  "source": "https://github.com/LostCityRS/Content"
+  "source": "https://github.com/LostCityRS/Content",
+  "unreleased": {
+   "runecraft_death": "death_talisman has no source anywhere in build 274 \u2014 it appears only in pack/obj.pack, its own runecraft.obj definition, and _test/scripts/cheats/cheat_bank.rs2, while every other talisman has at least one drop, shop or quest source. The row is also the only one in runecraft.dbrow whose enter_coord and exit_coord are both just the altar_coord, where every released altar has distinct ones. Death runecrafting arrived in 2005."
+  }
  },
  "recipes": {
   "brew_3dose1agility": {
@@ -4675,28 +4678,6 @@
    ],
    "xp": 8.0,
    "yieldPerLevel": 59
-  },
-  "rc_deathrune": {
-   "in": [
-    {
-     "id": 1436,
-     "n": 1
-    }
-   ],
-   "label": "Bind death runes",
-   "level": 65,
-   "out": [
-    {
-     "id": 560,
-     "n": 1
-    }
-   ],
-   "skill": "runecraft",
-   "src": "scripts/skill_runecraft/configs/runecraft.dbrow#runecraft_death",
-   "tools": [
-    1456
-   ],
-   "xp": 10.0
   },
   "rc_earthrune": {
    "in": [
