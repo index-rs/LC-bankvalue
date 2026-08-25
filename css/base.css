@@ -711,15 +711,112 @@ footer.site-footer {
   gap: 4px 10px;
   padding-top: 2px;
 }
+/* A road not taken is a button: clicking it pins that recipe to the item it
+   was measured against and re-runs the walk. Styled to stay a quiet chip
+   rather than announce itself as a control in a list of nine of them. */
 .xp-alt {
   white-space: nowrap;
+  border: 0;
   border-left: 2px solid var(--border-2);
-  padding-left: 6px;
+  border-radius: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  padding: 0 0 0 6px;
+  cursor: pointer;
+  transition: color .12s, border-color .12s;
 }
+.xp-alt:hover, .xp-alt:focus-visible {
+  color: var(--text-0);
+  border-left-color: var(--accent);
+}
+.xp-alt:hover b { color: var(--text-0); }
 .xp-alt b { color: var(--text-2); font-weight: 500; }
 .xp-alt.is-above { opacity: 0.6; }
 .xp-alt.is-above i { font-style: normal; color: var(--gold); }
 .xp-alt-more { color: var(--text-3); }
+
+/* Shop stock the plan assumes you buy — battlestaves, mostly. Gold, like the
+   other "this costs you something" notes. */
+.xp-shopping {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-2);
+  border-left: 2px solid var(--gold);
+  padding: 7px 0 7px 11px;
+  margin: 12px 0 0;
+}
+.xp-shopping b { color: var(--text-1); font-weight: 500; }
+.xp-buy b { color: var(--gold); font-weight: 500; }
+
+/* The "what to make" pickers. */
+.xp-choices {
+  margin: 14px 0 4px;
+  padding: 11px 13px;
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+}
+.xp-choices-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-2);
+  max-width: 78ch;
+}
+.xp-choices-head b { color: var(--text-1); font-weight: 500; }
+.xp-choice-reset {
+  margin-left: auto;
+  flex: none;
+  padding: 4px 9px;
+  font-size: 10px;
+}
+.xp-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 10px;
+}
+.xp-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 210px;
+  flex: 1 1 240px;
+}
+.xp-choice-item {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+}
+.xp-choice-item i { font-style: normal; text-transform: none; letter-spacing: 0; }
+.xp-choice select {
+  width: 100%;
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  background: var(--bg-1);
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  padding: 5px 7px;
+  cursor: pointer;
+}
+.xp-choice.is-pinned .xp-choice-item { color: var(--accent); }
+.xp-choice.is-pinned select { border-color: color-mix(in oklab, var(--accent) 45%, var(--border-2)); }
+.xp-choice-delta {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  margin-top: 10px;
+  color: var(--text-2);
+}
+.xp-choice-delta b { font-weight: 500; }
+.xp-choice-delta.up { color: var(--green); }
+.xp-choice-delta.down { color: var(--gold); }
 .xp-badge.quest { color: var(--violet); border-color: color-mix(in oklab, var(--violet) 35%, var(--border-2)); }
 .xp-badge.prep { color: var(--blue); border-color: color-mix(in oklab, var(--blue) 35%, var(--border-2)); }
 .xp-fee { color: var(--gold); }

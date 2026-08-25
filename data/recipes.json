@@ -1,22 +1,23 @@
 {
  "meta": {
   "bySkill": {
-   "crafting": 83,
+   "crafting": 87,
    "firemaking": 6,
    "fletching": 48,
    "herblore": 43,
    "magic": 17,
    "prayer": 17,
    "runecraft": 10,
-   "smithing": 139
+   "smithing": 140
   },
   "contentBuild": "274",
-  "count": 363,
+  "count": 368,
   "knownGaps": [
    "Superheat item (magic_spells.dbrow#magic_spell_superheat) smelts an ore and pays Magic xp *and* Smithing xp off one cast \u2014 two skills from one action, which this schema's one-skill-per-recipe shape cannot express.",
    "Chiselling wolf bones into arrow tips pays Fletching *and* Crafting off one action (ogre_arrows.rs2:66-67). Only the Fletching half is counted, for the same reason superheat is missing entirely.",
    "Cooking recipes that are not dbrow-driven \u2014 wine, pizza, cakes, gnome cooking \u2014 are out with the rest of cooking, but note they are separate scripts, so covering cooking later means more than one table.",
-   "One-off crafting scripts with a hardcoded xp literal and no config: cape dyeing (dye_cape.rs2:120, 2.5 xp) and snelm carving (snelm.rs2:15, 32.5 xp)."
+   "One-off crafting scripts with a hardcoded xp literal and no config: cape dyeing (dye_cape.rs2:120, 2.5 xp) and snelm carving (snelm.rs2:15, 32.5 xp).",
+   "Bones to bananas (magic_spells.dbrow#magic_spell_bones_to_bananas) pays 25 xp per cast and converts every bone you are carrying in that one cast (convert_bones.rs2:30 deletes inv_total(inv, bones)). The xp is per cast and the bones are not, so there is no honest bones-per-action number to put in a recipe \u2014 modelling it as one bone per cast would report a bank of bones as roughly 26x the Magic xp it is worth."
   ],
   "noAlch": [
    76,
@@ -968,14 +969,22 @@
    "xp": 4.5
   },
   "craft_air_orb": {
+   "buy": [
+    1391
+   ],
    "in": [
     {
      "id": 573,
+     "n": 1
+    },
+    {
+     "id": 1391,
      "n": 1
     }
    ],
    "label": "Make air battlestaff",
    "level": 66,
+   "note": "skill_crafting/scripts/battlestaves/battlestaves.rs2:34 inv_del(inv, battlestaff, 1); battlestaff is shop stock: areas/area_varrock/configs/varrock.inv:150 stock1=battlestaff,5 (Zaff) and areas/area_yanille/configs/magic_guild/magic_guild.inv:22",
    "out": [
     {
      "id": 1397,
@@ -1822,14 +1831,22 @@
    "xp": 100.0
   },
   "craft_earth_orb": {
+   "buy": [
+    1391
+   ],
    "in": [
     {
      "id": 575,
+     "n": 1
+    },
+    {
+     "id": 1391,
      "n": 1
     }
    ],
    "label": "Make earth battlestaff",
    "level": 58,
+   "note": "skill_crafting/scripts/battlestaves/battlestaves.rs2:34 inv_del(inv, battlestaff, 1); battlestaff is shop stock: areas/area_varrock/configs/varrock.inv:150 stock1=battlestaff,5 (Zaff) and areas/area_yanille/configs/magic_guild/magic_guild.inv:22",
    "out": [
     {
      "id": 1399,
@@ -1886,15 +1903,43 @@
    "src": "scripts/skill_crafting/configs/jewellery/jewellery.struct#emerald_ring",
    "xp": 55.0
   },
+  "craft_fill_bucket_sand": {
+   "in": [
+    {
+     "id": 1925,
+     "n": 1
+    }
+   ],
+   "label": "Fill a bucket at a sand pit",
+   "level": 1,
+   "note": "no xp and no cost \u2014 the sand is free, but molten glass cannot be made without it",
+   "out": [
+    {
+     "id": 1783,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/glass/glass.rs2:12 @sand_fill -- inv_del(inv, bucket_empty, 1); inv_add(inv, bucket_sand, 1)",
+   "xp": 0.0
+  },
   "craft_fire_orb": {
+   "buy": [
+    1391
+   ],
    "in": [
     {
      "id": 569,
+     "n": 1
+    },
+    {
+     "id": 1391,
      "n": 1
     }
    ],
    "label": "Make fire battlestaff",
    "level": 62,
+   "note": "skill_crafting/scripts/battlestaves/battlestaves.rs2:34 inv_del(inv, battlestaff, 1); battlestaff is shop stock: areas/area_varrock/configs/varrock.inv:150 stock1=battlestaff,5 (Zaff) and areas/area_yanille/configs/magic_guild/magic_guild.inv:22",
    "out": [
     {
      "id": 1393,
@@ -2281,6 +2326,90 @@
     2976
    ],
    "xp": 50.0
+  },
+  "craft_soften_clay_bowl_water": {
+   "in": [
+    {
+     "id": 434,
+     "n": 1
+    },
+    {
+     "id": 1921,
+     "n": 1
+    }
+   ],
+   "label": "Mix clay with bowl of water",
+   "level": 1,
+   "note": "no xp \u2014 but every pottery recipe needs soft clay, and the container comes back empty",
+   "out": [
+    {
+     "id": 1761,
+     "n": 1
+    },
+    {
+     "id": 1923,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/pottery/pottery.rs2:44 @make_softclay, dispatched from pottery.rs2:4 case bowl_water, bucket_water, jug_water",
+   "xp": 0.0
+  },
+  "craft_soften_clay_bucket_water": {
+   "in": [
+    {
+     "id": 434,
+     "n": 1
+    },
+    {
+     "id": 1929,
+     "n": 1
+    }
+   ],
+   "label": "Mix clay with bucket of water",
+   "level": 1,
+   "note": "no xp \u2014 but every pottery recipe needs soft clay, and the container comes back empty",
+   "out": [
+    {
+     "id": 1761,
+     "n": 1
+    },
+    {
+     "id": 1925,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/pottery/pottery.rs2:44 @make_softclay, dispatched from pottery.rs2:4 case bowl_water, bucket_water, jug_water",
+   "xp": 0.0
+  },
+  "craft_soften_clay_jug_water": {
+   "in": [
+    {
+     "id": 434,
+     "n": 1
+    },
+    {
+     "id": 1937,
+     "n": 1
+    }
+   ],
+   "label": "Mix clay with jug of water",
+   "level": 1,
+   "note": "no xp \u2014 but every pottery recipe needs soft clay, and the container comes back empty",
+   "out": [
+    {
+     "id": 1761,
+     "n": 1
+    },
+    {
+     "id": 1935,
+     "n": 1
+    }
+   ],
+   "skill": "crafting",
+   "src": "scripts/skill_crafting/scripts/pottery/pottery.rs2:44 @make_softclay, dispatched from pottery.rs2:4 case bowl_water, bucket_water, jug_water",
+   "xp": 0.0
   },
   "craft_string_nostringsnake": {
    "in": [
@@ -2703,14 +2832,22 @@
    "xp": 50.0
   },
   "craft_water_orb": {
+   "buy": [
+    1391
+   ],
    "in": [
     {
      "id": 571,
+     "n": 1
+    },
+    {
+     "id": 1391,
      "n": 1
     }
    ],
    "label": "Make water battlestaff",
    "level": 54,
+   "note": "skill_crafting/scripts/battlestaves/battlestaves.rs2:34 inv_del(inv, battlestaff, 1); battlestaff is shop stock: areas/area_varrock/configs/varrock.inv:150 stock1=battlestaff,5 (Zaff) and areas/area_yanille/configs/magic_guild/magic_guild.inv:22",
    "out": [
     {
      "id": 1395,
@@ -6091,6 +6228,32 @@
     4
    ],
    "xp": 37.5
+  },
+  "smith_dragon_sq_shield": {
+   "in": [
+    {
+     "id": 2366,
+     "n": 1
+    },
+    {
+     "id": 2368,
+     "n": 1
+    }
+   ],
+   "label": "Repair the dragon square shield",
+   "level": 60,
+   "out": [
+    {
+     "id": 1187,
+     "n": 1
+    }
+   ],
+   "skill": "smithing",
+   "src": "scripts/skill_smithing/scripts/smithing/dragon_sq.rs2:53 stat_advance(smithing, 750)",
+   "tools": [
+    2347
+   ],
+   "xp": 75.0
   },
   "smith_iron_2h_sword": {
    "in": [

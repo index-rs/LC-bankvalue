@@ -404,6 +404,42 @@ and warns about anything new. That check is a warning rather than an error becau
 grep heuristic, and a false positive shouldn't block a rebuild — but a new name in it means
 a row wants looking at.
 
+### A script deletes more than the table admits
+
+The other half of the same problem, and the one that has actually bitten most often: the
+config names one ingredient and the script that reads it deletes two. `battlestaves.struct`
+lists an orb; `battlestaves.rs2:34` also deletes a 7,000 gp battlestaff. The fletching
+tables name a log; `arrows.rs2` also eats a feather and a shaft.
+
+Every one of these was found by a person, because a missing ingredient makes a number
+**better** — nothing about the output looks wrong. So `check_deletions` now greps every
+skill script for literal `inv_del(inv, <slug>, ...)` calls and asks whether any recipe of
+that skill names that item at all. Config-driven deletions
+(`inv_del(inv, struct_param($struct, ingredient), 1)`) are skipped, since that is the path
+already being extracted, which keeps the signal high: the whole tree yields ten hits, and
+`EXPECTED_DELETIONS` accounts for each non-recipe one with a reason (teleporting destroys
+the smuggled rum; spinning the golden fleece is a quest step).
+
+Its first run found two real gaps, both the tanning bug wearing a different hat — a zero-XP
+prep step that lives only in a script, with a whole skill line behind it:
+
+| Bank | reported | actually |
+|---|---|---|
+| 1,000 clay + 1,000 buckets of water | **0 XP** | 33,000 Crafting |
+| 1,000 empty buckets + 1,000 soda ash | **0 XP** | 72,500 Crafting |
+
+Soft clay and bucket-filling now live in `h_prep_steps`. The proof they're right is that the
+bank one step earlier reports what the bank one step later already did: 1,000 clay and 1,000
+soft clay both come out at 33,000. It also turned up the dragon square shield, the one
+smithing action that isn't on the anvil table.
+
+Closing the bucket gap closed a *loop* — bucket → sand → glass → bucket — which promptly hit
+the walk's 400-pass limit. That cap turned out to be a **performance** rail, not a
+correctness one: every recipe the walk fires must consume something it doesn't hand back, and
+stock is finite integers, so the walk provably runs dry on its own. Raised to 20,000, which
+costs nothing for banks that settle early (real banks and the audit still finish in 35 passes
+at the same 4-7ms).
+
 Two traps in that data, both of which produce a wrong answer rather than an error:
 
 **Everything is in tenths.** `stat_advance` takes tenths of an xp point, so
@@ -475,8 +511,68 @@ Alternatives are capped by their *own* ingredients, which matters more than it s
 14,583 iron ore is 255K XP of steel bars on paper and 1.5K in a bank holding 168 coal; the
 paper figure would be the same double-counting the per-skill split exists to prevent, one
 level down. Where an alternative is short it shows the count it could actually reach
-(`Smelt steel bar ×84`). Recipes that tie exactly on XP aren't listed — eight identical
-numbers say nothing.
+(`Smelt steel bar ×84`). Recipes that pay the same rate per unit of the contested item
+aren't listed — eight identical numbers say nothing.
+
+Rate is measured **per unit of the limiting item, not per action**, which is what makes
+"steel or mithril out of my coal" answerable at all: a runite bar pays 50 XP to a steel
+bar's 17.5 and eats eight coal doing it, so action-for-action the two numbers compare
+nothing.
+
+### The tie-break is a control, not a verdict
+
+*"How does it prioritise making steel vs higher bars? Or iron vs steel?"* — the first
+question anyone asked of the XP tab, and the honest answer was "by a rule I picked".
+
+Every item two or more reachable recipes compete for is now a **fork the reader can pin**.
+Each skill gets a row of pickers, ordered by how much XP rides on the decision, and each
+one names what the default did:
+
+```
+What to make.  Every item two recipes want is a fork; the default takes the one
+paying most per unit of it, which is a stated choice and not the only sane one.
+
+  IRON ORE ×1,291    [ Best rate — Smelt steel bar + Smelt iron bar   v ]
+  COAL ×888          [ Smelt mithril bar — 7.50 xp per coal, 4 coal each  v ]
+
+  415 xp more than the default plan — 80,038 xp if you leave every fork alone.
+```
+
+The road-not-taken chips under each step are the same control: clicking `Smelt mithril bar
+×137 4.1K` pins that recipe to the coal it was measured against and re-runs the walk. Which
+forks exist is decided by a solve that always runs with **nothing** pinned, so the control
+that changed the plan is still on screen to change it back — pin mithril with no mithril
+ore in the bank and the coal fork does not vanish along with the mithril bars.
+
+Pinning is per contested item, so it composes: pinning coal to mithril disables steel
+smelting, which leaves the iron ore fork with only iron bars, which is exactly what a
+mithril-first plan means. The XP cost or gain against the default is always stated —
+overruling the tie-break is a real decision, and on a bank like the one above it happens to
+*win* 415 XP, because iron ore is worth more as arrowtips than as steel.
+
+A pin the level filter puts out of reach goes inert rather than emptying the fork.
+Otherwise ticking "only recipes I can use now" while runite was pinned would silently
+delete a branch of the plan and leave nothing on screen to put it back.
+
+### Some ingredients you buy, and it says how much
+
+`battlestaves.struct` lists an orb as the whole recipe. The script that reads it deletes a
+battlestaff too (`battlestaves.rs2:34`), and that staff is 7,000 gp of shop stock — so the
+first build reported 5,000 air orbs as 687,500 free Crafting XP, and a user caught it.
+
+The fix is not to require the staves. Nobody banks battlestaves; Zaff sells them five at a
+time and you buy them on the way. Recipes carry a `buy` list for ingredients Content sources
+from a shop, and such an input **never caps the plan** — whatever is already banked counts
+first, and the shortfall is counted, priced and reported:
+
+```
+Buy on the way.  Battlestaff ×3,800 at 7,700 gp = 29.26M gp — shop stock this plan
+assumes you buy rather than bank. It is counted in the gp-in figure above.
+```
+
+That spend lands in the skill's gp line, so the *51.5M gp in → 125M gp out* figure is the
+whole trip rather than the flattering half of it. A recipe whose every ingredient is shop
+stock still runs zero times: otherwise an empty bank would print money.
 
 ### Levels come from the save, and are computed, not read
 
@@ -643,14 +739,16 @@ show at a glance which items are resting on thin evidence.
 It also runs a **drift check between the two builders**. `items.json` and `recipes.json` are
 keyed by the same numeric game ids but generated by different scripts against different parts
 of Content, so a rebuild that drops an item the recipes still name would quietly cost the XP
-tab those recipes. The audit status line reports it either way: *"354 recipes, every
+tab those recipes. The audit status line reports it either way: *"368 recipes, every
 ingredient resolves."*
 
 What `?audit` is **not** is a recipe *coverage* harness. The original plan was that a recipe
 which never fires against a bank holding one of everything would be one that can't be reached
-— but that isn't what happens. 242 of 354 never fire there, and nearly all of them lost to a
-rival recipe competing for the same input, which is the solver working correctly. Measuring
-genuine unreachability needs a separate non-greedy pass, and doesn't exist yet.
+— but that isn't what happens. 258 of 368 never fire there, and nearly all of them lost to a
+rival recipe competing for the same input, which is the solver working correctly: 129 of the
+258 are smithing, where a whole tier of products ties on XP per bar and only the most
+valuable one gets hammered. Measuring genuine unreachability needs a separate non-greedy
+pass, and doesn't exist yet.
 
 ## Credits
 

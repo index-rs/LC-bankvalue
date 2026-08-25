@@ -5,6 +5,12 @@
 // skill is shown as its own answer to "if I spent all of this on you, what
 // happens", with the items two skills both want called out by name. See xp.js
 // for the solve.
+//
+// The tie-break is a control, not a verdict. Every item two recipes fight over
+// gets a "make" picker, and the road-not-taken chips under each step are
+// buttons: clicking one pins that recipe to the item it was measured against
+// and re-runs the walk. The picker says what the default did and what
+// overruling it costs, so the choice is informed rather than a shrug.
 
 (function () {
   function fmt(n) {
@@ -64,9 +70,15 @@
     if (step.chance) {
       badges.push(`<span class="xp-badge chance" title="${esc(step.note || '')}">estimate</span>`);
     }
-    if (step.fee) {
-      badges.push(`<span class="xp-badge prep" title="Costs ${fmt(step.fee)} gp each ` +
-                  `and pays no xp, but the recipes downstream need it done">prep</span>`);
+    // A step that pays nothing is a prerequisite, not a choice — badged
+    // whether or not it costs coins. Tanning charges 3 gp a hide; filling a
+    // bucket at a sand pit is free, and both are things you have to do before
+    // the recipes downstream can happen.
+    if (!step.xp) {
+      badges.push(`<span class="xp-badge prep" title="${
+        step.fee ? `Costs ${fmt(step.fee)} gp each and pays no xp`
+                 : 'Pays no xp and costs nothing'}, but the recipes ` +
+        `downstream need it done">prep</span>`);
     }
     if (step.quest) {
       badges.push(`<span class="xp-badge quest" title="Needs ${esc(step.quest)}` +
@@ -86,17 +98,31 @@
         (step.coins ? ` &mdash; pays ${fmtCompact(step.coins)} gp in coins` : '') +
         `</div>`
       : '';
+    const buying = step.buying && step.buying.length
+      // A shop ingredient is not a wall and not free either. Say the number,
+      // and say it is a trip rather than a deduction from what you hold.
+      ? `<div class="xp-step-note xp-buy">Buy ` +
+        step.buying.map((b) => {
+          const it = itemsDb[String(b.id)];
+          return `${esc(it ? it.name.toLowerCase() : b.id)} &times;${fmt(b.n)} ` +
+                 `at ${fmt(b.each)} gp`;
+        }).join(', ') +
+        ` &mdash; <b>${fmtCompact(step.buying.reduce((s2, b) => s2 + b.n * b.each, 0))} gp</b> ` +
+        `you do not have to bank, but do have to spend</div>`
+      : '';
     const alts = step.alternatives && step.alternatives.length
       ? `<div class="xp-step-note xp-alts">Same ${fmt(step.limitQty)} ` +
         `${esc((step.limitName || 'stock').toLowerCase())} instead &mdash; ` +
-        step.alternatives.map((a) =>
-          `<span class="xp-alt${a.aboveLevel ? ' is-above' : ''}"` +
-          `${a.aboveLevel ? ` title="needs level ${a.level}"` : ''}` +
-          `${a.capped ? ' title="limited by its other ingredients in this bank"' : ''}>` +
-          `${esc(a.label)}${a.capped ? ` &times;${fmt(a.times)}` : ''} ` +
-          `<b>${fmtCompact(a.xp)}</b>` +
-          `${a.aboveLevel ? ` <i>lvl ${a.level}</i>` : ''}</span>`
-        ).join('') +
+        step.alternatives.map((a) => {
+          const why = a.aboveLevel ? `needs level ${a.level}`
+            : a.capped ? 'limited by its other ingredients in this bank'
+            : `use this instead — ${fmtXpEach(a.xpEach)} xp each`;
+          return `<button type="button" class="xp-alt${a.aboveLevel ? ' is-above' : ''}" ` +
+            `data-pin-item="${a.on}" data-pin-key="${esc(a.key)}" title="${esc(why)}">` +
+            `${esc(a.label)}${a.capped ? ` &times;${fmt(a.times)}` : ''} ` +
+            `<b>${fmtCompact(a.xp)}</b>` +
+            `${a.aboveLevel ? ` <i>lvl ${a.level}</i>` : ''}</button>`;
+        }).join('') +
         (step.altMore ? `<span class="xp-alt-more">+${step.altMore} more</span>` : '') +
         `</div>`
       : '';
@@ -105,15 +131,91 @@
         <span class="xp-step-label" title="${esc(step.src)}">${esc(step.label)}${badges.join('')}</span>
         <span class="xp-step-times">&times;${fmt(step.times)}</span>
         <span class="xp-step-each">${
-          step.fee && !step.xp ? `${fmt(step.fee)} gp` : `${fmtXpEach(step.xpEach)} xp`
+          !step.xp ? (step.fee ? `${fmt(step.fee)} gp` : 'free')
+                   : `${fmtXpEach(step.xpEach)} xp`
         }</span>
         <span class="xp-step-total">${
-          step.fee && !step.xp ? `&mdash;${
+          !step.xp ? `&mdash;${
             step.fee * step.times
               ? ` <span class="xp-fee">-${fmtCompact(step.fee * step.times)} gp</span>`
               : ''}` : fmt(step.xp)
         }</span>
-        ${eaten}${alts}
+        ${eaten}${buying}${alts}
+      </div>`;
+  }
+
+  // The "make" pickers: one per item that two or more recipes in this skill
+  // compete for. Which forks exist is decided by the solve (see choiceGroups
+  // in xp.js) and never by what has been picked, so the control that changed
+  // the plan is still there to change it back.
+  //
+  // Shown by how much xp rides on the decision, which puts coal above the odd
+  // gem nobody has three of. Anything already pinned is shown whatever its
+  // rank, or you could pin a fork out of its own control.
+  const CHOICES_SHOWN = 5;
+
+  function choiceBlock(skill) {
+    const groups = skill.choiceGroups || [];
+    if (!groups.length) return '';
+    // Only pins the solve could actually honour count as pins. Ticking the
+    // level filter can put a pinned recipe out of reach, and the control has to
+    // agree with the plan about whether it is in force.
+    const chosen = {};
+    groups.forEach((g) => {
+      const pick = (skill.choices || {})[g.id];
+      if (pick && g.options.some((o) => o.key === pick)) chosen[g.id] = pick;
+    });
+    const shown = groups.filter((g, i) => i < CHOICES_SHOWN || chosen[g.id]);
+    const pins = Object.keys(chosen).length;
+    const delta = skill.totalXp - skill.autoXp;
+
+    const pickers = shown.map((g) => {
+      const pick = chosen[g.id] || '';
+      const auto = g.options[0];
+      const unit = g.name.toLowerCase();
+      const autoLabel = g.autoKeys.length
+        ? g.options.filter((o) => g.autoKeys.indexOf(o.key) !== -1)
+            .map((o) => o.label).join(' + ') || auto.label
+        : auto.label;
+      return `
+        <label class="xp-choice${pick ? ' is-pinned' : ''}">
+          <span class="xp-choice-item">${esc(g.name)} <i>&times;${fmt(g.qty)}</i></span>
+          <select data-skill="${esc(skill.skill)}" data-item="${g.id}">
+            <option value=""${pick ? '' : ' selected'}>Best rate &mdash; ${esc(autoLabel)}</option>
+            ${g.options.map((o) =>
+              // Rated per unit of the contested item, not per action — the
+              // whole point of the control is that a runite bar pays 50 xp and
+              // eats eight coal doing it.
+              `<option value="${esc(o.key)}"${o.key === pick ? ' selected' : ''}>` +
+              `${esc(o.label)} — ${fmtXpEach(o.perUnit)} xp per ${esc(unit)}` +
+              `${o.n > 1 ? `, ${o.n} ${esc(unit)} each` : ''}` +
+              `${o.aboveLevel ? ` (lvl ${o.level})` : ''}</option>`
+            ).join('')}
+          </select>
+        </label>`;
+    }).join('');
+
+    return `
+      <div class="xp-choices">
+        <div class="xp-choices-head">
+          <b>What to make.</b> Every item two recipes want is a fork; the default
+          takes the one paying most per unit of it, which is a stated choice and
+          not the only sane one.
+          ${pins ? `<button type="button" class="btn tiny xp-choice-reset"
+             data-skill="${esc(skill.skill)}">Back to best rate</button>` : ''}
+        </div>
+        <div class="xp-choice-row">${pickers}</div>
+        ${pins && Math.abs(delta) > 0.5 ? `
+        <div class="xp-choice-delta ${delta >= 0 ? 'up' : 'down'}">
+          ${delta >= 0 ? `${fmt(delta)} xp <b>more</b> than the default plan`
+                       : `${fmt(-delta)} xp <b>less</b> than the default plan`}
+          &mdash; ${fmt(skill.autoXp)} xp if you leave every fork alone.
+        </div>` : ''}
+        ${pins && !skill.steps.length ? `
+        <div class="xp-choice-delta down">
+          Nothing in this bank feeds the recipes you pinned. Set a fork back to
+          best rate to see a plan again.
+        </div>` : ''}
       </div>`;
   }
 
@@ -164,7 +266,13 @@
       const pct = Math.max(1, (skill.totalXp / top) * 100);
       const delta = skill.valueOut - skill.valueIn;
       const el = document.createElement('div');
-      el.className = 'xp-skill' + (idx === 0 ? ' open' : '');
+      // A re-solve rebuilds the whole list, so which panels the reader had
+      // open has to be carried across or picking a fork snaps them shut.
+      const open = opts && opts.openSkills
+        ? opts.openSkills.has(skill.skill)
+        : idx === 0;
+      el.className = 'xp-skill' + (open ? ' open' : '');
+      el.dataset.skill = skill.skill;
       el.innerHTML = `
         <div class="xp-skill-head">
           <span class="category-caret">&#9656;</span>
@@ -189,13 +297,25 @@
           ${skill.truncated ? `
           <div class="xp-caveat">
             The chain walk hit its pass limit with work still to do, so this total is a
-            floor, not the answer. Worth reporting as a bug.
+            floor, not the answer. That takes a bank holding thousands of one thing and
+            a handful of the container it cycles through &mdash; if yours is not shaped
+            like that, it is worth reporting.
           </div>` : ''}
           ${skill.estimatedXp ? `
           <div class="xp-caveat">
             ${fmt(skill.estimatedXp)} xp of this (${((skill.estimatedXp / skill.totalXp) * 100).toFixed(0)}%)
             comes from recipes that can fail &mdash; an expectation, not a count.
           </div>` : ''}
+          ${skill.shopping && skill.shopping.length ? `
+          <div class="xp-shopping">
+            <b>Buy on the way.</b>
+            ${skill.shopping.map((b) =>
+              `${esc(b.name)} &times;${fmt(b.n)} at ${fmt(b.each)} gp` +
+              ` = ${fmtCompact(b.n * b.each)} gp`).join(' &middot; ')}
+            &mdash; shop stock this plan assumes you buy rather than bank. It is
+            counted in the gp-in figure above.
+          </div>` : ''}
+          ${choiceBlock(skill)}
           <div class="xp-steps"></div>
           ${skill.contention.length ? `
           <div class="xp-contested">
@@ -214,6 +334,26 @@
       `;
       el.querySelector('.xp-skill-head')
         .addEventListener('click', () => el.classList.toggle('open'));
+
+      // Picking a fork, whether from the select or from a road-not-taken chip
+      // under a step, is the same action: pin one recipe to one item and ask
+      // for a fresh solve.
+      const onPick = opts && opts.onPick;
+      if (onPick) {
+        el.querySelectorAll('.xp-choices select').forEach((sel) => {
+          sel.addEventListener('change', () =>
+            onPick(sel.dataset.skill, Number(sel.dataset.item), sel.value || null));
+        });
+        const reset = el.querySelector('.xp-choice-reset');
+        if (reset) {
+          reset.addEventListener('click', () => onPick(skill.skill, null, null));
+        }
+        el.addEventListener('click', (e) => {
+          const chip = e.target.closest('.xp-alt[data-pin-key]');
+          if (!chip) return;
+          onPick(skill.skill, Number(chip.dataset.pinItem), chip.dataset.pinKey);
+        });
+      }
 
       const stepsEl = el.querySelector('.xp-steps');
       const shown = skill.steps.slice(0, 8);

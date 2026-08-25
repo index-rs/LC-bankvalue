@@ -4,7 +4,7 @@
 // The other currency players hold banks in. Same file, same catalog as the gp
 // report; the only new input is the recipe table built by build_recipes.py.
 //
-// Three ideas do most of the work here:
+// Four ideas do most of the work here:
 //
 //   1. **Never total across skills.** Yew logs are Fletching xp *or* Firemaking
 //      xp, never both. A single "your bank is worth 14M xp" number would be a
@@ -19,11 +19,19 @@
 //      truth, so the solve consumes stock, adds the products back, and goes
 //      round again.
 //
-//   3. **One stated tie-break.** When two recipes want the same item, the one
-//      paying more xp per unit of that item wins. That is a deliberate choice,
-//      not an approximation nobody noticed: for fletching it is exactly right
-//      (longbow beats shortbow at every tier), and where it isn't, the step
-//      list shows which branch was taken.
+//   3. **One stated tie-break, which you can overrule.** When two recipes want
+//      the same item, the one paying more xp per unit of that item wins. That
+//      is a deliberate choice, not an approximation nobody noticed: for
+//      fletching it is exactly right (longbow beats shortbow at every tier).
+//      But it is not the only sane plan — "how does it decide steel or mithril
+//      out of my coal" is a question with a personal answer, so every item two
+//      or more recipes compete for becomes a choice the reader can pin, and
+//      the walk re-runs against it.
+//
+//   4. **A shop is not a wall.** Battlestaff crafting eats a 7,000 gp staff
+//      per orb, and nobody banks those — you buy them on the way. An input
+//      Content marks as shop stock does not cap the plan; the shortfall is
+//      counted, priced, and reported as something to go and buy.
 
 (function () {
   // Standard RS xp curve. Ten lines, no data file: level L needs
@@ -108,12 +116,21 @@
     },
   ];
 
-  // Safety rail for the walk. Content has genuine round trips (a bucket of
-  // sand becomes molten glass and an empty bucket), so the loop is bounded
-  // rather than trusted to run dry. Real banks and the one-of-everything audit
-  // both settle inside 35 passes; if anything ever hits the cap the result is
-  // flagged rather than quietly reported short.
-  const MAX_PASSES = 400;
+  // Safety rail for the walk, and a performance one rather than a correctness
+  // one: every recipe the walk will fire has to consume something it does not
+  // hand straight back (the `net` check below), and stock is finite integers,
+  // so the loop provably runs dry on its own. The cap only bounds how long
+  // that takes.
+  //
+  // It is set high because Content has genuine round trips and one of them is
+  // useful. An empty bucket becomes a bucket of sand, which becomes molten
+  // glass and an empty bucket again — so five buckets and 10,000 soda ash is
+  // 2,000 laps of a two-recipe loop, and the old cap of 400 stopped a fifth of
+  // the way in and called the answer truncated. Real banks and the
+  // one-of-everything audit still settle inside 35 passes and pay nothing for
+  // the headroom; the cap costs time only when the walk genuinely needs it,
+  // and 20,000 passes is about 60ms.
+  const MAX_PASSES = 20000;
 
   function mergeStock(containers) {
     const sets = Array.isArray(containers) ? { bank: containers } : containers || {};
@@ -185,10 +202,12 @@
 
   function solveSkill(skill, recipeList, baseStock, opts) {
     const { itemsDb, pricesDb, level, capToLevel, noAlch } = opts;
+    const choices = opts.choices || {};
 
     const stock = new Map(baseStock);
     const consumed = new Map(); // id -> qty taken out of the original bank
     const produced = new Map(); // id -> qty of things that ended up made
+    const bought = new Map();   // id -> qty of shop stock the plan assumes you buy
     const steps = [];
     const byKey = new Map();
 
@@ -196,11 +215,42 @@
     let estimatedXp = 0; // the slice of totalXp that came from a roll
     let alchCoins = 0;   // coins alchemy hands back, which are a real product
     let fees = 0;        // coins paid to NPCs on the way, e.g. the tanner
+    let spend = 0;       // coins paid to shops for `buy` ingredients
     let truncated = false; // did the walk hit MAX_PASSES with work left to do?
 
     // recipeList is [key, recipe] pairs — destructure, or every recipe reads
     // as undefined and the filter silently empties the whole skill.
     const usable = recipeList.filter(([, r]) => !capToLevel || r.level <= level);
+
+    // What the walk is allowed to run. `usable` is everything this level
+    // reaches; `active` is what survives the reader's own choices. The two are
+    // kept apart on purpose: the alternatives listed under each step are drawn
+    // from `usable`, so pinning nature runes still shows what law would have
+    // paid rather than hiding the road not taken.
+    const reachable = new Set(usable.map(([key]) => key));
+    const active = usable.filter(([key, r]) =>
+      r.in.every((input) => {
+        const pick = choices[input.id];
+        // A pin on a recipe this level cannot reach goes inert rather than
+        // emptying the fork. Otherwise ticking "only recipes I can use now"
+        // would silently delete a whole branch of the plan and leave no
+        // control on screen to put it back.
+        return !pick || !reachable.has(pick) || pick === key;
+      }));
+
+    // A shop-stock ingredient (`buy` in recipes.json) never caps the plan.
+    // Nobody banks battlestaves — Zaff sells them five at a time — so what
+    // matters is not whether you hold one but what the trip costs.
+    function isBought(recipe, id) {
+      return !!(recipe.buy && recipe.buy.indexOf(id) !== -1);
+    }
+
+    // What a shop input costs to replace. The market price is what a player
+    // would actually pay; `cost` is the shop's own number and is the floor
+    // under it, used when nothing has traded.
+    function buyPrice(id) {
+      return unitPrice(id, itemsDb, pricesDb) || (itemsDb[String(id)] || {}).cost || 0;
+    }
 
     // Alchemy and its cousins consume "one item, any item" alongside their
     // runes. The target is chosen from the bank rather than invented here, and
@@ -251,11 +301,15 @@
     function timesRunnable(recipe) {
       let times = Infinity;
       for (const input of recipe.in) {
+        if (isBought(recipe, input.id)) continue; // buy as many as the rest allow
         const have = stock.get(input.id) || 0;
         times = Math.min(times, Math.floor(have / input.n));
         if (times <= 0) return 0;
       }
-      if (times === Infinity) return 0; // no inputs at all — not a bank recipe
+      // No inputs at all, or nothing but shop stock — not a bank recipe. The
+      // second case matters: without it a recipe whose every ingredient can be
+      // bought would run forever off an empty bank.
+      if (times === Infinity) return 0;
       return times;
     }
 
@@ -283,7 +337,7 @@
       const inputUnits = recipe.in.reduce((sum, i) => sum + i.n, 0) || 1;
       let best = 0;
       for (const out of recipe.out) {
-        for (const [, other] of usable) {
+        for (const [, other] of active) {
           if (other === recipe || other.anyItem) continue;
           const slot = other.in.find((i) => i.id === out.id);
           if (!slot) continue;
@@ -305,16 +359,40 @@
 
     // Which input ran out first. That is the one the recipe was really
     // competing for, and so the one an alternative has to be measured against.
+    //
+    // Must be read BEFORE the step spends anything. Called afterwards it sees
+    // the drained stock, matches nothing, and falls through to the first
+    // ingredient — which is how "Smelt steel bar ×444" came to report itself
+    // limited by iron ore when a bank holding 1,291 iron ore and 889 coal is
+    // plainly limited by the coal.
     function limitingInput(recipe, times) {
       for (const input of recipe.in) {
+        if (isBought(recipe, input.id)) continue; // a shop never runs you out
         if (Math.floor((stock.get(input.id) || 0) / input.n) === times) return input;
       }
-      return recipe.in[0];
+      return recipe.in.find((i) => !isBought(recipe, i.id)) || recipe.in[0];
     }
 
     function fire(recipe, key, times) {
+      const buying = [];
+      const limit = limitingInput(recipe, times); // before any stock moves
       recipe.in.forEach((input) => {
         const take = input.n * times;
+        if (isBought(recipe, input.id)) {
+          // Whatever is already banked counts first; only the shortfall is a
+          // trip to the shop. Stock floors at zero rather than going negative,
+          // so a bought ingredient never reads as debt to the rest of the walk.
+          const have = Math.max(0, stock.get(input.id) || 0);
+          const short = Math.max(0, take - have);
+          if (short) {
+            bought.set(input.id, (bought.get(input.id) || 0) + short);
+            spend += short * buyPrice(input.id);
+            buying.push({ id: input.id, n: short, each: buyPrice(input.id) });
+          }
+          stock.set(input.id, have - (take - short));
+          consumed.set(input.id, (consumed.get(input.id) || 0) + take);
+          return;
+        }
         stock.set(input.id, (stock.get(input.id) || 0) - take);
         consumed.set(input.id, (consumed.get(input.id) || 0) + take);
       });
@@ -334,11 +412,16 @@
       if (existing) {
         existing.times += times;
         existing.xp += gained;
+        buying.forEach((b) => {
+          const already = existing.buying.find((x) => x.id === b.id);
+          if (already) already.n += b.n;
+          else existing.buying.push(b);
+        });
       } else {
         const step = {
           key,
           recipe,
-          limit: limitingInput(recipe, times),
+          limit,
           label: recipe.label,
           level: recipe.level,
           xpEach: each,
@@ -353,6 +436,7 @@
           in: recipe.in,
           out: recipe.out,
           tools: recipe.tools || [],
+          buying,
         };
         byKey.set(key, step);
         steps.push(step);
@@ -364,7 +448,7 @@
       let bestScore = -Infinity;
       let bestTimes = 0;
 
-      for (const [key, recipe] of usable) {
+      for (const [key, recipe] of active) {
         if (recipe.anyItem) continue; // handled after the deterministic walk
         const times = timesRunnable(recipe);
         if (!times) continue;
@@ -391,7 +475,7 @@
 
     // "One item, any item" spells, once the ordinary chains have run: the
     // runes cap the casts, and so does the supply of things worth alching.
-    for (const [key, recipe] of usable) {
+    for (const [key, recipe] of active) {
       if (!recipe.anyItem) continue;
       let casts = timesRunnable(recipe);
       if (!casts) continue;
@@ -434,29 +518,36 @@
     // So every step carries what the *same* limiting stock would have paid
     // through the recipes that lost.
     //
-    // Only recipes that lost on xp are listed. A whole tier of smithing ties
-    // exactly (same xp per bar whatever you hammer), and listing eight
-    // identical numbers would say nothing.
+    // Only recipes that pay a different rate are listed. A whole tier of
+    // smithing ties exactly (same xp per bar whatever you hammer), and listing
+    // eight identical numbers would say nothing.
+    //
+    // Rate is measured per unit of the limiting item, not per action, which is
+    // what makes "steel or mithril out of my coal" answerable: those two want
+    // two coal and four, so comparing them action-for-action compares nothing.
     steps.forEach((step) => {
       const limit = step.limit;
       const alternatives = [];
+      const perUnit = limit ? step.xpEach / limit.n : 0;
+      const limitQty = limit ? step.times * limit.n : 0;
       if (limit) {
-        for (const [, other] of usable) {
+        for (const [otherKey, other] of usable) {
           if (other === step.recipe || other.anyItem) continue;
           const slot = other.in.find((i) => i.id === limit.id);
-          if (!slot || slot.n !== limit.n) continue;
+          if (!slot) continue;
           const each = expectedXp(other, level);
-          if (Math.abs(each - step.xpEach) < 1e-9) continue;
+          if (Math.abs(each / slot.n - perUnit) < 1e-9) continue;
           // An alternative is only worth as much as its *other* ingredients
           // allow. 14,583 iron ore is 255k xp of steel bars on paper and 1.5k
           // in practice if the bank holds 168 coal — offering the paper figure
           // would be the same double-counting the per-skill split exists to
           // avoid, one level down. Measured against the original bank, since
           // that is what "if you had spent it this way instead" means.
-          let times = step.times;
+          let times = Math.floor(limitQty / slot.n);
           let capped = false;
           for (const input of other.in) {
             if (input.id === limit.id) continue;
+            if (other.buy && other.buy.indexOf(input.id) !== -1) continue;
             const possible = Math.floor((baseStock.get(input.id) || 0) / input.n);
             if (possible < times) {
               times = possible;
@@ -465,6 +556,8 @@
           }
           if (times <= 0) continue;
           alternatives.push({
+            key: otherKey,
+            on: limit.id,
             label: other.label,
             level: other.level,
             xpEach: each,
@@ -480,15 +573,65 @@
       step.altMore = Math.max(0, alternatives.length - 5);
       if (limit) {
         step.limitName = itemName(limit.id, itemsDb);
-        step.limitQty = step.times * limit.n;
+        step.limitQty = limitQty;
       }
       delete step.recipe;
       delete step.limit;
     });
 
+    // The choices this bank actually presents.
+    //
+    // A group is one item that two or more reachable recipes compete for, and
+    // that the plan really spent — so it is never a hypothetical menu of the
+    // whole skill, only the forks this bank walks past. Coal is the one the
+    // question always gets asked about: steel, mithril, adamantite and runite
+    // all want it, at two, four, six and eight a bar.
+    //
+    // Options are rated per unit of the contested item for the same reason the
+    // alternatives above are: a runite bar pays 50 xp to a steel bar's 17.5 and
+    // is still the worse use of coal.
+    const choiceGroups = [];
+    consumed.forEach((qty, id) => {
+      const options = [];
+      for (const [key, recipe] of usable) {
+        if (recipe.anyItem) continue;
+        const slot = recipe.in.find((i) => i.id === id);
+        if (!slot) continue;
+        if (recipe.buy && recipe.buy.indexOf(id) !== -1) continue; // shop stock, not a fork
+        options.push({
+          key,
+          label: recipe.label,
+          level: recipe.level,
+          aboveLevel: recipe.level > level,
+          perUnit: expectedXp(recipe, level) / slot.n,
+          n: slot.n,
+          value: tieBreak(recipe),
+        });
+      }
+      if (options.length < 2) return;
+      // Same order the walk itself uses: rate first, then what the product is
+      // worth, so a whole tier of smithing (all 37.5 xp a bar) reads down from
+      // the most valuable thing to hammer rather than in table order.
+      options.sort((a, b) => (b.perUnit - a.perUnit) || (b.value - a.value));
+      choiceGroups.push({
+        id,
+        name: itemName(id, itemsDb),
+        qty,
+        options,
+        // What the auto walk did with this item, so a reader who has not
+        // chosen anything can still see which branch was taken.
+        autoKeys: steps.filter((st) => st.in.some((i) => i.id === id))
+          .map((st) => st.key),
+        // The xp riding on the decision, used to order the controls: the top
+        // option applied to everything this item was spent on.
+        stake: options[0].perUnit * qty,
+      });
+    });
+    choiceGroups.sort((a, b) => b.stake - a.stake);
+
     // gp: what went in, and what came out and survived. A product that a later
     // recipe ate is not counted twice — only stock still standing at the end.
-    let valueIn = fees;
+    let valueIn = fees + spend;
     consumed.forEach((qty, id) => {
       const fromBank = Math.min(qty, baseStock.get(id) || 0);
       valueIn += fromBank * unitPrice(id, itemsDb, pricesDb);
@@ -507,11 +650,16 @@
       steps,
       truncated,
       fees,
+      spend,
       totalXp,
       estimatedXp,
       valueIn,
       valueOut,
       consumed,
+      choiceGroups,
+      shopping: [...bought.entries()].map(([id, n]) => ({
+        id, n, name: itemName(id, itemsDb), each: buyPrice(id),
+      })).sort((a, b) => b.n * b.each - a.n * a.each),
       itemName: (id) => itemName(id, itemsDb),
     };
   }
@@ -526,6 +674,7 @@
   function solve(containers, itemsDb, pricesDb, recipesDb, stats, options) {
     const opts = options || {};
     const capToLevel = !!opts.capToLevel;
+    const allChoices = opts.choices || {};
     const baseStock = mergeStock(containers);
 
     const bySkill = new Map();
@@ -558,10 +707,26 @@
       const currentXp = stat ? stat.xp : 0;
       const level = levelFor(currentXp);
 
-      const result = solveSkill(skill, list, baseStock, {
+      // Always solve once with nothing pinned. That pass is what the choice
+      // controls are built from, so the menu of forks stays put no matter what
+      // the reader picks — pin "mithril bar" with no mithril ore in the bank
+      // and the coal fork has to still be there to un-pin.
+      const auto = solveSkill(skill, list, baseStock, {
         itemsDb, pricesDb, level, capToLevel, noAlch,
       });
-      if (!result.steps.length) return;
+      const choices = allChoices[skill] || null;
+      const result = choices
+        ? solveSkill(skill, list, baseStock, {
+            itemsDb, pricesDb, level, capToLevel, noAlch, choices,
+          })
+        : auto;
+      result.choiceGroups = auto.choiceGroups;
+      result.choices = choices || {};
+      // What the chosen plan gave up against the default one. Stated rather
+      // than silently absorbed: overruling the tie-break is a real decision and
+      // it usually costs xp.
+      result.autoXp = auto.totalXp;
+      if (!result.steps.length && !auto.steps.length) return;
 
       const endXp = Math.min(XP_CAP, currentXp + result.totalXp);
       result.baseXp = currentXp;
@@ -601,6 +766,8 @@
 
       delete result.consumed;
       delete result.itemName;
+      delete auto.consumed;
+      delete auto.itemName;
       results.push(result);
     });
 
@@ -609,6 +776,7 @@
     return {
       skills: results,
       capToLevel,
+      choices: allChoices,
       knownStats: !!stats,
       meta: recipesDb.meta || {},
     };

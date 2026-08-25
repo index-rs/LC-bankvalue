@@ -1,10 +1,11 @@
 # Spec: banked XP calculator
 
-Status: **built** (2026-08-23). `scripts/build_recipes.py` -> `data/recipes.json`
-(354 recipes, 8 skills), `js/xp.js` + `js/xpReport.js`, stats capture in `js/savParser.js`,
-and a Value / XP tab pair. Steps 0.1-0.5 of the ladder below are done. See the
-**Banked XP** section of the README for what shipped; this file is kept as the design
-record, with the places reality differed marked inline.
+Status: **built** (2026-08-23; forks and shop inputs 2026-08-25).
+`scripts/build_recipes.py` -> `data/recipes.json` (368 recipes, 8 skills), `js/xp.js` +
+`js/xpReport.js`, stats capture in `js/savParser.js`, and a Value / XP tab pair. Steps
+0.1-0.5 of the ladder below are done. See the **Banked XP** section of the README for what
+shipped; this file is kept as the design record, with the places reality differed marked
+inline.
 
 ## The question it answers
 
@@ -149,6 +150,11 @@ Notes on the shape:
   discipline as the tier badges — an estimate is never presented as a fact.
 * **`tools` is advisory.** You need a knife, you don't consume it. Use it to warn
   ("you hold no knife"), never to zero out the estimate.
+* **`buy` is advisory in the other direction.** An ingredient the recipe really does
+  consume, but which Content sources from a shop rather than from the world — a
+  battlestaff. It is deleted like any other input, so it must be in `in`; it just must
+  not cap the plan, because not holding one is a five-minute walk to Zaff rather than a
+  reason the XP isn't there. Price the shortfall and say so.
 * Probabilistic recipes carry their success model rather than pretending to be
   deterministic (see below).
 
@@ -279,14 +285,107 @@ Two things worth keeping, because neither was visible in the output.
 a death rune recipe — the best XP per essence in the table, so it dominated every
 runecrafting answer. Death runecrafting arrived in 2005; build 274 has the row but no
 `death_talisman` anywhere a player could reach. Caught by a user, not by the build. There is
-now a tool-source check that greps for every required tool outside `.obj`/`_test`, and it
-flags exactly one item across all 354 recipes.
+now a tool-source check that greps for every required tool outside `.obj`/`_test`.
+
+It flags nothing across all 368 recipes, which is the right reading of a clean build rather
+than a sign the check is asleep: the one item it ever flagged was `death_talisman`, and that
+row now sits in `UNRELEASED`, so the recipe never reaches the check to be flagged. The check
+earns its place on the *next* Content update, not on this one.
 
 **One answer per skill is not the only sane answer.** The greedy walk reports the single
 highest-XP-per-unit recipe, which for runecraft is always the top rune you can reach. Real
 players craft nature, law and fire. The fix is not to change the tie-break — it is right,
 and stated — but to show the ladder underneath it, capped by each alternative's own
 ingredients.
+
+## What the second round of feedback got wrong
+
+Three things, all found by users rather than by the build, and all of the same shape: the
+tool was confident about something it had no business being confident about.
+
+**The ladder was read-only, and that wasn't enough.** "How does it prioritize making steel
+vs higher bars? or iron vs steel?" — a question the report could not answer, because the
+answer was a rule the tool had picked and only narrated. Showing the roads not taken was
+the right instinct and half a feature. Every contested item is now a fork the reader pins,
+the walk re-runs against it, and the XP delta against the default plan is stated.
+
+Two decisions inside that are worth keeping:
+
+* **The forks come from a solve that always runs unpinned.** Deriving the menu from the
+  *current* plan is the obvious implementation and it strands the reader: pin mithril with
+  no mithril ore in the bank and the coal fork disappears, along with any way to undo it.
+  Two solves per skill, ~4ms for a real bank, and the control is stable by construction.
+* **Rate is per unit of the contested item, not per action.** This was already wrong in the
+  alternatives list, which required `slot.n === limit.n` and so never once offered mithril
+  as an alternative to steel — the exact comparison the question was about.
+
+**`limitingInput` was called after the stock had been spent.** So it matched nothing and
+fell through to `recipe.in[0]`, and a bank holding 1,291 iron ore and 889 coal was told its
+steel smelting was limited by iron ore. Invisible in the output, wrong in the way that
+makes a tool feel arbitrary — and it made the alternatives compare against the wrong item.
+Read the limit before the step moves anything.
+
+**A struct is not the whole recipe, and a shop is not a wall.** `battlestaves.struct` names
+only the orb; `battlestaves.rs2:34` deletes a 7,000 gp battlestaff alongside it. Same class
+of error as the fletching co-inputs, caught the same way — by reading the `.rs2` that
+consumes the table — and the same fix, with one addition. Requiring the staves in the bank
+would be as wrong as ignoring them: nobody banks battlestaves, Zaff stocks five at a time.
+So recipes carry a `buy` list, a bought input never caps the plan, and the shortfall is
+counted, priced and reported. `SHOP_BOUGHT` cites the `.inv` line, same discipline as the
+co-input table.
+
+The general lesson for anything added here later: **an ingredient nobody banks is a
+shopping note, not a wall** — the tool already made that call for tools, and there was no
+reason for shop stock to be different.
+
+## Turning "caught by a user" into "caught by the build"
+
+Three of the four bugs found so far were the same shape: Content deletes an item the
+extracted recipe never mentions. Death runecrafting, the fletching co-inputs, battlestaves.
+Each was found by a person, and each was invisible in the output — a missing ingredient
+makes a number *better*, so nothing looks wrong.
+
+That is mechanically checkable, and now is. `check_deletions` greps every skill script for
+literal `inv_del(inv, <slug>, ...)` calls and asks whether any recipe of that skill names
+that item as an input or a tool. Only literals are checked; `inv_del(inv,
+struct_param($struct, ingredient), 1)` is skipped, because that is the config-driven path
+already being extracted. The signal is very high — the whole tree yields ten hits, and
+`EXPECTED_DELETIONS` accounts for each one that is not a recipe, with a reason.
+
+Running it for the first time found two gaps of exactly the class it was built for, and
+both were the tanning bug again:
+
+* **Clay never reached the potter's wheel.** Every pottery recipe wants soft clay, and soft
+  clay is made by a script (`pottery.rs2:44`), not a config. So a bank of 1,000 clay and
+  1,000 buckets of water reported **zero** Crafting xp where the answer is 33,000.
+* **Empty buckets never reached the furnace.** Molten glass needs a bucket of sand, and
+  filling a bucket at a sand pit is likewise a bare script (`glass.rs2:12`). 1,000 empty
+  buckets and 1,000 soda ash reported **zero** where the answer is 72,500.
+
+Both are zero-xp prep steps, so they live in `h_prep_steps` next to `h_tanning` — same
+shape, same reason, same citation discipline. The proof that they are right is that the
+bank one step earlier now reports what the bank one step later already did: 1,000 clay and
+1,000 soft clay both come out at 33,000.
+
+The check also found the dragon square shield (`dragon_sq.rs2:53`, 75 xp, level 60 and a
+hammer), the one smithing action not on the anvil table, now in `LITERALS`.
+
+### The rail was measuring the wrong thing
+
+Closing the bucket gap closed a *loop*: an empty bucket becomes a bucket of sand, which
+becomes molten glass and an empty bucket. Five buckets and 10,000 soda ash is 2,000 laps of
+a two-recipe cycle, and `MAX_PASSES = 400` stopped a fifth of the way in.
+
+The fix is to notice what that cap was ever for. Every recipe the walk fires has to consume
+something it does not hand straight back — that is the `net` check — and stock is finite
+integers, so the walk provably runs dry on its own. `MAX_PASSES` is a *performance* rail,
+not a correctness one, and it costs nothing when the walk settles early: real banks and the
+audit still finish inside 35 passes at the same 4-7ms. Raised to 20,000, which covers any
+plausible bank and is about 60ms in the worst case.
+
+The truncation caveat was also reworded. It used to say "worth reporting as a bug", which
+was true when only a solver fault could trip it and wrong now that a legitimately shaped
+bank can.
 
 ## Risks
 

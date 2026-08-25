@@ -68,6 +68,10 @@
     // page, same as everything else here.
     let current = null;         // { containers, stats }
     let capToLevel = false;
+    // Pinned recipes, per skill: { smithing: { 453: 'smelt_mithril_bar' } }.
+    // The solve's default tie-break is a stated choice rather than the only
+    // sane one, so the reader gets to overrule it per contested item.
+    let choices = {};
 
     function setStatus(msg, kind) {
       if (!statusEl) return;
@@ -109,11 +113,20 @@
     // checkbox lives inside the rendered markup, so it is fresh each time.
     function renderXp() {
       if (!xpReportEl || !current) return;
+      // Which skill panels are open survives the re-render; otherwise picking
+      // a recipe would collapse everything the reader had opened to find it.
+      const openSkills = new Set(
+        [...xpReportEl.querySelectorAll('.xp-skill.open')].map((el) => el.dataset.skill)
+      );
       const solved = window.BankXP.solve(
         current.containers, itemsDb, pricesDb, recipesDb, current.stats,
-        { capToLevel }
+        { capToLevel, choices }
       );
-      window.BankXPReport.renderXpReport(xpReportEl, solved, itemsDb, { capToLevel });
+      window.BankXPReport.renderXpReport(xpReportEl, solved, itemsDb, {
+        capToLevel,
+        openSkills: openSkills.size ? openSkills : null,
+        onPick,
+      });
       const box = xpReportEl.querySelector('#xp-cap-level');
       if (box) {
         box.addEventListener('change', () => {
@@ -124,11 +137,26 @@
       return solved;
     }
 
+    // Pin one recipe to one contested item, or clear the whole skill when the
+    // item is null (the "back to best rate" button).
+    function onPick(skill, itemId, key) {
+      if (itemId === null) delete choices[skill];
+      else {
+        const forSkill = { ...(choices[skill] || {}) };
+        if (key) forSkill[itemId] = key;
+        else delete forSkill[itemId];
+        if (Object.keys(forSkill).length) choices[skill] = forSkill;
+        else delete choices[skill];
+      }
+      renderXp();
+    }
+
     // One entry point for every source of a bank: a dropped save, the sample,
     // or the audit harness. Both tabs are always built, so switching between
     // them is instant and neither view can go stale against the other.
     function render(containers, stats, meta) {
       current = { containers, stats: stats || null };
+      choices = {}; // a different bank has different forks
       const rows = window.BankReport.buildRows(containers, itemsDb, pricesDb);
       const r = window.BankReport.renderReport(reportEl, rows, meta || {});
       renderXp();

@@ -209,6 +209,11 @@ class Content:
             raw = slug.replace("_", " ").capitalize()
         return disambiguate_name(slug, raw) or raw
 
+    def obj_param(self, slug, name):
+        """One `param=<name>,<value>` off an item definition, or None."""
+        found = self.objs.get(slug)
+        return param(found[1], name) if found else None
+
     def rows(self, table):
         """All dbrows declaring `table=<table>`, as (name, relpath, kv)."""
         out = [(n, rel, kv) for n, (rel, t, kv) in self.dbrows.items() if t == table]
@@ -289,6 +294,24 @@ CO_INPUT_SRC = {
     "bolt": "skill_fletching/scripts/bolts.rs2:82 inv_del(inv, bolt, $bolts_count)",
     "studs": "skill_crafting/scripts/studded/studded.rs2:51 inv_del(inv, studs, 1)",
     "ball_of_wool": "skill_crafting/scripts/jewellery/stringing.rs2:64 inv_del(inv, ball_of_wool, 1)",
+    "battlestaff": "skill_crafting/scripts/battlestaves/battlestaves.rs2:34 inv_del(inv, battlestaff, 1)",
+}
+
+# Ingredients you are expected to BUY rather than bank.
+#
+# A battlestaff is not something you find — Zaff in Varrock and the Magic Guild
+# stock them, five at a time, and a crafter buying orbs buys staves to go with
+# them. battlestaves.struct names only the orb, so without this the recipe read
+# as free and a bank of 5,000 orbs reported 687k Crafting xp with no mention of
+# the 38M gp of staves it takes to get it.
+#
+# Marked rather than dropped: the solve still runs the recipe, but counts the
+# shortfall as a purchase, prices it, and says so. A missing ingredient you can
+# walk into a shop and buy is a shopping note, not a wall — the same call the
+# tool already makes for tools you don't hold.
+SHOP_BOUGHT = {
+    "battlestaff": "areas/area_varrock/configs/varrock.inv:150 stock1=battlestaff,5 "
+                   "(Zaff) and areas/area_yanille/configs/magic_guild/magic_guild.inv:22",
 }
 
 # Gems that dispatch to @make_bolt_tips instead of @make_bolts. This is the one
@@ -351,6 +374,25 @@ TANNING = [
 TANNING_SRC = ("scripts/areas/area_alkharid/scripts/tanner.rs2 "
                "@tan_soft_leather / @tan_hard_leather / @tan_dragonhide "
                "+ configs/tanner.constant")
+
+# The other zero-xp prep steps, same shape as tanning and there for the same
+# reason: without them a whole skill line reads as worth nothing.
+#
+#   clay + a container of water -> soft clay, and the empty container back
+#   an empty bucket             -> a bucket of sand, from any sand pit
+#
+# Neither pays xp, and neither is in any config — both are plain script bodies
+# — but every pottery recipe wants soft clay and every glass recipe wants sand,
+# so a bank of raw clay read as zero Crafting the same way 700 dragonhide once
+# did. The sand is free: a sand pit fills a bucket for nothing, so the only
+# thing standing between an empty bucket and molten glass is the walk knowing
+# the step exists.
+SOFT_CLAY_WATER = ["bowl_water", "bucket_water", "jug_water"]
+SOFT_CLAY_SRC = ("scripts/skill_crafting/scripts/pottery/pottery.rs2:44 "
+                 "@make_softclay, dispatched from pottery.rs2:4 "
+                 "case bowl_water, bucket_water, jug_water")
+SAND_FILL_SRC = ("scripts/skill_crafting/scripts/glass/glass.rs2:12 @sand_fill "
+                 "-- inv_del(inv, bucket_empty, 1); inv_add(inv, bucket_sand, 1)")
 
 # quest.enum:22 — the varp these recipes gate on is %chompybird.
 OGRE_QUEST = "Big Chompy Bird Hunting"
@@ -427,6 +469,17 @@ LITERALS = [
         src="scripts/skill_smithing/scripts/smelting/cannonballs.rs2:42 "
             "stat_advance(smithing, 375)",
     ),
+    # The one smithing action that is not on the anvil table. Both halves plus
+    # a hammer, and the script gates on level 60 and nothing else — no quest
+    # check in build 274, whatever later versions require.
+    dict(
+        key="smith_dragon_sq_shield", skill="smithing", level=60, xp=75.0,
+        label="Repair the dragon square shield",
+        inp=[("dragonshield_a", 1), ("dragonshield_b", 1)],
+        out=[("dragon_sq_shield", 1)], tools=["hammer"],
+        src="scripts/skill_smithing/scripts/smithing/dragon_sq.rs2:53 "
+            "stat_advance(smithing, 750)",
+    ),
 ]
 
 # Amulet stringing is a single hardcoded 4 xp for every amulet
@@ -448,7 +501,7 @@ class Recipes:
         self.counts = {}
 
     def add(self, key, *, skill, label, level, xp, inp, out, src,
-            tools=(), chance=None, note=None, extra=None):
+            tools=(), buy=(), chance=None, note=None, extra=None):
         if key in self.out:
             raise BuildError(f"duplicate recipe key {key!r}")
         if xp is None:
@@ -464,6 +517,8 @@ class Recipes:
         }
         if tools:
             rec["tools"] = [self.c.oid(t) for t in tools]
+        if buy:
+            rec["buy"] = [self.c.oid(b) for b in buy]
         if chance is not None:
             rec["chance"] = chance
         if note:
@@ -721,6 +776,42 @@ def h_tanning(c, r):
         )
 
 
+def h_prep_steps(c, r):
+    """
+    The zero-xp conversions pottery and glassblowing are gated behind.
+
+    Sibling of h_tanning, and there for exactly the same reason: these pay
+    nothing, so they are not recipes in the xp sense, but every recipe
+    downstream needs them done. Leaving them out made 1,000 clay read as worth
+    zero Crafting xp when it is 33,000, and 1,000 empty buckets plus soda ash
+    read as zero when it is 72,500.
+
+    Filed under crafting so the chain walk can reach them — the solve is per
+    skill, and a conversion step is only reachable by the skill it feeds.
+    """
+    for water in SOFT_CLAY_WATER:
+        empty = c.obj_param(water, "next_obj_stage")
+        if not empty:
+            raise BuildError(f"{water} has no next_obj_stage param — moved?")
+        r.add(
+            f"craft_soften_clay_{water}", skill="crafting", level=1, xp=0.0,
+            label=f"Mix clay with {c.obj_name(water).lower()}",
+            inp=[("clay", 1), (water, 1)],
+            out=[("softclay", 1), (empty, 1)],
+            src=SOFT_CLAY_SRC,
+            note="no xp — but every pottery recipe needs soft clay, and the "
+                 "container comes back empty",
+        )
+    r.add(
+        "craft_fill_bucket_sand", skill="crafting", level=1, xp=0.0,
+        label="Fill a bucket at a sand pit",
+        inp=[("bucket_empty", 1)], out=[("bucket_sand", 1)],
+        src=SAND_FILL_SRC,
+        note="no xp and no cost — the sand is free, but molten glass cannot "
+             "be made without it",
+    )
+
+
 def h_leather(c, r):
     """craft_leather_table. The `leather` column carries its own count."""
     for name, rel, kv in c.rows("craft_leather_table"):
@@ -742,11 +833,17 @@ def h_struct_pairs(c, r):
     """
     The plain one-in-one-out struct families: spinning, battlestaves, studded.
     Each names its own `ingredient` and `product`; the only thing the scripts
-    add is a co-input (studs) or nothing at all.
+    add is a co-input (studs, a battlestaff) or nothing at all.
+
+    Battlestaves are the reason to read the script rather than trust the
+    struct. `battlestaves.struct` lists the orb as the whole recipe, but
+    `craft_staff` deletes a battlestaff alongside it — a 7,000 gp shop item
+    that dwarfs everything else in the step. The first build missed it and
+    reported the xp as though the staves were free.
     """
     families = [
         ("spinning", "levelrequire", [], "Spin"),
-        ("battlestaves", "levelrequire", [], "Make"),
+        ("battlestaves", "levelrequire", ["battlestaff"], "Make"),
         ("studded", "levelrequired", ["studs"], "Make"),
     ]
     for folder, level_key, co, verb in families:
@@ -756,13 +853,17 @@ def h_struct_pairs(c, r):
             exp = param(kv, "productexp")
             if not (ingredient and product and exp):
                 continue
+            notes = [CO_INPUT_SRC[x] for x in co]
+            notes += [f"{x} is shop stock: {SHOP_BOUGHT[x]}"
+                      for x in co if x in SHOP_BOUGHT]
             r.add(
                 f"craft_{name}", skill="crafting",
                 level=int(param(kv, level_key, 1)), xp=tenths(exp),
                 label=f"{verb} {c.obj_name(product).lower()}",
                 inp=[(ingredient, 1)] + [(x, 1) for x in co], out=[(product, 1)],
+                buy=[x for x in co if x in SHOP_BOUGHT],
                 src=f"{rel}#{name}",
-                note=CO_INPUT_SRC[co[0]] if co else None,
+                note="; ".join(notes) or None,
             )
 
 
@@ -1011,8 +1112,8 @@ def h_literals(c, r):
 
 HANDLERS = [
     h_fletching_logs, h_fletching_table, h_firemaking, h_prayer,
-    h_smelting, h_smithing_anvil, h_gem_cutting, h_tanning, h_leather,
-    h_struct_pairs,
+    h_smelting, h_smithing_anvil, h_gem_cutting, h_tanning, h_prep_steps,
+    h_leather, h_struct_pairs,
     h_glassblowing, h_pottery, h_jewellery, h_herblore, h_runecraft, h_magic,
     h_literals,
 ]
@@ -1037,6 +1138,13 @@ KNOWN_GAPS = [
     "One-off crafting scripts with a hardcoded xp literal and no config: "
     "cape dyeing (dye_cape.rs2:120, 2.5 xp) and snelm carving "
     "(snelm.rs2:15, 32.5 xp).",
+
+    "Bones to bananas (magic_spells.dbrow#magic_spell_bones_to_bananas) pays "
+    "25 xp per cast and converts every bone you are carrying in that one cast "
+    "(convert_bones.rs2:30 deletes inv_total(inv, bones)). The xp is per cast "
+    "and the bones are not, so there is no honest bones-per-action number to "
+    "put in a recipe — modelling it as one bone per cast would report a bank "
+    "of bones as roughly 26x the Magic xp it is worth.",
 ]
 
 # Skills deliberately left out, with the reason. Written into the data file so
@@ -1053,6 +1161,96 @@ NOT_COVERED = {
     "thieving": "no item input",
     "combat": "no item input",
 }
+
+
+# Which Content skill folder feeds which extracted skill. Used by
+# check_deletions to ask "this script eats an item — does any recipe of its
+# skill know about that?"
+SKILL_FOLDERS = {
+    "skill_fletching": "fletching", "skill_crafting": "crafting",
+    "skill_smithing": "smithing", "skill_herblore": "herblore",
+    "skill_firemaking": "firemaking", "skill_runecraft": "runecraft",
+    "skill_prayer": "prayer", "skill_magic": "magic",
+}
+
+# Deletions check_deletions is expected to find, with why they are not recipes.
+# Everything NOT on this list that the check reports is a missing ingredient or
+# a missing recipe, which is the whole point of the check.
+EXPECTED_DELETIONS = {
+    ("crafting", "viking_golden_fleece"):
+        "The Fremennik Trials — spinning the golden fleece is a quest step, "
+        "not a repeatable recipe (spinning.rs2:25).",
+    ("herblore", "empty_dye_bottle"):
+        "A quest item consumed by the grinder, not an ingredient "
+        "(grind_ingredient.rs2:73).",
+    ("magic", "bones"):
+        "Bones to bananas — see KNOWN_GAPS; the xp is per cast and the bones "
+        "are not, so there is no per-action number to record.",
+    ("magic", "karamja_rum"): "Teleporting destroys smuggled rum. Not a recipe.",
+    ("magic", "plaguesample"): "Teleporting destroys the plague sample.",
+    ("magic", "thanainabarrel"): "Teleporting destroys the barrel of thanaina.",
+}
+
+INV_DEL_RE = re.compile(r"inv_del\(\s*inv\s*,\s*([a-z0-9_]+)\s*,")
+
+
+def check_deletions(content, recipes):
+    """
+    Warn about any item a skill script consumes that no recipe of that skill
+    names as an ingredient.
+
+    This is the check that would have caught battlestaves. `battlestaves.struct`
+    lists only the orb, so the extracted recipe was free; the 7,000 gp staff was
+    deleted three lines into the script and appeared nowhere in the data file.
+    A user found it, which is one user too many — the whole failure mode of a
+    missing ingredient is that it makes a number *better* and nobody looks
+    twice.
+
+    Only literal deletions are checked: `inv_del(inv, battlestaff, 1)` yes,
+    `inv_del(inv, struct_param($struct, ingredient), 1)` no, because the latter
+    is exactly the config-driven path already being extracted. That keeps the
+    signal high — the whole tree yields a handful of hits, and every one of
+    them is either a real gap or an entry in EXPECTED_DELETIONS with a reason.
+
+    A warning rather than an error, same as check_tool_sources: quest scripts
+    live in these folders too, and a false positive should not block a rebuild.
+    """
+    by_id = {gid: slug for slug, gid in content.slug_to_id.items()}
+    known = {}  # skill -> set of slugs the recipes already account for
+    for r in recipes.values():
+        seen = known.setdefault(r["skill"], set())
+        for slot in r["in"]:
+            seen.add(by_id.get(slot["id"]))
+        for tool in r.get("tools", ()):
+            seen.add(by_id.get(tool))
+
+    found = {}
+    for rel, text in content.tree.items():
+        if not rel.endswith(".rs2") or "/_test/" in rel:
+            continue
+        parts = rel.split("/")
+        skill = next((SKILL_FOLDERS[part] for part in parts
+                      if part in SKILL_FOLDERS), None)
+        if not skill:
+            continue
+        for lineno, line in enumerate(text.splitlines(), 1):
+            for slug in INV_DEL_RE.findall(line):
+                if slug in known.get(skill, ()):
+                    continue
+                if slug not in content.slug_to_id:
+                    continue  # a local variable name, not an item
+                if (skill, slug) in EXPECTED_DELETIONS:
+                    continue
+                found.setdefault((skill, slug), f"{rel}:{lineno}")
+
+    if found:
+        # Plain ASCII, same reason as check_tool_sources: this line has to
+        # survive a console with a legacy codepage.
+        print("\n  WARNING: skill scripts delete items no recipe of that "
+              "skill names - missing ingredient, or missing recipe:", flush=True)
+        for (skill, slug), where in sorted(found.items()):
+            print(f"    {skill:<11} {slug:<24} {where}", flush=True)
+    return found
 
 
 def check_tool_sources(content, recipes):
@@ -1123,6 +1321,7 @@ def main():
             "deleting the entry."
         )
     check_tool_sources(content, recipes.out)
+    check_deletions(content, recipes.out)
 
     # Items alchemy refuses, so the alch plan cannot quietly eat them:
     # anything carrying param=no_alchemy, plus coins themselves
