@@ -16743,11 +16743,12 @@
   },
   "60": {
     "asOf": "2026-08-25T04:56:00Z",
-    "price": 10000,
-    "saleMedian": 10000,
-    "sampleSize": 1,
-    "tier": "market",
-    "volume": 1
+    "bulkCap": 300,
+    "price": 40,
+    "sampleSize": 0,
+    "tier": "capped",
+    "uncappedPrice": 10000,
+    "uncappedTier": "market"
   },
   "600": {
     "asOf": "2026-08-25T04:56:00Z",
@@ -16788,9 +16789,9 @@
   "61": {
     "asOf": "2026-08-25T04:56:00Z",
     "notedFrom": "60",
-    "price": 10000,
-    "sampleSize": 1,
-    "tier": "market"
+    "price": 40,
+    "sampleSize": 0,
+    "tier": "capped"
   },
   "619": {
     "asOf": "2026-08-25T04:56:00Z",
@@ -17741,11 +17742,12 @@
   },
   "849": {
     "asOf": "2026-08-25T04:56:00Z",
-    "price": 5000,
-    "saleMedian": 5000,
-    "sampleSize": 1,
-    "tier": "market",
-    "volume": 1
+    "bulkCap": 300,
+    "price": 80,
+    "sampleSize": 0,
+    "tier": "capped",
+    "uncappedPrice": 5000,
+    "uncappedTier": "market"
   },
   "85": {
     "asOf": "2026-08-25T04:56:00Z",
@@ -17756,9 +17758,9 @@
   "850": {
     "asOf": "2026-08-25T04:56:00Z",
     "notedFrom": "849",
-    "price": 5000,
-    "sampleSize": 1,
-    "tier": "market"
+    "price": 80,
+    "sampleSize": 0,
+    "tier": "capped"
   },
   "851": {
     "asOf": "2026-08-25T04:56:00Z",
@@ -17777,19 +17779,19 @@
   },
   "853": {
     "asOf": "2026-08-25T04:56:00Z",
-    "bestAsk": 1000,
-    "price": 3500,
-    "saleMedian": 3500,
-    "sampleSize": 8,
-    "tier": "market",
-    "volume": 8
+    "bulkCap": 300,
+    "price": 160,
+    "sampleSize": 0,
+    "tier": "capped",
+    "uncappedPrice": 3500,
+    "uncappedTier": "market"
   },
   "854": {
     "asOf": "2026-08-25T04:56:00Z",
     "notedFrom": "853",
-    "price": 3500,
-    "sampleSize": 8,
-    "tier": "market"
+    "price": 160,
+    "sampleSize": 0,
+    "tier": "capped"
   },
   "855": {
     "asOf": "2026-08-25T04:56:00Z",
@@ -17809,18 +17811,19 @@
   },
   "857": {
     "asOf": "2026-08-25T04:56:00Z",
-    "price": 5500,
-    "saleMedian": 5500,
-    "sampleSize": 2,
-    "tier": "market",
-    "volume": 492
+    "bulkCap": 1000,
+    "price": 320,
+    "sampleSize": 0,
+    "tier": "capped",
+    "uncappedPrice": 5500,
+    "uncappedTier": "market"
   },
   "858": {
     "asOf": "2026-08-25T04:56:00Z",
     "notedFrom": "857",
-    "price": 5500,
-    "sampleSize": 2,
-    "tier": "market"
+    "price": 320,
+    "sampleSize": 0,
+    "tier": "capped"
   },
   "859": {
     "asOf": "2026-08-25T04:56:00Z",

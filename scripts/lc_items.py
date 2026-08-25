@@ -633,6 +633,57 @@ BULK_UNSELLABLE = {
 }
 
 
+# ---------------------------------------------------------------------
+# Hard per-unit ceilings on items that come off a grind by the thousand.
+#
+# The low-tier bows are the clearest case in the game. Nobody buys a willow
+# shortbow — they are what a fletcher produces on the way to yew, and they go
+# to a shop or an alch. So the market reading for one is whatever the last
+# person to post one felt like asking: an unstrung willow shortbow read 10,000
+# gp off a SINGLE sale, which puts 10M on a bank holding a thousand of them,
+# and a maple shortbow read 3,500 off eight.
+#
+# It does not settle down, either. One daily refresh moved the strung willow
+# shortbow from 3,500 off two sales to 5,000 off one — which is the tell: a
+# price that swings 40% on a single trade is not tracking a market.
+#
+# BULK_DISCOUNT is the wrong tool here — halving a price that is 100x wrong
+# still leaves it 50x wrong. What these are actually worth is what the shop
+# pays, so above the cap the price falls back to vendor value (cost * 0.4)
+# rather than being scaled.
+#
+# The cap only bites upward. A bow trading under it keeps its market price,
+# which is the normal case: willow longbows read 130, maple longbows 300, the
+# yew longbow 630 off twenty-four, and the unstrung yew shortbow 90 off ten.
+#
+# The ceiling is per item rather than one constant, because the tiers are not
+# equally dead. Yew shortbows sit next to a genuinely liquid yew longbow market
+# and 1,000 gp is a plausible price for one; 5,250 off two sales is not. The
+# lower tiers have no plausible price at all above a few hundred.
+#
+# Maple and yew LONGbows are deliberately not here at all. They are the bows in
+# this range with a real buyer — high alchers — reading 300 off genuine sales
+# and 630 off twenty-four, so there is a market to track rather than noise to
+# suppress. Magic bows are a tier up and trade properly.
+
+
+def _both(cap, *bows):
+    """{slug: cap} for each bow strung and unstrung — the pair always moves together."""
+    return {slug: cap for bow in bows for slug in (bow, f"unstrung_{bow}")}
+
+
+UNSELLABLE_CAPPED = {
+    # Normal, oak and willow, short and long.
+    **_both(300, "shortbow", "longbow"),
+    **_both(300, "oak_shortbow", "oak_longbow"),
+    **_both(300, "willow_shortbow", "willow_longbow"),
+    # Maple and yew shortbows only, and yew high enough to leave a real market
+    # room to exist.
+    **_both(300, "maple_shortbow"),
+    **_both(1_000, "yew_shortbow"),
+}
+
+
 def parse_charges(slug):
     """Return (charges, family, spec) for charged jewellery, else (None, None, None).
 

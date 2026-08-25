@@ -24,8 +24,9 @@ a single item's slug (full rune sets under "rune platebody", etc), and plain
 gem jewellery is capped at its enchanted form's price (ENCHANT_PRODUCT).
 FIXED_PRICES hand-sets the few items no rule reads correctly (cannon parts,
 soul runes) and overrides everything else. MATERIAL_RECIPES prices an item from
-what it's made of, and BULK_UNSELLABLE discounts the handful that only ever
-trade one at a time.
+what it's made of, BULK_UNSELLABLE discounts the handful that only ever
+trade one at a time, and UNSELLABLE_CAPPED sends the low-tier bows back to shop
+value when a lone listing quotes one above its bulk ceiling.
 
 Deep sale history for slow-moving items comes from backfill_history.py.
 
@@ -45,7 +46,8 @@ import lc_market as mkt          # noqa: E402
 from lc_items import (   # noqa: E402
     BULK_DISCOUNT, BULK_UNSELLABLE, BUNDLE_CAPS, ENCHANT_PRODUCT,
     FINE_CLOTH_SLUG, FIXED_PRICES, MATERIAL_RECIPES, SAME_AS_BASE,
-    SPLITBARK_CLOTH, UNID_HERB, VIAL_WATER_SLUG, categorize, is_alch_default,
+    SPLITBARK_CLOTH, UNID_HERB, UNSELLABLE_CAPPED,
+    VIAL_WATER_SLUG, categorize, is_alch_default,
     is_vendor_default, parse_charges, parse_dose, unfinished_potion_herb,
 )
 
@@ -736,6 +738,38 @@ def apply_bulk_discount(catalog, prices, now_iso):
     return discounted
 
 
+def apply_unsellable_caps(catalog, prices, now_iso):
+    """Fall back to vendor value for items quoted above their bulk ceiling.
+
+    The low-tier bows come off a fletching grind by the thousand and have no
+    buyer, so a lone listing is the whole market reading: an unstrung willow
+    shortbow read 10,000 gp off one sale. Above the cap the shop price is the
+    honest number. See UNSELLABLE_CAPPED in lc_items.py, which sets the ceiling
+    per item — the tiers are not equally dead.
+
+    One-directional — a bow trading under its cap keeps its market price.
+    """
+    by_slug = {i.get("slug"): g for g, i in catalog.items()}
+    capped = 0
+    for slug, cap in sorted(UNSELLABLE_CAPPED.items()):
+        gid = by_slug.get(slug)
+        entry = prices.get(gid) if gid else None
+        if not entry or entry.get("price", 0) <= cap:
+            continue
+        cost = catalog[gid].get("cost") or 0
+        prices[gid] = {
+            "price": max(1, round(cost * 0.4)),
+            "tier": "capped",
+            "sampleSize": 0,
+            "asOf": now_iso,
+            "bulkCap": cap,
+            "uncappedPrice": entry["price"],
+            "uncappedTier": entry["tier"],
+        }
+        capped += 1
+    return capped
+
+
 def apply_same_as_base(catalog, prices, now_iso):
     """Items worth exactly what another item is worth. See SAME_AS_BASE.
 
@@ -1046,6 +1080,7 @@ def main():
     unid_filled = apply_unidentified_herb_pricing(items_db, prices, now_iso)
     enchant_capped = apply_enchant_caps(items_db, prices, now_iso)
     bulk_discounted = apply_bulk_discount(items_db, prices, now_iso)
+    bulk_capped = apply_unsellable_caps(items_db, prices, now_iso)
     # Hand-set prices beat every tier above, including live market data.
     fixed_forced = apply_fixed_prices(items_db, prices, now_iso)
     # Variants and notes resolve LAST: they mirror a base item's final price,
@@ -1073,7 +1108,8 @@ def main():
           f"{container_filled} same-as-base, {junk_priced} junk, "
           f"{recipe_filled} from materials, {bulk_discounted} bulk-discounted, "
           f"{alch_forced} forced alch, {unid_filled} unidentified herbs, "
-          f"{enchant_capped} enchant-capped, {fixed_forced} fixed)", flush=True)
+          f"{enchant_capped} enchant-capped, {bulk_capped} bulk-capped, "
+          f"{fixed_forced} fixed)", flush=True)
 
     ITEMS_PATH.write_text(json.dumps(items_db, indent=2, sort_keys=True), encoding="utf-8")
     PRICES_PATH.write_text(json.dumps(prices, indent=2, sort_keys=True), encoding="utf-8")

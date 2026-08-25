@@ -14,6 +14,8 @@
 //   enchant   plain gem jewellery, capped at what its enchanted form sells for
 //   bulk      real per-unit price, but no depth behind it — marked down, since
 //             a stack of 300 can't be sold at the price one buyer pays for one
+//   capped    quoted above a bulk ceiling nothing supports (a willow shortbow
+//             at 10,000 off one sale) — fell back to shop value
 //   fixed     hand-set price — the market reads this item wrong (cannon parts
 //             trade as a whole cannon, soul runes off a single outlier bid)
 //   stale     no recent trade, but it has sold before — old price beats a guess
@@ -59,6 +61,7 @@
     cloth: 'Fine cloth',
     recipe: 'Materials',
     bulk: 'No bulk',
+    capped: 'Bulk cap',
     enchant: 'Enchant cap',
     fixed: 'Fixed',
     stale: 'Old sale',
@@ -76,6 +79,7 @@
   const VALUED_TIERS = new Set([
     'market', 'bid', 'ask', 'dose', 'charge', 'cloth', 'enchant', 'fixed',
     'stale', 'noted', 'alch', 'vendor', 'unfinished', 'recipe', 'bulk', 'junk',
+    'capped',
   ]);
 
   function fmtGp(n) {

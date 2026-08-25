@@ -70,6 +70,7 @@ Price per item, best available evidence first:
 | `fixed` | A hand-set price, overriding every tier below and the live market too |
 | `recipe` | Priced from the materials it's made of — molten glass is a bucket of sand plus soda ash |
 | `bulk` | A real per-unit price with no depth behind it — discounted, since the stack can't be sold at the price one buyer pays for one |
+| `capped` | Quoted above a bulk ceiling nothing supports (a willow shortbow at 10,000 off one sale) — fell back to shop value |
 | `sameAs` | Worth exactly what another item is worth — filled buckets, broken tools, tool heads, tanned leather, soda ash |
 | `noted` | A noted (`cert_`) item, priced from its base item |
 | `stale` | No recent trade, but it has sold before — a real old price beats a guess |
@@ -254,6 +255,44 @@ to someone who wants a door opened today: about 85 units in two months. The per-
 real and the depth is not, so `BULK_UNSELLABLE` marks the stack down by half. It's a blunt
 constant standing in for per-item traded volume, which the price file now records (`volume`)
 but doesn't yet spend.
+
+**And some have no market at all, only listings.** The low-tier bows are the clearest case
+in the game: nobody *buys* a willow shortbow, it is what a fletcher produces on the way to
+yew, and it goes to a shop or an alch. So whatever the last person to post one felt like
+asking becomes the whole market reading. An unstrung willow shortbow read **10,000 gp off a
+single sale**, which puts 10M on a bank holding a thousand of them; a maple shortbow read
+3,500 off eight. Nor does it settle: one daily refresh moved the strung willow shortbow from
+3,500 off two sales to 5,000 off one, which is the tell — a price that swings 40% on a single
+trade is not tracking a market.
+
+Halving those would still leave them fifty times wrong, so `UNSELLABLE_CAPPED` is a hard
+ceiling rather than a discount: above its cap the price falls back to vendor value, tier
+`capped`. The ceiling is **per item**, because the tiers are not equally dead — a yew
+shortbow sits next to a liquid yew longbow market and 1,000 gp is a plausible price for
+one, while nothing below willow has a plausible price above a few hundred:
+
+| Cap | Bows (each strung and unstrung) |
+|---|---|
+| 300 gp | normal, oak and willow — short and long — plus maple shortbows |
+| 1,000 gp | yew shortbows |
+
+The cap only bites upward, and mostly it doesn't bite: it moves four items and leaves the
+rest of the ladder alone.
+
+| | read | now |
+|---|---|---|
+| Unstrung willow shortbow | 10,000 off **1** sale | 40 (vendor) |
+| Willow shortbow | 5,000 off **1** | 80 (vendor) |
+| Maple shortbow | 3,500 off 8 | 160 (vendor) |
+| Yew shortbow | 5,500 off 2 | 320 (vendor) |
+| Willow longbow | 130 off 2 | unchanged — under the cap |
+| Maple longbow | 300 off 2 | unchanged |
+| Unstrung yew shortbow | 90 off 10 | unchanged — real depth, well under |
+| Yew longbow | 630 off 24 | unchanged — a genuine market |
+
+Maple and yew *longbows* are deliberately not on the list at all. They are the bows in this
+range with a real buyer — high alchers — so there is a market to track rather than noise to
+suppress. Magic bows are a tier up and trade properly.
 
 **A standing offer far from where an item actually sells is a typo or a troll**, on either
 side of the book. A santa hat read 110,000,084gp — the midpoint of a 169gp bid and a
