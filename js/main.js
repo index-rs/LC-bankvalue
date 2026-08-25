@@ -72,6 +72,14 @@
     // The solve's default tie-break is a stated choice rather than the only
     // sane one, so the reader gets to overrule it per contested item.
     let choices = {};
+    // Items dropped out of a skill's plan: { magic: [1512, 1514] }. Same idea
+    // as a pin, one step further — "don't smith my mithril bars" and "alch
+    // only the magic longbows" are the same instruction.
+    let excluded = {};
+    // How many "any item" casts to do, per skill. Alchemy is rune-limited, so
+    // without this the plan burns every spare nature rune on whatever is left
+    // in the bank — real xp, real loss, and not a plan anyone follows.
+    let casts = {};
 
     function setStatus(msg, kind) {
       if (!statusEl) return;
@@ -120,12 +128,14 @@
       );
       const solved = window.BankXP.solve(
         current.containers, itemsDb, pricesDb, recipesDb, current.stats,
-        { capToLevel, choices }
+        { capToLevel, choices, excluded, casts }
       );
       window.BankXPReport.renderXpReport(xpReportEl, solved, itemsDb, {
         capToLevel,
         openSkills: openSkills.size ? openSkills : null,
         onPick,
+        onDrop,
+        onCasts,
       });
       const box = xpReportEl.querySelector('#xp-cap-level');
       if (box) {
@@ -139,9 +149,42 @@
 
     // Pin one recipe to one contested item, or clear the whole skill when the
     // item is null (the "back to best rate" button).
+    // Drop an item out of a skill's plan, or put it back.
+    function onDrop(skill, itemId, off) {
+      const ids = Array.isArray(itemId) ? itemId : [itemId];
+      const list = new Set(excluded[skill] || []);
+      ids.forEach((id) => (off ? list.add(id) : list.delete(id)));
+      if (list.size) excluded[skill] = [...list];
+      else delete excluded[skill];
+      // A dropped item cannot also be pinned to a recipe.
+      if (off && choices[skill]) {
+        const forSkill = { ...choices[skill] };
+        ids.forEach((id) => delete forSkill[id]);
+        if (Object.keys(forSkill).length) choices[skill] = forSkill;
+        else delete choices[skill];
+      }
+      renderXp();
+    }
+
+    // Cap the alchs for one skill; null means "as many as the runes allow".
+    function onCasts(skill, n) {
+      if (n == null) delete casts[skill];
+      else casts[skill] = n;
+      renderXp();
+    }
+
     function onPick(skill, itemId, key) {
-      if (itemId === null) delete choices[skill];
-      else {
+      if (itemId === null) {
+        delete choices[skill];
+        delete excluded[skill]; // "back to best rate" undoes drops
+        delete casts[skill];    // and the cast cap
+      } else {
+        // Picking a recipe for an item necessarily puts it back in the plan.
+        if (key && excluded[skill]) {
+          const list = (excluded[skill] || []).filter((x) => x !== itemId);
+          if (list.length) excluded[skill] = list;
+          else delete excluded[skill];
+        }
         const forSkill = { ...(choices[skill] || {}) };
         if (key) forSkill[itemId] = key;
         else delete forSkill[itemId];
@@ -157,6 +200,8 @@
     function render(containers, stats, meta) {
       current = { containers, stats: stats || null };
       choices = {}; // a different bank has different forks
+      excluded = {};
+      casts = {};
       const rows = window.BankReport.buildRows(containers, itemsDb, pricesDb);
       const r = window.BankReport.renderReport(reportEl, rows, meta || {});
       renderXp();

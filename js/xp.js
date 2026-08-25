@@ -87,6 +87,9 @@
   //
   // Anything not on the list is still eligible, after all of it, and still
   // cheapest-first: that half of the old rule was right.
+  // Index past the end of ALCH_PRIORITY — the tier everything unlisted lands
+  // in. Exported on each eaten item so the report can separate "worth alching"
+  // from "eaten because the runes were spare".
   const ALCH_PRIORITY = [
     {
       label: 'Bows',
@@ -159,9 +162,16 @@
   // and (for gem cutting) a quarter on a miss, but the honest headline is the
   // expectation — reported as such, and tallied separately so the skill total
   // can say how much of itself is an estimate.
+  //
+  // Unless the roll has an answer. Iron smelting fails half the time
+  // bare-handed and never fails wearing a ring of forging, which is a branch
+  // in Content and not a mitigation anyone invented — and since nobody smelts
+  // iron without one, reporting the bare-handed expectation described a way of
+  // playing that does not happen. A `mitigatedBy` roll pays full xp, and the
+  // report says what it assumes and what that costs.
   function expectedXp(recipe, level) {
     const chance = recipe.chance;
-    if (!chance) return recipe.xp;
+    if (!chance || chance.mitigatedBy) return recipe.xp;
     if (chance.kind === 'flat') return recipe.xp * chance.p;
     // A random *yield* (ogre arrow shafts: 2-6 per log, xp paid per shaft) is
     // stored already averaged, so there is nothing to weight here — but it is
@@ -203,6 +213,23 @@
   function solveSkill(skill, recipeList, baseStock, opts) {
     const { itemsDb, pricesDb, level, capToLevel, noAlch } = opts;
     const choices = opts.choices || {};
+    // Items the reader has taken off the table for this skill. "Don't smith my
+    // mithril bars" is a real plan, and so is "alch only the magic longbows" —
+    // both are the same instruction, so they are the same mechanism: no recipe
+    // may consume an excluded item, and alchemy may not eat one.
+    const excluded = opts.excluded || new Set();
+    // How many "one item, any item" casts to actually do. Alchemy is limited
+    // by runes, not by anything worth alching, so a bank with 39,000 nature
+    // runes will happily burn the last 12,000 on bronze arrows and spades —
+    // real xp, and a real loss, and not a plan anybody follows. Capping the
+    // casts is the reader saying where the sense runs out; targets are eaten
+    // best-first, so the cap keeps the good ones.
+    //
+    // It is one budget for the whole skill rather than a limit per spell. High
+    // and low alchemy both burn nature runes, so capping them separately does
+    // not cut the alching — it hands the runes high alch gave up straight to
+    // the worse spell, and the plan gets *further* from what was asked for.
+    let castBudget = opts.castCap != null ? opts.castCap : Infinity;
 
     const stock = new Map(baseStock);
     const consumed = new Map(); // id -> qty taken out of the original bank
@@ -220,7 +247,10 @@
 
     // recipeList is [key, recipe] pairs — destructure, or every recipe reads
     // as undefined and the filter silently empties the whole skill.
-    const usable = recipeList.filter(([, r]) => !capToLevel || r.level <= level);
+    // `levelCap` is how far up the list this bank can actually climb, which is
+    // not the same as the level you are now — see reachableLevel() in solve().
+    const ceiling = opts.levelCap != null ? opts.levelCap : level;
+    const usable = recipeList.filter(([, r]) => !capToLevel || r.level <= ceiling);
 
     // What the walk is allowed to run. `usable` is everything this level
     // reaches; `active` is what survives the reader's own choices. The two are
@@ -230,6 +260,7 @@
     const reachable = new Set(usable.map(([key]) => key));
     const active = usable.filter(([key, r]) =>
       r.in.every((input) => {
+        if (excluded.has(input.id)) return false;
         const pick = choices[input.id];
         // A pin on a recipe this level cannot reach goes inert rather than
         // emptying the fork. Otherwise ticking "only recipes I can use now"
@@ -272,7 +303,9 @@
       const reagents = new Set(recipe.in.map((i) => i.id));
       const targets = [];
       stock.forEach((qty, id) => {
+        if (qty <= 0) return; // drained by an earlier spell, not a target
         if (reagents.has(id)) return;
+        if (excluded.has(id)) return; // the reader said not this one
         const item = itemsDb[String(id)];
         if (!item || !item.tradeable || item.rare) return;
         if (!item.cost) return; // nothing to alch it for
@@ -375,6 +408,7 @@
 
     function fire(recipe, key, times) {
       const buying = [];
+      let pendingMitigation = null;
       const limit = limitingInput(recipe, times); // before any stock moves
       recipe.in.forEach((input) => {
         const take = input.n * times;
@@ -403,10 +437,22 @@
       });
 
       if (recipe.fee) fees += recipe.fee * times;
+      // A roll with an answer costs something to answer. A ring of forging
+      // melts on its 140th smelt, so a plan that smelts 2,494 iron says it
+      // takes 18 of them rather than quietly assuming one lasts forever.
+      const mit = recipe.chance && recipe.chance.mitigatedBy;
+      if (mit) {
+        const soFar = (byKey.get(key) || {}).mitigation;
+        const uses = (soFar ? soFar.actions : 0) + times;
+        const rec = { id: mit.item, uses: mit.uses, actions: uses,
+                      count: Math.ceil(uses / mit.uses) };
+        if (soFar) byKey.get(key).mitigation = rec;
+        else pendingMitigation = rec;
+      }
       const each = expectedXp(recipe, level);
       const gained = each * times;
       totalXp += gained;
-      if (recipe.chance) estimatedXp += gained;
+      if (recipe.chance && !recipe.chance.mitigatedBy) estimatedXp += gained;
 
       const existing = byKey.get(key);
       if (existing) {
@@ -437,6 +483,7 @@
           out: recipe.out,
           tools: recipe.tools || [],
           buying,
+          mitigation: pendingMitigation,
         };
         byKey.set(key, step);
         steps.push(step);
@@ -481,17 +528,22 @@
       if (!casts) continue;
       const targets = alchTargets(recipe);
       let available = targets.reduce((sum, t) => sum + t.qty, 0);
-      casts = Math.min(casts, available);
+      casts = Math.min(casts, available, castBudget);
       if (!casts) continue;
+      castBudget -= casts;
 
       let remaining = casts;
       const eaten = [];
       for (const target of targets) {
         if (remaining <= 0) break;
         const take = Math.min(target.qty, remaining);
+        if (take <= 0) continue;
         stock.set(target.id, (stock.get(target.id) || 0) - take);
         consumed.set(target.id, (consumed.get(target.id) || 0) + take);
-        eaten.push({ id: target.id, n: take });
+        // `tier` rides along so the report can offer "drop the leftovers":
+        // anything past the priority list is being alched because the runes
+        // were there, not because it was worth alching.
+        eaten.push({ id: target.id, n: take, tier: target.tier });
         remaining -= take;
       }
       fire(recipe, key, casts);
@@ -608,7 +660,11 @@
           value: tieBreak(recipe),
         });
       }
-      if (options.length < 2) return;
+      // One option is still a decision: "leave my mithril bars alone" needs a
+      // control whether or not there is a second thing to do with them. Zero
+      // options means nothing in this skill has a use for it — an alchemy
+      // target, which gets its own control on the step that eats it.
+      if (!options.length) return;
       // Same order the walk itself uses: rate first, then what the product is
       // worth, so a whole tier of smithing (all 37.5 xp a bar) reads down from
       // the most valuable thing to hammer rather than in table order.
@@ -660,6 +716,24 @@
       shopping: [...bought.entries()].map(([id, n]) => ({
         id, n, name: itemName(id, itemsDb), each: buyPrice(id),
       })).sort((a, b) => b.n * b.each - a.n * a.each),
+      // The alchemy step, if there is one, and the two counts worth offering
+      // as stops: everything the runes allow, and everything actually worth
+      // alching (the priority list — bows, platebodies, hides, amulets).
+      alch: (() => {
+        const spells = steps.filter((x) => x.eaten && x.eaten.length);
+        if (!spells.length) return null;
+        const all = spells.reduce((acc, st) => acc.concat(st.eaten), []);
+        return {
+          max: spells.reduce((sum, st) => sum + st.times, 0),
+          worthIt: all.filter((e) => e.tier < ALCH_PRIORITY.length)
+            .reduce((sum, e) => sum + e.n, 0),
+        };
+      })(),
+      // Kit the plan assumes you are wearing, and how much of it you get
+      // through. Advisory like tools, but unlike a knife these wear out.
+      mitigations: steps.filter((st) => st.mitigation).map((st) => ({
+        ...st.mitigation, name: itemName(st.mitigation.id, itemsDb),
+      })),
       itemName: (id) => itemName(id, itemsDb),
     };
   }
@@ -675,6 +749,8 @@
     const opts = options || {};
     const capToLevel = !!opts.capToLevel;
     const allChoices = opts.choices || {};
+    const allExcluded = opts.excluded || {};
+    const allCasts = opts.casts || {};
     const baseStock = mergeStock(containers);
 
     const bySkill = new Map();
@@ -707,26 +783,90 @@
       const currentXp = stat ? stat.xp : 0;
       const level = levelFor(currentXp);
 
-      // Always solve once with nothing pinned. That pass is what the choice
-      // controls are built from, so the menu of forks stays put no matter what
-      // the reader picks — pin "mithril bar" with no mithril ore in the bank
-      // and the coal fork has to still be there to un-pin.
-      const auto = solveSkill(skill, list, baseStock, {
-        itemsDb, pricesDb, level, capToLevel, noAlch,
-      });
+      // How far up the recipe list this bank can actually reach.
+      //
+      // "Show recipes I'll unlock on the way" is the truthful default for a
+      // long grind — you really do unlock the better one partway through. It
+      // was not truthful about recipes you will *never* unlock: a bank worth
+      // 89k Smithing xp to a level 67 takes you to 68, and the plan was still
+      // recommending rune 2h swords, which want 99. Nothing about that is a
+      // grind you can finish.
+      //
+      // So the ceiling is the level this bank pays for, found by fixpoint:
+      // solve within what you can reach today, see where that lands you, and
+      // let the newly-unlocked recipes have another go. Each round can only
+      // raise the ceiling, so it settles in two or three — and the answer it
+      // settles on is the one where the recipes used and the level reached
+      // finally agree with each other.
+      function reachableLevel() {
+        if (capToLevel) return level;
+        // Without a stats block there is no level to reason from. "How far can
+        // this bank carry you" is not a question a save that never said where
+        // you started can answer, and pinning everyone to level 1 would hide
+        // most of the recipe table — including from the ?audit harness, whose
+        // whole job is to put every recipe through the real path.
+        if (!stat) return MAX_LEVEL;
+        let ceiling = level;
+        for (let round = 0; round < 8; round++) {
+          const trial = solveSkill(skill, list, baseStock, {
+            itemsDb, pricesDb, level, capToLevel: true, levelCap: ceiling, noAlch,
+          });
+          const reached = levelFor(Math.min(XP_CAP, currentXp + trial.totalXp));
+          if (reached <= ceiling) return ceiling;
+          ceiling = reached;
+        }
+        return ceiling;
+      }
+      const levelCap = reachableLevel();
+      const common = { itemsDb, pricesDb, level, noAlch,
+                       capToLevel: true, levelCap };
+
+      // Always solve once with nothing pinned and nothing excluded. That pass
+      // is what the choice controls are built from, so the menu of forks stays
+      // put no matter what the reader picks — pin "mithril bar" with no
+      // mithril ore in the bank and the coal fork has to still be there to
+      // un-pin.
+      const auto = solveSkill(skill, list, baseStock, common);
       const choices = allChoices[skill] || null;
-      const result = choices
-        ? solveSkill(skill, list, baseStock, {
-            itemsDb, pricesDb, level, capToLevel, noAlch, choices,
-          })
+      const excludedList = allExcluded[skill] || null;
+      const excluded = excludedList && excludedList.length
+        ? new Set(excludedList) : null;
+      const castCap = allCasts[skill] != null ? allCasts[skill] : null;
+      const result = (choices || excluded || castCap != null)
+        ? solveSkill(skill, list, baseStock,
+                     { ...common, choices, excluded, castCap })
         : auto;
       result.choiceGroups = auto.choiceGroups;
       result.choices = choices || {};
+      result.excluded = excludedList || [];
+      result.levelCap = levelCap;
+      // What the ceiling kept out, so it is a stated limit rather than a
+      // silent one. A bank of 1,200 yew logs belonging to a level 60 fletcher
+      // really is worth no Fletching xp today — but "nothing here feeds
+      // Fletching" would be the wrong way to say it, and dropping the skill
+      // off the page entirely would be worse.
+      //
+      // Only recipes this bank could actually feed are listed: a level you
+      // cannot reach is only interesting when you are holding the thing it
+      // would consume. Nearest first, because that is the one worth training
+      // towards.
+      result.outOfReach = levelCap >= MAX_LEVEL ? [] : list
+        .filter(([, r]) => r.level > levelCap
+          && r.in.some((i) => (baseStock.get(i.id) || 0) >= i.n))
+        .map(([, r]) => ({ label: r.label, level: r.level }))
+        .sort((a, b) => a.level - b.level)
+        .slice(0, 3);
+      result.castCap = castCap;
+      // The stops offered by the control come from the uncapped plan, so
+      // capping never rewrites the menu you capped from.
+      result.alch = auto.alch;
       // What the chosen plan gave up against the default one. Stated rather
       // than silently absorbed: overruling the tie-break is a real decision and
       // it usually costs xp.
       result.autoXp = auto.totalXp;
-      if (!result.steps.length && !auto.steps.length) return;
+      // Keep a skill that has nothing to do *because of the ceiling* — that is
+      // an answer, and a more useful one than leaving the skill off the page.
+      if (!result.steps.length && !auto.steps.length && !result.outOfReach.length) return;
 
       const endXp = Math.min(XP_CAP, currentXp + result.totalXp);
       result.baseXp = currentXp;
@@ -777,6 +917,8 @@
       skills: results,
       capToLevel,
       choices: allChoices,
+      excluded: allExcluded,
+      casts: allCasts,
       knownStats: !!stats,
       meta: recipesDb.meta || {},
     };
@@ -784,5 +926,6 @@
 
   window.BankXP = {
     solve, levelFor, xpForLevel, SKILL_ORDER, SKILL_LABELS, MAX_LEVEL,
+    ALCH_TIERS: ALCH_PRIORITY.length,
   };
 })();

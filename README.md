@@ -554,6 +554,60 @@ A pin the level filter puts out of reach goes inert rather than emptying the for
 Otherwise ticking "only recipes I can use now" while runite was pinned would silently
 delete a branch of the plan and leave nothing on screen to put it back.
 
+### A roll with an answer is not a roll
+
+Iron smelting fails half the time, and the report said so — `estimate` badge, 6.25 XP a bar
+instead of 12.5, a caveat about "recipes that can fail". A user pointed out that nobody
+smelts iron that way: you wear a ring of forging, or you superheat.
+
+They're right, and it's in Content rather than being a mitigation anyone invented. The roll
+is the `else` half of an `if`:
+
+```
+if (inv_total(worn, ring_of_forging) > 0 & map_members = ^true) {
+    ~lose_charge_ring_of_forging;
+} else if (randominc(1) = 1) { ... fail ... }
+```
+
+Wearing one removes the roll outright — not a reduced chance, no roll at all. Same class of
+mistake as the battlestaff: the config was read and the script wasn't. The 50% is still
+recorded, because it is what Content says, but the recipe now also carries what cancels it,
+and the solve models the way people actually play.
+
+The ring isn't free, so the plan says what it costs: `ring_of_forging.rs2:5` melts it on the
+140th charge, and the step reads *"Assumes a ring of forging… they melt after 140 — **18** of
+them for this many."* Index's smithing went 89,083 → 103,728 XP, and the `estimate` badge is
+gone from a step that no longer estimates.
+
+### Nothing here is worth alching except the magic longbows
+
+Alchemy is limited by **runes**, not by anything worth alching. A bank with 39,036 nature
+runes will happily spend the last 12,000 on bronze arrows, spades, oranges and a lit candle —
+real XP, a real loss, and not a plan anybody follows.
+
+Dropping the junk item by item is whack-a-mole: the casts are still there and just reach
+deeper into the bank. The count is the real control, so that's what it is — a number, plus a
+preset for the common case. Targets are eaten best-first, so stopping early keeps the good
+ones:
+
+| index.sav, Magic | XP | gp |
+|---|---|---|
+| 39,036 casts (every rune) | 2,551,708 | costs 15.69M, 6.15 gp per XP |
+| 26,797 casts (worth alching) | 1,756,173 | costs 9.80M, 5.58 gp per XP |
+
+One subtlety worth recording: the cap is **one budget for the whole skill**, not a limit per
+spell. High and low alchemy both burn nature runes, so capping them separately doesn't cut
+the alching — it hands the runes high alch gave up straight to the worse spell, and the plan
+gets *further* from what was asked for. The first version did exactly that.
+
+### Leaving things out of the plan
+
+"I don't want to smith my mithril bars" and "alch only the magic longbows" are the same
+instruction, so they're the same mechanism: an item dropped from a skill's plan is one no
+recipe may consume and no spell may eat. Every item a plan consumes gets a control — one
+option is still a decision — and every alchemy target is a chip you can click off. Dropped
+items keep a visible way back, because a control that can only be used once isn't a control.
+
 ### Some ingredients you buy, and it says how much
 
 `battlestaves.struct` lists an orb as the whole recipe. The script that reads it deletes a
@@ -590,6 +644,33 @@ things about it are not obvious, and both were verified rather than assumed:
 Recipes above your level are shown greyed with a `lvl N` badge by default — for a long
 grind that's the truthful default, since you *do* unlock the better recipe partway through.
 A toggle restricts the solve to what you can make right now.
+
+**But only as far as the bank can carry you.** "You'll unlock it on the way" was doing a lot
+of unexamined work: a bank worth 89K Smithing XP to a level 67 takes them to 68, and the plan
+was recommending **rune 2h swords, which want 99**. Nothing about that is a grind anyone can
+finish, and a user said so.
+
+So the ceiling is the level this bank pays for, found by fixpoint: solve within what you can
+reach today, see where that lands you, let the newly-unlocked recipes have another go, repeat.
+Each round can only raise the ceiling, so it settles in two or three, and the answer it
+settles on is the one where *the recipes used and the level reached finally agree with each
+other*. Index's smithing now plans rune scimitars at 90 rather than platebodies at 99.
+
+The ceiling is stated, never silent. Recipes it kept out that the bank holds stock for are
+listed with the level they want:
+
+```
+3 recipes this bank holds the stock for are out of reach.
+Cut magic logs into shortbows level 80 · String magic shortbow level 80
+· Fletch rune darts level 81 — and the 180,000 xp here only takes you to 72,
+so they are not counted.
+```
+
+A skill whose *whole* plan is out of reach keeps its place on the page for that note, rather
+than vanishing — "level 60 fletcher, 1,200 yew logs, five levels short" is an answer, and a
+more useful one than silence. A save with no stats block skips the ceiling entirely: "how far
+can this bank carry you" is not a question a save that never said where you started can
+answer, and it would gut the `?audit` harness.
 
 ### What it doesn't cover, and says so
 

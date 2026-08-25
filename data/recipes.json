@@ -5133,6 +5133,10 @@
   "smelt_iron_bar": {
    "chance": {
     "kind": "flat",
+    "mitigatedBy": {
+     "item": 2568,
+     "uses": 140
+    },
     "p": 0.5
    },
    "in": [
@@ -5143,7 +5147,7 @@
    ],
    "label": "Smelt iron bar",
    "level": 15,
-   "note": "50% failure unless a ring of forging is worn \u2014 smelting.rs2:200 randominc(1)",
+   "note": "50% failure bare-handed (smelting.rs2:202 randominc(1)), but a ring of forging skips the roll entirely (smelting.rs2:200) and melts after 140 smelts (ring_of_forging.rs2:5)",
    "out": [
     {
      "id": 2351,

@@ -817,6 +817,90 @@ footer.site-footer {
 .xp-choice-delta b { font-weight: 500; }
 .xp-choice-delta.up { color: var(--green); }
 .xp-choice-delta.down { color: var(--gold); }
+
+/* An item dropped out of the plan: the control stays, greyed, so there is
+   always a way back. */
+.xp-choice.is-off .xp-choice-item { color: var(--text-3); text-decoration: line-through; }
+.xp-choice.is-off select { color: var(--text-3); border-style: dashed; }
+.xp-dropped {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+.xp-dropped b { color: var(--text-2); font-weight: 500; }
+
+/* Chips you click to take an item out of the plan (or put it back). Quiet
+   until hovered — there can be ten of them under one alchemy step. */
+.xp-drop-chip, .xp-eat {
+  font: inherit;
+  color: var(--text-3);
+  background: none;
+  border: 1px solid var(--border-2);
+  border-radius: 3px;
+  padding: 1px 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .12s, border-color .12s;
+}
+.xp-drop-chip .x, .xp-eat .x { color: var(--text-3); margin-left: 2px; }
+.xp-drop-chip:hover, .xp-eat:hover,
+.xp-drop-chip:focus-visible, .xp-eat:focus-visible {
+  color: var(--text-0);
+  border-color: var(--red);
+}
+.xp-drop-chip:hover .x, .xp-eat:hover .x { color: var(--red); }
+/* Restoring is the friendly direction, so it does not borrow the warning red. */
+.xp-drop-chip:hover, .xp-drop-chip:focus-visible { border-color: var(--accent); }
+.xp-drop-chip:hover .x { color: var(--accent); }
+.xp-eats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
+}
+.xp-eat-coins { color: var(--gold); }
+.xp-kit b { color: var(--text-2); font-weight: 500; }
 .xp-badge.quest { color: var(--violet); border-color: color-mix(in oklab, var(--violet) 35%, var(--border-2)); }
 .xp-badge.prep { color: var(--blue); border-color: color-mix(in oklab, var(--blue) 35%, var(--border-2)); }
 .xp-fee { color: var(--gold); }
+
+/* How many alchs to cast. The count is the real control over an alchemy plan,
+   because the runes — not anything worth alching — are what set it. */
+.xp-casts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 14px 0 4px;
+  padding: 9px 13px;
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+.xp-casts label { display: flex; align-items: center; gap: 7px; }
+.xp-cast-input {
+  width: 8em;
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  background: var(--bg-1);
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  padding: 4px 7px;
+}
+.xp-casts-of { color: var(--text-3); }
+.xp-cast-preset { padding: 3px 8px; font-size: 9.5px; }
+.xp-casts-note {
+  flex-basis: 100%;
+  color: var(--text-3);
+  font-size: 10.5px;
+  line-height: 1.5;
+}

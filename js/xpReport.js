@@ -53,6 +53,16 @@
       return `<span class="xp-level">${skill.baseLevel} <span class="arrow">&rarr;</span> ` +
              `<b>${skill.endLevel}</b></span>`;
     }
+    if (!skill.totalXp) {
+      return `<span class="xp-level">${skill.baseLevel} ` +
+             `<span class="xp-level-note">nothing usable at this level</span></span>`;
+    }
+    if (skill.levelCap > skill.baseLevel) {
+      // The plan reaches for recipes you have not unlocked yet without quite
+      // getting you a level: worth saying, because those steps are badged.
+      return `<span class="xp-level">${skill.baseLevel} <span class="xp-level-note">` +
+             `using recipes up to ${skill.levelCap}</span></span>`;
+    }
     if (skill.baseLevel >= window.BankXP.MAX_LEVEL) {
       return `<span class="xp-level">99 <span class="xp-level-note">maxed</span></span>`;
     }
@@ -67,7 +77,11 @@
       badges.push(`<span class="xp-badge above" title="You are not this level yet — ` +
                   `it unlocks partway through the grind">lvl ${step.level}</span>`);
     }
-    if (step.chance) {
+    // A roll with an answer is not an estimate. Iron smelting carries its 50%
+    // because Content does, but the plan wears a ring of forging, so the badge
+    // would be claiming an uncertainty the number does not have — the kit note
+    // below the step says what it assumes instead.
+    if (step.chance && !step.chance.mitigatedBy) {
       badges.push(`<span class="xp-badge chance" title="${esc(step.note || '')}">estimate</span>`);
     }
     // A step that pays nothing is a prerequisite, not a choice — badged
@@ -84,18 +98,27 @@
       badges.push(`<span class="xp-badge quest" title="Needs ${esc(step.quest)}` +
                   `">quest</span>`);
     }
-    const eaten = step.eaten && step.eaten.length
-      // Listed in the order they are actually eaten, because that order is now
-      // a deliberate priority rather than a tiebreak — seeing the bows go
-      // first is the point.
-      ? `<div class="xp-step-note">Consumes ${fmt(step.eaten.reduce((s, e) => s + e.n, 0))} ` +
-        `items, in priority order &mdash; ` +
-        step.eaten.slice(0, 4).map((e) => {
+    // What alchemy eats, in the order it eats them — a deliberate priority
+    // rather than a tiebreak, so seeing the bows go first is the point.
+    //
+    // Each one is a button, because "there is nothing here worth alching
+    // except the magic longbows" is the normal case and the plan should be
+    // able to say so. Dropping an item takes it out of the targets and the
+    // cast count follows, so the xp and gp are the ones you would really get.
+    const EATEN_SHOWN = 10;
+    const eatenList = step.eaten || [];
+    const eaten = eatenList.length
+      ? `<div class="xp-step-note xp-eats">Consumes ${
+          fmt(eatenList.reduce((s2, e) => s2 + e.n, 0))} items, best first &mdash; ` +
+        eatenList.slice(0, EATEN_SHOWN).map((e) => {
           const it = itemsDb[String(e.id)];
-          return `${esc(it ? it.name : e.id)} &times;${fmt(e.n)}`;
-        }).join(', ') +
-        (step.eaten.length > 4 ? `, +${step.eaten.length - 4} more` : '') +
-        (step.coins ? ` &mdash; pays ${fmtCompact(step.coins)} gp in coins` : '') +
+          return `<button type="button" class="xp-eat" data-drop-item="${e.id}" ` +
+            `title="Leave these out of the plan">${esc(it ? it.name : e.id)} ` +
+            `&times;${fmt(e.n)} <span class="x">&times;</span></button>`;
+        }).join('') +
+        (eatenList.length > EATEN_SHOWN
+          ? `<span class="xp-alt-more">+${eatenList.length - EATEN_SHOWN} more</span>` : '') +
+        (step.coins ? ` <span class="xp-eat-coins">pays ${fmtCompact(step.coins)} gp in coins</span>` : '') +
         `</div>`
       : '';
     const buying = step.buying && step.buying.length
@@ -109,6 +132,13 @@
         }).join(', ') +
         ` &mdash; <b>${fmtCompact(step.buying.reduce((s2, b) => s2 + b.n * b.each, 0))} gp</b> ` +
         `you do not have to bank, but do have to spend</div>`
+      : '';
+    const kit = step.mitigation
+      ? `<div class="xp-step-note xp-kit">Assumes a ` +
+        `${esc((itemsDb[String(step.mitigation.id)] || {}).name || 'ring').toLowerCase()}, ` +
+        `which skips the failure roll outright rather than reducing it. ` +
+        `They melt after ${fmt(step.mitigation.uses)} &mdash; ` +
+        `<b>${fmt(step.mitigation.count)}</b> of them for this many.</div>`
       : '';
     const alts = step.alternatives && step.alternatives.length
       ? `<div class="xp-step-note xp-alts">Same ${fmt(step.limitQty)} ` +
@@ -140,7 +170,7 @@
               ? ` <span class="xp-fee">-${fmtCompact(step.fee * step.times)} gp</span>`
               : ''}` : fmt(step.xp)
         }</span>
-        ${eaten}${buying}${alts}
+        ${eaten}${buying}${kit}${alts}
       </div>`;
   }
 
@@ -154,9 +184,15 @@
   // rank, or you could pin a fork out of its own control.
   const CHOICES_SHOWN = 5;
 
-  function choiceBlock(skill) {
+  // The value a select carries when the reader wants the item left alone. It
+  // cannot collide with a recipe key: those are all slugs built from a handler
+  // name and an item, and none of them is bracketed like this.
+  const DROP = '--leave-it--';
+
+  function choiceBlock(skill, itemsDb) {
     const groups = skill.choiceGroups || [];
-    if (!groups.length) return '';
+    const dropped = new Set(skill.excluded || []);
+    if (!groups.length && !dropped.size) return '';
     // Only pins the solve could actually honour count as pins. Ticking the
     // level filter can put a pinned recipe out of reach, and the control has to
     // agree with the plan about whether it is in force.
@@ -165,12 +201,16 @@
       const pick = (skill.choices || {})[g.id];
       if (pick && g.options.some((o) => o.key === pick)) chosen[g.id] = pick;
     });
-    const shown = groups.filter((g, i) => i < CHOICES_SHOWN || chosen[g.id]);
-    const pins = Object.keys(chosen).length;
+    // A dropped item always keeps its control, wherever it ranks — otherwise
+    // the only way back from "don't use these" would be the reset button.
+    const shown = groups.filter((g, i) =>
+      i < CHOICES_SHOWN || chosen[g.id] || dropped.has(g.id));
+    const pins = Object.keys(chosen).length + dropped.size;
     const delta = skill.totalXp - skill.autoXp;
 
     const pickers = shown.map((g) => {
-      const pick = chosen[g.id] || '';
+      const off = dropped.has(g.id);
+      const pick = off ? DROP : (chosen[g.id] || '');
       const auto = g.options[0];
       const unit = g.name.toLowerCase();
       const autoLabel = g.autoKeys.length
@@ -178,10 +218,12 @@
             .map((o) => o.label).join(' + ') || auto.label
         : auto.label;
       return `
-        <label class="xp-choice${pick ? ' is-pinned' : ''}">
+        <label class="xp-choice${pick ? ' is-pinned' : ''}${off ? ' is-off' : ''}">
           <span class="xp-choice-item">${esc(g.name)} <i>&times;${fmt(g.qty)}</i></span>
           <select data-skill="${esc(skill.skill)}" data-item="${g.id}">
-            <option value=""${pick ? '' : ' selected'}>Best rate &mdash; ${esc(autoLabel)}</option>
+            <option value=""${pick ? '' : ' selected'}>${
+              g.options.length > 1 ? 'Best rate &mdash; ' : 'Use &mdash; '
+            }${esc(autoLabel)}</option>
             ${g.options.map((o) =>
               // Rated per unit of the contested item, not per action — the
               // whole point of the control is that a runite bar pays 50 xp and
@@ -191,20 +233,37 @@
               `${o.n > 1 ? `, ${o.n} ${esc(unit)} each` : ''}` +
               `${o.aboveLevel ? ` (lvl ${o.level})` : ''}</option>`
             ).join('')}
+            <option value="${DROP}"${off ? ' selected' : ''}>Don't use these &mdash; leave in the bank</option>
           </select>
         </label>`;
     }).join('');
+
+    // Anything dropped that never had a fork of its own — an alchemy target,
+    // mostly. Those are chosen on the step that eats them, and this is where
+    // they come back from.
+    const orphans = [...dropped].filter((id) => !groups.some((g) => g.id === id));
 
     return `
       <div class="xp-choices">
         <div class="xp-choices-head">
           <b>What to make.</b> Every item two recipes want is a fork; the default
           takes the one paying most per unit of it, which is a stated choice and
-          not the only sane one.
+          not the only sane one. Anything you would rather keep can be dropped
+          out of the plan entirely.
           ${pins ? `<button type="button" class="btn tiny xp-choice-reset"
              data-skill="${esc(skill.skill)}">Back to best rate</button>` : ''}
         </div>
         <div class="xp-choice-row">${pickers}</div>
+        ${orphans.length ? `
+        <div class="xp-dropped">
+          <b>Left out.</b>
+          ${orphans.map((id) => {
+            const it = itemsDb[String(id)];
+            return `<button type="button" class="xp-drop-chip" data-skill="${esc(skill.skill)}" ` +
+              `data-restore="${id}" title="Put this back in the plan">` +
+              `${esc(it ? it.name : id)} <span class="x">&times;</span></button>`;
+          }).join('')}
+        </div>` : ''}
         ${pins && Math.abs(delta) > 0.5 ? `
         <div class="xp-choice-delta ${delta >= 0 ? 'up' : 'down'}">
           ${delta >= 0 ? `${fmt(delta)} xp <b>more</b> than the default plan`
@@ -216,6 +275,38 @@
           Nothing in this bank feeds the recipes you pinned. Set a fork back to
           best rate to see a plan again.
         </div>` : ''}
+      </div>`;
+  }
+
+  // How many alchs to actually do.
+  //
+  // Alchemy is limited by runes, not by anything worth alching: a bank with
+  // 39,000 nature runes burns the last 12,000 on bronze arrows and spades. So
+  // dropping the junk one item at a time is whack-a-mole — the casts are still
+  // there and just reach deeper into the bank. The count is the real control,
+  // and since targets are eaten best-first, stopping early keeps the good ones.
+  function castBlock(skill) {
+    const alch = skill.alch;
+    if (!alch || !alch.max) return '';
+    const cap = skill.castCap != null ? skill.castCap : alch.max;
+    const worth = alch.worthIt;
+    return `
+      <div class="xp-casts">
+        <label>
+          <span>Alchs to cast</span>
+          <input type="number" class="xp-cast-input" min="0" max="${alch.max}"
+                 step="1" value="${cap}" data-skill="${esc(skill.skill)}">
+        </label>
+        <span class="xp-casts-of">of ${fmt(alch.max)} the runes allow</span>
+        ${worth && worth < alch.max ? `
+        <button type="button" class="btn tiny xp-cast-preset"
+          data-skill="${esc(skill.skill)}" data-casts="${worth}">Just the ${
+          fmt(worth)} worth alching</button>` : ''}
+        ${skill.castCap != null ? `
+        <button type="button" class="btn tiny xp-cast-preset"
+          data-skill="${esc(skill.skill)}" data-casts="">All of them</button>` : ''}
+        <span class="xp-casts-note">Targets are eaten best-first, so stopping
+          early keeps the ones worth alching and leaves the spades alone.</span>
       </div>`;
   }
 
@@ -234,6 +325,11 @@
             skill. <b>These do not add up</b> &mdash; yew logs are Fletching xp
             <i>or</i> Firemaking xp, never both, so a combined total would be a lie
             by double-counting.
+          </p>
+          <p class="xp-lede">
+            Recipes above your level are included, but only as far as this bank can
+            actually carry you: a plan that takes Smithing 67 to 68 will not suggest
+            a rune platebody at 99.
           </p>
         </div>
         <div class="xp-controls">
@@ -294,6 +390,17 @@
               }
             </span>
           </div>
+          ${skill.outOfReach && skill.outOfReach.length ? `
+          <div class="xp-caveat">
+            <b>${skill.outOfReach.length} recipe${skill.outOfReach.length === 1 ? '' : 's'}
+            this bank holds the stock for ${skill.outOfReach.length === 1 ? 'is' : 'are'} out of reach.</b>
+            ${skill.outOfReach.map((r) =>
+              `${esc(r.label)} <i>level ${r.level}</i>`).join(' &middot; ')}
+            &mdash; and ${skill.totalXp
+              ? `the ${fmt(skill.totalXp)} xp here only takes you to ${skill.levelCap}`
+              : `there is nothing else here to level on`}, so
+            ${skill.outOfReach.length === 1 ? 'it is' : 'they are'} not counted.
+          </div>` : ''}
           ${skill.truncated ? `
           <div class="xp-caveat">
             The chain walk hit its pass limit with work still to do, so this total is a
@@ -315,7 +422,8 @@
             &mdash; shop stock this plan assumes you buy rather than bank. It is
             counted in the gp-in figure above.
           </div>` : ''}
-          ${choiceBlock(skill)}
+          ${castBlock(skill)}
+          ${choiceBlock(skill, itemsDb)}
           <div class="xp-steps"></div>
           ${skill.contention.length ? `
           <div class="xp-contested">
@@ -339,19 +447,48 @@
       // under a step, is the same action: pin one recipe to one item and ask
       // for a fresh solve.
       const onPick = opts && opts.onPick;
+      const onDrop = opts && opts.onDrop;
+      const onCasts = opts && opts.onCasts;
       if (onPick) {
+        const box = el.querySelector('.xp-cast-input');
+        if (box) {
+          box.addEventListener('change', () => {
+            const n = Math.max(0, Math.round(Number(box.value) || 0));
+            onCasts(box.dataset.skill, n >= skill.alch.max ? null : n);
+          });
+        }
         el.querySelectorAll('.xp-choices select').forEach((sel) => {
-          sel.addEventListener('change', () =>
-            onPick(sel.dataset.skill, Number(sel.dataset.item), sel.value || null));
+          sel.addEventListener('change', () => {
+            const id = Number(sel.dataset.item);
+            if (sel.value === DROP) onDrop(sel.dataset.skill, id, true);
+            else onPick(sel.dataset.skill, id, sel.value || null);
+          });
         });
         const reset = el.querySelector('.xp-choice-reset');
         if (reset) {
           reset.addEventListener('click', () => onPick(skill.skill, null, null));
         }
         el.addEventListener('click', (e) => {
-          const chip = e.target.closest('.xp-alt[data-pin-key]');
-          if (!chip) return;
-          onPick(skill.skill, Number(chip.dataset.pinItem), chip.dataset.pinKey);
+          // Three controls, one delegated listener: pin an alternative, drop
+          // an alchemy target, put a dropped item back.
+          const alt = e.target.closest('.xp-alt[data-pin-key]');
+          if (alt) {
+            onPick(skill.skill, Number(alt.dataset.pinItem), alt.dataset.pinKey);
+            return;
+          }
+          const preset = e.target.closest('.xp-cast-preset');
+          if (preset) {
+            onCasts(skill.skill, preset.dataset.casts === ''
+              ? null : Number(preset.dataset.casts));
+            return;
+          }
+          const eat = e.target.closest('[data-drop-item]');
+          if (eat) {
+            onDrop(skill.skill, Number(eat.dataset.dropItem), true);
+            return;
+          }
+          const back = e.target.closest('[data-restore]');
+          if (back) onDrop(skill.skill, Number(back.dataset.restore), false);
         });
       }
 

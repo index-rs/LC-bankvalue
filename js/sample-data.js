@@ -40,9 +40,17 @@
   //
   // These belong to the bank above: someone mid-fletching-grind with 1,200 yew
   // logs and 2,000 bow string, who has not reached the level 85 magic longbows
-  // also sitting in there. That makes the sample show the two things that are
-  // easy to miss — a recipe badged above your level, and yew logs contested
-  // between Fletching and Firemaking.
+  // also sitting in there. That makes the sample show the three things that are
+  // easy to miss — a recipe badged above your level, a recipe this bank cannot
+  // reach at all, and yew logs contested between Fletching and Firemaking.
+  //
+  // Fletching and Firemaking are set just *over* the yew requirements (70 and
+  // 60) rather than just under. They used to sit under, which stopped mattering
+  // when the solve started refusing recipes a bank cannot pay its way up to:
+  // a level 60 fletcher holding nothing but yew logs can do nothing with them,
+  // so the sample demonstrated two empty skills instead of the contention it
+  // exists to show. The magic logs stay out of reach on purpose — that is the
+  // "1 recipe out of reach" note earning its place.
   //
   // `current` is the drained/boosted level a save stores; nothing reads it, and
   // it is here only so the sample has the same shape as a parsed save.
@@ -56,9 +64,9 @@
     magic: { xp: 305979, current: 61 },
     cooking: { xp: 347887, current: 62 },
     woodcutting: { xp: 823265, current: 71 },
-    fletching: { xp: 283948, current: 60 },
+    fletching: { xp: 751400, current: 70 },
     fishing: { xp: 227386, current: 58 },
-    firemaking: { xp: 169038, current: 55 },
+    firemaking: { xp: 318220, current: 61 },
     crafting: { xp: 232702, current: 58 },
     smithing: { xp: 527748, current: 66 },
     mining: { xp: 374716, current: 63 },

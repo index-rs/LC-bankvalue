@@ -397,6 +397,13 @@ SAND_FILL_SRC = ("scripts/skill_crafting/scripts/glass/glass.rs2:12 @sand_fill "
 # quest.enum:22 — the varp these recipes gate on is %chompybird.
 OGRE_QUEST = "Big Chompy Bird Hunting"
 
+# What cancels the iron-smelting roll, and what it costs. Both read out of the
+# scripts rather than assumed: smelting.rs2:200 takes the ring branch before it
+# ever reaches the roll, and ring_of_forging.rs2:5 melts the ring on the 140th
+# charge.
+RING_OF_FORGING = "ring_of_forging"
+RING_CHARGES = 140
+
 # Shape 4: literals in .rs2 bodies. Every entry cites file:line.
 LITERALS = [
     dict(
@@ -674,9 +681,21 @@ def h_smelting(c, r):
     the product and the xp — so nothing here is inferred.
 
     Iron is why the schema needs `chance`: smelting.rs2:200 rolls
-    `randominc(1)` and on a miss consumes the ore for no bar and no xp. A ring
-    of forging removes the roll, which is why the odds are recorded rather
-    than folded into the xp.
+    `randominc(1)` and on a miss consumes the ore for no bar and no xp.
+
+    But read the whole branch, not just the roll. The `else` is the second
+    half of an `if`, and the first half is a ring of forging:
+
+        if (inv_total(worn, ring_of_forging) > 0 & map_members = ^true) {
+            ~lose_charge_ring_of_forging;
+        } else if (randominc(1) = 1) { ... fail ... }
+
+    Wearing one removes the roll outright — no reduced chance, no roll at all —
+    and nobody smelts iron without one, because the ring is a ruby ring and an
+    enchant. So the odds are recorded (they are what Content says) and the
+    recipe also carries what cancels them, which is what the solve actually
+    models. The ring is not free: ring_of_forging.rs2:5 melts it at 140
+    charges, so a plan says how many rings it takes.
     """
     for name, rel, kv in c.structs_in("smelting"):
         product = param(kv, "product")
@@ -693,9 +712,14 @@ def h_smelting(c, r):
             level=int(param(kv, "levelrequired", 1)), xp=tenths(exp),
             label=f"Smelt {c.obj_name(product).lower()}",
             inp=inp, out=[(product, 1)], src=f"{rel}#{name}",
-            chance={"kind": "flat", "p": 0.5} if iron else None,
-            note="50% failure unless a ring of forging is worn — "
-                 "smelting.rs2:200 randominc(1)" if iron else None,
+            chance={
+                "kind": "flat", "p": 0.5,
+                "mitigatedBy": {"item": c.oid(RING_OF_FORGING), "uses": RING_CHARGES},
+            } if iron else None,
+            note="50% failure bare-handed (smelting.rs2:202 randominc(1)), but "
+                 "a ring of forging skips the roll entirely (smelting.rs2:200) "
+                 "and melts after 140 smelts (ring_of_forging.rs2:5)"
+                 if iron else None,
         )
 
 

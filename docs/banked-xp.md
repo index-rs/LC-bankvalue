@@ -370,6 +370,42 @@ bank one step earlier now reports what the bank one step later already did: 1,00
 The check also found the dragon square shield (`dragon_sq.rs2:53`, 75 xp, level 60 and a
 hammer), the one smithing action not on the anvil table, now in `LITERALS`.
 
+## What the third round of feedback got wrong
+
+Four things, one theme: the tool kept describing a way of playing that nobody plays.
+
+**"You'll unlock it on the way" was never checked.** Recipes above your level are included
+by design, and the design never asked whether the bank could get you there. A level 67 smith
+was being told to make rune 2h swords at 99 off a bank worth one level. The fix is a
+fixpoint — solve within reach, see where it lands you, let the newly-unlocked recipes try
+again — and the invariant it settles on is worth stating: *the recipes used and the level
+reached agree with each other.*
+
+Two things fell out of it that were not obvious:
+
+* **A save with no stats has to skip the ceiling.** Level 1 across the board plus a
+  reachability test is not conservatism, it is a different tool — and it quietly gutted the
+  `?audit` harness, whose whole job is to put every recipe through the real path. Coverage
+  dropped from 110 recipes firing to a handful before this was caught.
+* **The sample bank was a demo of features it no longer demonstrated.** Its stats were set
+  just *under* the yew requirements to show off the above-level badge; under the new ceiling
+  that made Fletching and Firemaking both report zero, so the contention the sample exists to
+  illustrate stopped existing. Sample data that no longer shows what its own comment claims
+  is a broken test, not a cosmetic problem.
+
+**A roll with an answer is not a roll.** Iron smelting's 50% is the `else` branch of a ring
+of forging check. Same mistake as battlestaves — config read, script not — and the same fix:
+record what Content says, model what the script does, and price the kit it assumes (140
+charges, so 18 rings for 2,494 bars).
+
+**Alchemy is rune-limited, so item-level controls are whack-a-mole.** Dropping the spades
+frees casts that immediately find the bronze arrows. The count is the control. And it has to
+be one budget across every "any item" spell, or capping high alchemy just feeds the runes to
+low alchemy and the plan gets worse.
+
+**One instruction, one mechanism.** "Don't smith my mithril bars" and "alch only the magic
+longbows" are the same request. Two mechanisms for it would have been two sets of bugs.
+
 ### The rail was measuring the wrong thing
 
 Closing the bucket gap closed a *loop*: an empty bucket becomes a bucket of sand, which
