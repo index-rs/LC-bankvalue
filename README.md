@@ -2,10 +2,30 @@
 
 Estimate what a [Lost City](https://lostcity.rs) (2004scape) bank is worth — in gp, and in XP.
 
-Drop in your `.sav` file, get a categorised valuation and, on a second tab, what that same
-bank is worth in each skill you could spend it on. **The save file never leaves your
-browser** — parsing happens client-side, nothing is uploaded. That's not a policy promise,
-it's how it's built: the site is static files, there's no server to upload to.
+### ▶ [Open the calculator](https://index-rs.github.io/LC-bankvalue/)
+
+## Usage
+
+1. Log in to the game at [2004.lostcity.rs](https://2004.lostcity.rs) and open the
+   [Account Centre](https://2004.lostcity.rs/account).
+2. Download your character's save file (`.sav`).
+3. [Open the calculator](https://index-rs.github.io/LC-bankvalue/) and drop the `.sav` on the
+   page — or click the dropzone to browse for it.
+4. Read the valuation: the **Value** tab is what the bank is worth in gp, categorised; the
+   **XP** tab is what that same bank is worth in each skill you could spend it on.
+
+Nothing to install, no account to make, and no upload. **The save file never leaves your
+browser** — parsing happens client-side. That's not a policy promise, it's how it's built:
+the site is static files, there's no server to upload to.
+
+As for the save file itself: Lost City admin **Pazaz** has
+[confirmed on the forum](https://lostcity.rs/t/automatic-bank-value-tool/18271/6) that a `.sav`
+carries no sensitive information — no password, just your stats, position, inventories and
+variables. (One caveat: once bank pins exist, the pin would be in there, and Pazaz was
+considering stripping it on export.)
+
+Not ready to hand over a save file? **View a sample report** on the page runs the whole thing
+on a made-up bank.
 
 Runs on GitHub Pages. No build step, no framework, no dependencies.
 
